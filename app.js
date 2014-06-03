@@ -14,11 +14,14 @@ var express = require('express')
   , formidable = require('formidable')
   , mongo = require('mongodb')
   , monk = require('monk')
-  , db = monk('localhost:27017/citizen')
+  , db = monk('localhost:27017/scitizen')
   , users = db.get('users')
   , projects = db.get('projects')
   , images = db.get('images')
+  , sciconfig = db.get('config')
+  , bcrypt = require('bcryptjs')
   , path = require('path');
+
 
 var CONFIG = require('config').Swift;
 var pkgcloud = require("pkgcloud");
@@ -39,9 +42,26 @@ var rackspace = pkgcloud.storage.createClient({
 /**
 * Create admin user if none
 */
-users.findOne({ username: 'admin' }, function (err, user) {
+var salt = null;
+
+sciconfig.findOne( { name: 'default'}, function(err, config) {
+    if(!config) {
+        salt = bcrypt.genSaltSync(10);
+        sciconfig.insert({ name: 'default', salt: salt }, function(err) {
+            createAdmin();
+        });
+    }
+    else {
+        salt = config.salt;
+        createAdmin();
+    }
+});
+
+function createAdmin() {
+    users.findOne({ username: 'admin' }, function (err, user) {
     if(!user) {
-        users.insert({ username: 'admin', password: 'passwd', group: ['admin']})
+        var hash = bcrypt.hashSync('passwd', salt);
+        users.insert({ username: 'admin', password: hash, group: ['admin']})
         console.log("Create admin user with password: passwd");
     }
     else {
@@ -49,6 +69,7 @@ users.findOne({ username: 'admin' }, function (err, user) {
         console.log(user);
     }
 });
+}
 
 /*
 projects.findOne({ name: 'sample' }, function (err, project) {
@@ -109,13 +130,13 @@ passport.use(new LocalStrategy(
   function(username, password, done) {
     console.log("DEBUG: use local strategy");
     users.findOne({ username: username }, function (err, user) {
-      console.log("DEBUG: "+username);
       console.log(user);
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
-      if (user.password!=password) {
+      var hash = bcrypt.hashSync(password, salt);
+      if (user.password!=hash) {
         return done(null, false, { message: 'Incorrect password.' });
       }
       return done(null, user);

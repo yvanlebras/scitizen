@@ -9,7 +9,7 @@ var pkgcloud = require("pkgcloud");
 var MongoClient = require('mongodb').MongoClient;
 
 var monk = require('monk')
-  , db = monk('localhost:27017/citizen')
+  , db = monk('localhost:27017/scitizen')
   , users_db = db.get('users')
   , projects_db = db.get('projects')
   , images_db = db.get('images');
@@ -29,7 +29,7 @@ var rackspace = pkgcloud.storage.createClient({
 
 var version = null;
 
-MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
+MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
     db.admin().serverInfo(function(err, result){
          console.log(result);
          version = result["versionArray"][1];
@@ -115,7 +115,7 @@ exports.list = function(req, res) {
             else {
                 res.json(projects);
             }
-            
+
         });
 };
 
@@ -229,12 +229,32 @@ exports.random = function(req, res){
 };
 
 function upload_file(req, res, project) {
-    console.log("upload new file");
     var form = new formidable.IncomingForm();
     form.uploadDir = '/tmp';
     form.keepExtensions = true;
+    var properfields = {};
+
+    form.on('field', function(name, value) {
+    name = name.replace('[]','');
+    if (!properfields[name]) {
+      properfields[name] = value;
+    } else {
+      if (properfields[name].constructor.toString().indexOf("Array") > -1) { // is array
+        properfields[name].push(value);
+      } else { // not array
+        var tmp = properfields[name];
+        properfields[name] = [];
+        properfields[name].push(tmp);
+        properfields[name].push(value);
+      }
+    }
+    });
+
+
     form.parse(req, function(err, fields, files) {
       //console.log(util.inspect({fields: fields, files: files}));
+      //console.log(properfields);
+      fields = properfields;
       if(project['geo'] && fields["location"]=="") {
         res.status(400).send("Geo position is missing");
         return;
@@ -248,14 +268,13 @@ function upload_file(req, res, project) {
         fields["loc"]  = {"type" :  "Point", "coordinates" : fields["location"]};
       }
 
-      var item = {project: images_db.id(req.param('id')), fields: fields, name:
-files.image.name, validated: false, spam: false, favorite: false};
+      var item = {project: images_db.id(req.param('id')), fields: fields, name: files.image.name, validated: false, spam: false, favorite: false};
 
       images_db.insert(item, function(err, image) {
            if(err!=null) {
                 res.status(500).send("Error while saving item");
             }
- 
+
             rackspace.upload({
             container:  SWIFT_CONFIG.container,
             remote: image._id.toHexString(),
@@ -280,4 +299,3 @@ files.image.name, validated: false, spam: false, favorite: false};
 
     });
 }
-

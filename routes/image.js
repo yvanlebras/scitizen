@@ -8,7 +8,7 @@ var pkgcloud = require("pkgcloud");
 var MongoClient = require('mongodb').MongoClient;
 
 var monk = require('monk')
-  , db = monk('localhost:27017/citizen')
+  , db = monk('localhost:27017/scitizen')
   , users_db = db.get('users')
   , projects_db = db.get('projects')
   , images_db = db.get('images');
@@ -27,7 +27,7 @@ var rackspace = pkgcloud.storage.createClient({
 var LRU = require("lru-cache")
   , options = { max: 100
               , length: function (n) { return n.size/1048576; }
-              , dispose: function (key, n) { 
+              , dispose: function (key, n) {
                 fs.exists(CONFIG.dir + '/' + n.name, function(exists) {
                     if(exists) {
                         fs.unlink(CONFIG.dir + '/' + n.name);
@@ -67,7 +67,15 @@ exports.curate = function(req, res) {
         var forms = req.param('form_elts').split(',');
         var stats = { "stats.vote": 1};
         for(var i =0;i<forms.length;i++) {
-            stats["stats."+forms[i]+"."+req.param(forms[i])] = 1;
+            var param = req.param(forms[i]);
+            if(param instanceof Array) {
+                for(var j=0;j<param.length;j++) {
+                  stats["stats." + forms[i] + "." + param[j]] = 1;
+                }
+            }
+            else {
+              stats["stats." + forms[i] + "." + param] = 1;
+            }
         }
         var to_update = { $inc : stats };
         images_db.update({_id: image_id}, to_update, function(err) {
@@ -100,7 +108,7 @@ exports.delete = function(req, res) {
 exports.get = function(req, res) {
     var image_id= req.param('id');
     var image = cache.get(image_id);
-    if(image==null) {
+    if(image==null || image==undefined) {
         var myFile = fs.createWriteStream(CONFIG.dir+'/'+image_id);
         rackspace.download({
             container: CONFIG.container,
@@ -131,7 +139,7 @@ exports.list = function(req, res) {
     images_db.find({ project: images_db.id(req.param('id')) }, function(err, images) {
         res.json(images);
     });
-    /*   
+    /*
     var files = rackspace.getFiles("scitizen", function(err, files) {
         if(err!=null && ('statusCode' in err) && (err['statusCode']==404)) {
             rackspace.createContainer({ name: "scitizen" },function(err, files)             {
@@ -149,4 +157,3 @@ exports.list = function(req, res) {
     });
     */
 };
-

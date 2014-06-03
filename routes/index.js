@@ -1,5 +1,5 @@
 var monk = require('monk')
-  , db = monk('localhost:27017/citizen')
+  , db = monk('localhost:27017/scitizen')
   , projects_db = db.get('projects');
 
 /*

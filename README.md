@@ -7,10 +7,10 @@ node app.js --NODE_CONFIG_DIR=.
 Ensure 2d index on db location  :
 
     // For mongo 2.2
-    db.citizen.ensureIndex( { "fields.location" : "2d" })
+    db.images.ensureIndex( { "fields.location" : "2d" })
 
     // GeoJSON in loc, for mongo 2.4
-    db.points.ensureIndex({ "fields.loc" : "2dsphere" })
+    db.images.ensureIndex({ "fields.loc" : "2dsphere" })
 
 
 

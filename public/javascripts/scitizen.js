@@ -1,10 +1,10 @@
 
 /**
- * parses and returns URI query parameters 
- * 
+ * parses and returns URI query parameters
+ *
  * @param {string} param parm
- * @param {bool?} asArray if true, returns an array instead of a scalar 
- * @returns {Object|Array} 
+ * @param {bool?} asArray if true, returns an array instead of a scalar
+ * @returns {Object|Array}
  */
 function getURIParameter(param, asArray) {
     return document.location.search.substring(1).split('&').reduce(function(p,c)
@@ -135,11 +135,14 @@ function getURIParameter(param, asArray) {
         else if(elt_type == 'multiple') {
             elt += '<div class="large-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
-            elt += '<select class="sciform" required name="r'+elt_id+'" id="r'+elt_id+'" multiple="multiple">';
+            elt += '<select class="sciform" required name="r'+elt_id+'[]" id="r'+elt_id+'" multiple="multiple">';
             var values = form_elt['values'];
+            if(! value instanceof Array) {
+              value = [value];
+            }
             var selected = '';
             for(var i=0;i<values.length;i++) {
-                if(values[i]==value) {
+                if(value!=null && value.indexOf(values[i])>-1) {
                     selected = "selected";
                 }
                 else {
@@ -155,4 +158,3 @@ function getURIParameter(param, asArray) {
 
         return elt;
     }
-
