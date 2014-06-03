@@ -200,7 +200,7 @@
 								//}
 								//stat_html += "</ul>";
 								//stat_html += "</div>";
-								$("#image_stats").append('<div class="large-4 column"><div>'+label+'</div><canvas id="chart_'+stat+'" width="200" height="200"></canvas></div>');
+								$("#image_stats").append('<div class="large-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
 								var ctx = $("#chart_"+stat).get(0).getContext("2d");
 								var myNewChart = new Chart(ctx).Bar(data);
 							}
