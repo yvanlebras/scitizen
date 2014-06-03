@@ -1,0 +1,373 @@
+<!--
+<div id="messages" data-alert class="alert-box warning" data-bind="if: has_message">
+<div data-bind="text: message"></div>
+<a href="#" class="close" data-bind="click: clear_message">&times;</a>
+</div>
+-->
+<div id="main" data-bind="visible: main_panel">
+  <div id="last_images" class="block row section_dark" data-bind="if: has_images">
+  <div class="large-6 columns main_image">
+        <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)}" alt="selected image" />
+  </div>
+  <div class="large-4 columns" data-bind="foreach: last_10_images">
+      <div class="large-2">
+        <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)}" alt="last 10 images" />
+      </div>
+  </div>
+  </div>
+
+<div class="row">
+  <div data-alert class="alert-box">
+  Help us curating the database, give your advice on the random selected item.
+  </div>
+</div>
+
+  <div class="block row">
+    <!-- help, about -->
+    <div class="large-6 columns sub" data-bind="if: has_images">
+      <!-- random element -->
+      <div class="row">
+        <div class="large-6 columns">
+              <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)}" alt="random image from database" />
+        </div>
+        <div class="large-6 columns">
+        <form id="random_form" data-bind="html: curate_form_html">
+        </form>
+        </div>
+      </div>
+      <div class="row">
+          <div class="large-3 columns">
+            <button id="curate" class="button action" data-bind="click: image_curate"><i class="fi-upload"></i> Send</button>
+          </div>
+          <div class="large-3 columns">
+            <button id="spam" class="button action" data-bind="click: image_spam"><i class="fi-trash"></i> Spam</button>
+          </div>
+          <div class="large-6 columns">
+          </div>
+      </div>
+    </div>
+    <div id="aboutus" class="large-6 columns">
+          <div class="heading"><span>{{ project.name }}</span></div>
+          <div data-bind="html: project_description"></div>
+          <i class="fi-social-twitter large"></i>
+          <i class="fi-social-facebook large"></i>
+          <i class="fi-social-google-plus large"></i>
+    </div>
+  </div>
+
+  <div class="block row">
+    <h2><i class="fi-compass"></i> Browse the world...</h2>
+    <div id="cluster-canvas" >
+    <!-- map -->
+
+    </div>
+  </div>
+
+
+</div>
+<!-- end main panel -->
+
+<div id="newitem" class="section_white" data-bind="visible: newitem_panel">
+<div class="row">
+<h2>Help us adding new data</h2>
+</div>
+<form id="image_form" action="/project/{{ project._id }}" enctype="multipart/form-data" method="post">
+<div class="row">
+<div class="large-4 columns">
+  <h3>Please fill the following form</h3>
+<div id="dynaform"></div>
+</div>
+<div class="large-8 columns">
+<h3>Upload image/photo</h3>
+<label for="image">Image file upload</label>
+
+<input type="file" name="image" id="image" size="40" required>
+
+<div class="row" id="location"  data-bind="visible: geo" >
+<h3>Location</h3>
+<label for="geo">Select location</label>
+<input type="hidden" name="location" id="geo" value=""/>
+<div id="map-canvas" />
+</div>
+</div>
+</div>
+<div class="row">
+<button class="button expand action" id="send" name="send" value="item">Send</button>
+</div>
+</form>
+</div>
+</div>
+<!-- end new item -->
+
+
+
+<script type="text/javascript">
+
+var map;
+var cluster_map;
+var infowindow = new google.maps.InfoWindow();;
+var event_position = new google.maps.LatLng(48.112047191207964, -1.6814074292778969);
+var marker=null;
+
+function initialize2() {
+      var mapOptions = {
+        center: event_position,
+        zoom: 8
+      };
+      map = new google.maps.Map(document.getElementById("map-canvas"),
+          mapOptions);
+      google.maps.event.addListener(map, "click", function(event) {
+      var lat = event.latLng.lat();
+      var lng = event.latLng.lng();
+      // populate yor box/field with lat, lng
+      if(marker!=null) {
+            marker.setMap(null);
+      }
+      marker = new google.maps.Marker({
+          position: event.latLng,
+          map: map,
+          title: 'Event'
+      });
+    $("#geo").val(lat+","+lng);
+    });
+}
+
+function initialize() {
+
+
+  var cluster_mapOptions = {
+    zoom: 3,
+    center: event_position,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  }
+  cluster_map = new google.maps.Map(document.getElementById('cluster-canvas'),
+   cluster_mapOptions);
+
+}
+
+
+    var project =  { _id: '{{ project._id }}', name: '', description: '' };
+
+    var viewModel = {
+      //message: ko.observable(''),
+      //has_message: ko.computed(function() { return viewModel.message()==''; }, viewModel),
+      //clear_message: function() {
+      //  viewModel.message('');
+      //},
+      message: function(msg) {
+        alert(msg);
+      },
+      project: ko.observable({ _id: '{{ project._id }}', name: '', description: '' }),
+      project_ready: ko.observable(false),
+      project_description: ko.observable(''),
+      selected_image: ko.observable({_id:0}),
+      random_image: ko.observable({_id:0}),
+      show_image: function(image) {
+        viewModel.selected_image(image);
+      },
+      goto_addnew_panel: function() {
+        viewModel.main_panel(false);
+        viewModel.newitem_panel(true);
+        if(map==null) {
+          initialize2();
+        }
+      },
+      goto_home_panel: function() {
+        viewModel.main_panel(true);
+        viewModel.newitem_panel(false);
+      },
+      has_images: ko.observable(false),
+      geo: ko.observable({{ project.geo }}),
+      newitem_panel: ko.observable(false),
+      main_panel: ko.observable(true),
+      images: ko.observableArray(),
+      image_spam: function() {
+        var image_id = viewModel.random_image()._id;
+        $.ajax({
+            url: '/image/'+image_id,
+            type: 'PUT',
+            data: { spam: 1},
+            success: function(result) {
+              changeRandomImage();
+            }
+        });
+      },
+      image_curate: function() {
+        var form_elts = $("#random_form .sciform");
+        var curate = {};
+        var form_ids = "";
+        var i = 0;
+        $.each(form_elts, function(form_elt) {
+          if(i>0) { form_ids += "," };
+          i+=1;
+          // send form_elts with all attr, comma separated
+          // and each key=value form element
+          curate[$(this).attr('id')]=$(this).val();
+          form_ids += $(this).attr('id');
+        });
+        curate['form_elts'] = form_ids;
+        $.ajax({
+          url: '/image/'+viewModel.random_image()._id,
+          type: 'PUT',
+          data: curate,
+          success: function(result) {
+            changeRandomImage();
+          }
+        });
+      },
+      last_10_images: ko.observableArray(),
+      form_html: ko.observable(),
+      curate_form_html: ko.observable()
+    };
+    ko.applyBindings(viewModel);
+
+    viewModel.random_image.subscribe(function(newValue) {
+      // TODO update form
+    });
+
+    function changeRandomImage() {
+      var data = viewModel.images();
+      var random_elt = Math.floor((Math.random() * data.length));
+      var image = data[random_elt];
+      viewModel.random_image(image);
+      // Update form
+      var form_html = "";
+      var count = 0;
+      var keys = "";
+      $.each(project['form'],function(key) {
+            if(count>0) { keys += ','; }
+            keys += project['form'][key]['id'];
+            var key_id = "r"+project['form'][key]['id'];
+            count += 1;
+            var value=null;
+            if(image['fields'][key_id]!=undefined) {
+              value = image['fields'][key_id];
+            }
+            form_html += project_form_element(project['form'][key],value);
+      });
+      form_html += '<input class="" name="form_elts" type="hidden" value="'+keys+'"/>';
+      viewModel.curate_form_html(form_html);
+    }
+
+
+    $(document).ready(function() {
+      initialize();
+      $.getJSON("/project/"+project._id, function(data) {
+        project = data;
+        viewModel.project(data);
+			  var form_html = "";
+        var count = 0;
+			  $.each(project['form'],function(key) {
+              count += 1;
+				      form_html += project_form_element(project['form'][key],null);
+        });
+			  form_html += "";
+        if(count > 0) {
+          viewModel.project_ready(true);
+        }
+        var converter = new Markdown.Converter();
+        viewModel.project_description(converter.makeHtml(data['description']));
+        viewModel.form_html(form_html);
+			  $("#dynaform").html(form_html);
+      });
+
+      $.getJSON("/project/"+project._id+"/image", function(data) {
+        if(data!=null && data.length>0) {
+          viewModel.has_images(true);
+          viewModel.images(data);
+          viewModel.last_10_images(data.slice(0,9));
+          viewModel.selected_image(data[0]);
+          //var random_elt = Math.floor((Math.random() * data.length));
+          //viewModel.random_image(data[random_elt]);
+          changeRandomImage();
+          update_map();
+        }
+      });
+
+		$("#image_form").submit(function(e) {
+			var formObj = $(this);
+			var formURL = formObj.attr("action");
+			var formData = new FormData(this);
+			$.ajax({
+				url: formURL,
+				type: 'POST',
+				data:  formData,
+				mimeType:"multipart/form-data",
+				contentType: false,
+				cache: false,
+				processData:false,
+				success: function(data, textStatus, jqXHR)
+				{
+          /*
+          var message = '<div data-alert class="alert-box">';
+          message += 'New item successfully loaded';
+          message += '<a href="#" class="close">&times;</a>'
+          message += '</div>';
+          */
+          message = 'New item successfully loaded';
+          viewModel.message(message);
+				},
+				error: function(jqXHR, textStatus, errorThrown)
+				{
+            /*
+            var message = '<div data-alert class="alert-box alert">';
+            message += jqXHR.responseText;
+            message += '<a href="#" class="close">&times;</a>'
+            message += '</div>';
+            */
+            message = jqXHR.responseText;
+            viewModel.message(message);
+				}
+			});
+			e.preventDefault(); //Prevent Default action.
+			//e.unbind();
+		});
+
+  });
+
+
+  function update_map() {
+    var markers = new Array();
+    var results = viewModel.images();
+
+    for(var i=0;i<results.length;i++) {
+      var result = results[i];
+      var result_position = new google.maps.LatLng(result['fields']['location'][0], result['fields']['location'][1]);
+      var cluster_marker = new google.maps.Marker({
+        position: result_position
+      });
+      if(i==0) {
+        cluster_map.setCenter(result_position);
+      }
+      makeInfoWindowEvent(cluster_map, infowindow, result, cluster_marker);
+      markers.push(cluster_marker);
+      }
+      var markerCluster = new MarkerClusterer(cluster_map, markers);
+  }
+
+  function makeInfoWindowEvent(map, infowindow, result, marker) {
+    google.maps.event.addListener(marker, 'click', function() {
+      contentString = '<div>';
+      contentString += '<img src="/image/'+result['_id']+'" width="300"/>';
+      console.log(project);
+      for(field in result['fields']) {
+        if(field!="loc" && field!="send") {
+          for(i in project["form"]) {
+            if("r"+project["form"][i]["id"] == field) {
+              contentString += '<div> '+project["form"][i]["label"]+' : '+result['fields'][field]+'</div>';
+              break;
+            }
+          }
+        }
+      }
+      contentString += '</div>';
+      infowindow.setContent(contentString);
+      infowindow.open(map, marker);
+    });
+  }
+
+	function panelProjects() { }
+
+  //google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>

@@ -1,0 +1,14 @@
+/* Css Theme by CssTemplateHeaven - www.csstemplateheaven.com */
+
+body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
+
+.project_selection {
+    margin: 15px !important;
+}
+
+#project_selection {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+

@@ -1,0 +1,472 @@
+	<div class="row" data-bind="visible: manageItems">
+		<div class="row">
+			<h2 data-bind="text: project_current().name"></h2>
+		</div>
+		<div class="large-6 columns">
+    <table>
+    <thead>
+        <tr><th>Name</th><th>Image</th><th>Votes</th><th>Tagged as spam</th><th>Actions</th></tr>
+    </thead>
+    <tbody data-bind="foreach: image_list">
+        <tr>
+			<td data-bind="text: name"></td>
+			<td>
+			<a class="th" data-bind="attr: {href: '/image/'+ko.utils.unwrapObservable(_id)}">
+			<img class="thumb" data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(_id)}"/>
+			</a>
+			</td>
+			<td data-bind="if: $data.stats">
+				<span data-bind="text: stats.vote"></span>
+			</td>
+			<td data-bind="if: $data.stats">
+				<span data-bind="text: stats.spam"></span>
+			</td>
+			<td>
+			<i class="fi-trash" data-bind="click: $parent.image_trash">Trash</i>
+			<i class="fi-monitor" data-bind="click: $parent.image_show">Stats</i>
+			</td>
+		</tr>
+	</tbody>
+	</table>
+	</div>
+	<div class="large-6 columns">
+		<div id="image_stats" class="row">
+		</div>
+	</div>
+	</div>
+    <div class="row" data-bind="visible: editProject">
+    <div class="large-4 columns">
+		<div>
+			<label>API</label>
+			<input type="text" data-bind="attr: {value: project_current().api}" disabled/>
+			<label for="project_short_desc_edit">Short description</label>
+			<textarea rows="20" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
+			<label for="project_desc_edit">Description (MarkDown support)</label>
+			<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
+			<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
+		</div>
+        <form>
+        <label>Form selection (Markdown supported)</label>
+        <select data-bind="options: project_form_elements, optionsCaption: 'Choose from ...', value: selected_form_element">
+        </select>
+		<div class="columns">
+        <button type="button" class="button tiny" data-bind="click: add_project_form_element">Add</button>
+		<button type="button" class="button tiny" data-bind="click: render_project_form_element">Render</button>
+		<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
+		</div>
+        </form>
+        <div id="form_element" data-bind="html: form_elements"></div>
+    </div>
+    <div class="large-8 columns" id="form_render">
+    </div>
+    </div>
+
+    <div class="row" data-bind="visible: showProjects">
+    <div class="large-7 large-offset-2 columns">
+    <table>
+    <thead>
+        <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th></th></tr>
+    </thead>
+    <tbody data-bind="foreach: project_list">
+        <tr>
+            <td>
+            <div class="onoffswitch">
+                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" data-bind="checked: status, attr: {id: 'onoff'+name, value: status}, click: $parent.project_switch_on_off" >
+                <label class="onoffswitch-label" data-bind="attr: {for: 'onoff'+name}">
+                <div class="onoffswitch-inner"></div>
+                <div class="onoffswitch-switch"></div>
+            </label>
+            </div>
+            </td>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: owner"></td>
+
+			<td>
+			<div class="onoffswitch">
+                <input type="checkbox" name="publicswitch" class="onoffswitch-checkbox" data-bind="checked: public, attr: {id: 'public'+name, value: public}, click: $parent.project_switch_public" >
+                <label class="onoffswitch-label" data-bind="attr: {for: 'public'+name}">
+                <div class="onoffswitch-inner"></div>
+                <div class="onoffswitch-switch"></div>
+            </label>
+            </div>
+            </td>
+
+            <td>
+            <div class="onoffswitch">
+                <input type="checkbox" name="geoswitch" class="onoffswitch-checkbox" data-bind="checked: geo, attr: {id: 'geo'+name, value: geo}, click: $parent.project_switch_geo" >
+                <label class="onoffswitch-label" data-bind="attr: {for: 'geo'+name}">
+                <div class="onoffswitch-inner"></div>
+                <div class="onoffswitch-switch"></div>
+            </label>
+            </div>
+            </td>
+            <td>
+            <div class="onoffswitch">
+                <input type="checkbox" name="validationswitch" class="onoffswitch-checkbox" data-bind="checked: validation, attr: {id: 'validation'+name, value: validation}, click: $parent.project_switch_validation" >
+                <label class="onoffswitch-label" data-bind="attr: {for: 'validation'+name}">
+                <div class="onoffswitch-inner"></div>
+                <div class="onoffswitch-switch"></div>
+            </label>
+            </div>
+            </td>
+
+            <td class="actions">
+			<i data-bind="attr: { project: _id }, click: $parent.edit_project" class="fi-page-edit"> </i>
+			<i class="fi-trash" data-bind="attr: { project: _id }, click: $parent.delete_project">	</i>
+			<i class="fi-monitor" data-bind="attr: { project: _id }, click: $parent.show_project"> </i>
+			<a target="_blank" data-bind="attr: {href: '/project/'+ko.utils.unwrapObservable(_id)+'/dashboard?api='+ko.utils.unwrapObservable(api)}"><i class="fi-folder-add"></i></a></td>
+        </tr>
+    </tbody>
+    </table>
+    </div>
+    <div class="large-3 columns">
+       <i data-bind="click: addProject" class="fi-folder-add"> Create project</i>
+    </div>
+    </div>
+
+    <div class="row" data-bind="visible: showProject">
+    <div class="large-6 columns">
+    <form>
+        <label for="pname">Project name</label>
+        <input name="pname" id="pname" type="text" data-bind="value: project_name"/>
+				<label for="pdesc">Project description</label>
+        <textarea name="pdesc" id="pdesc" data-bind="value: project_description"></textarea>
+        <button type="button" data-bind="click: add_project">Create</button>
+    </form>
+    </div>
+    </div>
+
+  <script>
+    var my_projects = [];
+
+    var project =  { name: '',
+                    owner: '{{ user }}',
+										description: '',
+                    status: false }
+
+    $(document).ready(function() {
+        $.getJSON("/project", function(data) {
+            viewModel.project_list(data);
+        });
+
+				$(document).on("click", "#form_element .fi-trash", function() {
+						//var form_elts = $("#form_element .form_elt");
+						var new_form_elements ='';
+						var trash_id = $(this).attr("data-id");
+						$("#form_element .form_elt").each(function(index) {
+							if($(this).attr("id")!=("elt"+trash_id)) {
+								new_form_elements += $(this)[0].outerHTML;
+							}
+						});
+						viewModel.form_elements(new_form_elements);
+				});
+    });
+
+    var viewModel = {
+						manageItems: ko.observable(false),
+						form_elements: ko.observable(''),
+						image_show: function(image) {
+							//console.log(image.stats);
+							//var stat_html = "";
+							$("#image_stats").html("");
+							for(stat in image.stats) {
+								var data = {labels: [], datasets:[ { fillColor : "rgba(151,187,205,0.5)", strokeColor : "rgba(151,187,205,1)",data: [] }]};
+								//stat_html += "<div>";
+								project = viewModel.project_current();
+								var label=null;
+								for(var j=0;j<project["form"].length;j++) {
+									if("r"+project["form"][j]["id"] == stat) {
+										label = project["form"][j]["label"];
+										break;
+									}
+								}
+								if(label==null) {
+									continue;
+								}
+								//stat_html += "<div>"+label+"</div>";
+								//$("#image_stats").append("<div>"+label+"</div>");
+								//stat_html += "<ul>";
+								var nb_stat = 0;
+								for(count in image.stats[stat]) {
+									nb_stat += 1;
+									data.labels.push(count);
+									//stat_html += "<li>"+count+": "+image.stats[stat][count]+"</li>";
+									data.datasets[0].data.push( image.stats[stat][count] );
+								}
+								//if(nb_stat==1) {
+									// Add a fake for scale
+									data.labels.push("other");
+									data.datasets[0].data.push( 0 );
+								//}
+								//stat_html += "</ul>";
+								//stat_html += "</div>";
+								$("#image_stats").append('<div class="large-4 column"><div>'+label+'</div><canvas id="chart_'+stat+'" width="200" height="200"></canvas></div>');
+								var ctx = $("#chart_"+stat).get(0).getContext("2d");
+								var myNewChart = new Chart(ctx).Bar(data);
+							}
+							//$("#image_stats").html(stat_html);
+;
+						},
+					  image_list: ko.observableArray(),
+						image_trash: function(image) {
+							$.ajax({
+									url: '/image/'+image._id,
+									type: 'DELETE',
+										success: function(result) {
+											viewModel.image_list.remove(function(item) { return item._id == image._id })
+										}
+									});
+						},
+            project_list: ko.observableArray(),
+            showProjects: ko.observable(true),
+            showProject: ko.observable(false),
+            editProject: ko.observable(false),
+					  project_current: ko.observable({}),
+						project_update: function() {
+								$.ajax({
+										url: '/project/'+viewModel.project_current()._id,
+										type: 'PUT',
+										data: {description: viewModel.project_description(), short_description: viewModel.project_short_description()},
+										success: function(result) {
+											$.getJSON("/project", function(data) {
+													viewModel.project_list(data);
+											});
+										}
+								});
+						},
+            project_name: ko.observable(''),
+					  project_description: ko.observable(''),
+						project_short_description: ko.observable(''),
+            project_owner: ko.observable('{{user}}'),
+            project_status: ko.observable(false),
+					  project_public: ko.observable(true),
+					  project_switch_on_off: function(project) {
+                            $.ajax({
+                                url: '/project/'+project._id,
+                                type: 'PUT',
+                                data: {status: project.status},
+                                success: function(result) {
+                                }
+                            });
+						return true;
+					  },
+            project_switch_public: function(project) {
+                            $.ajax({
+                                url: '/project/'+project._id,
+                                type: 'PUT',
+                                data: {public: project.public},
+                                success: function(result) {
+                                }
+                            });
+                        return true;
+                      },
+            project_switch_geo: function(project) {
+                            $.ajax({
+                                url: '/project/'+project._id,
+                                type: 'PUT',
+                                data: {geo: project.geo},
+                                success: function(result) {
+                                }
+                            });
+                        return true;
+                      },
+            project_switch_validation: function(project) {
+                            $.ajax({
+                                url: '/project/'+project._id,
+                                type: 'PUT',
+                                data: {validation: project.validation},
+                                success: function(result) {
+                                }
+                            });
+                        return true;
+                      },
+            add_project: function(){
+												viewModel.project_description('');
+                        $.post( "/project", { pname: this.project_name(), pdesc: this.project_description() }, function(data) {
+                            viewModel.project_list.push(data);
+                        } );
+                        panelProjects();
+                      },
+            edit_project: function(project) {
+							viewModel.project_current(project);
+							viewModel.project_description(project.description);
+							viewModel.project_short_description(project.short_description);
+							//$("#form_element").html("");
+							$("#form_render").html("");
+							var form_elts = project['form'];
+							var new_elements = '';
+							for(var i=0;i<form_elts.length;i++){
+								var form_elt = form_elts[i];
+								new_elements += add_to_form(form_elt['type'],form_elt);
+							}
+							viewModel.form_elements(new_elements);
+							panelEditProject(project._id);
+					  },
+            show_project: function(project) {
+							viewModel.project_current(project);
+							panelManageItems(project._id);
+					  },
+            delete_project: function(project) {
+                            $.ajax({
+                                url: '/project/'+project._id,
+                                type: 'DELETE',
+                                success: function(result) {
+                                    viewModel.project_list.remove(function(item) { return item._id == project._id })
+                                }
+                            });
+                      },
+            selected_form_element: ko.observable(),
+					  render_project_form_element: function() {
+                        render_form();
+                      },
+					  save_project_form_element: function() {
+                        save_form();
+                      },
+            add_project_form_element: function() {
+												var previous_form = viewModel.form_elements();
+                        var new_element = add_to_form(this.selected_form_element());
+												viewModel.form_elements(previous_form + new_element);
+                      },
+					  delete_project_form_element: function(data, form_elt) {
+						$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
+						var new_form_elements = $("#form_element").html("");
+						viewModel.form_elements(new_form_elements);
+					  },
+                      project_form_elements: ko.observableArray(['single choice', 'multiple choice', 'textarea', 'text', 'checkbox'])
+                    };
+
+    ko.applyBindings(viewModel);
+
+	/**
+	* Save form for project
+	*/
+	function save_form() {
+		var project_form = [];
+		$("#form_element .label").each(function(elt) {
+			var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
+			if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
+				var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
+				form_elt['values'] = values;
+			}
+		project_form.push(form_elt);
+		});
+        $.ajax({
+			url: '/project/'+viewModel.project_current()._id,
+            type: 'PUT',
+            data: {form: project_form},
+            success: function(result) {
+            }
+        });
+	}
+
+
+	/**
+	* Show what form will looks like
+	*/
+	function render_form() {
+		var form_html = "<form>";
+		$("#form_element .label").each(function(elt) {
+			form_html += render_form_element(this.getAttribute("data-type"), this.getAttribute("data-id"));
+		});
+		form_html += "</form>";
+		$("#form_render").html(form_html);
+	}
+
+    /**
+    * Add a form element (choice, textarea, .. to project form)
+    */
+    var elt_count = 0;
+
+	function add_to_form(elt) {
+		add_to_form(elt,null);
+	}
+
+    function add_to_form(elt, info) {
+		if(elt == undefined) {
+			return;
+		}
+		elt_count += 1;
+		var elt_id = elt_count;
+		if(info!=null && 'id' in info) {
+			elt_id = parseInt(info['id'].replace('elt',''));
+			if(elt_count<= elt_id) { elt_count = elt_id + 1; }
+		}
+		var form_elt = '<div id="elt'+elt_id+'" class="form_elt">';
+		//form_elt += '<i class="fi-trash" data-id="'+elt_id+'" data-bind="click: delete_project_form_element"></i>';
+		form_elt += '<i class="fi-trash" data-id="'+elt_id+'"></i>';
+		var labelvalue = 'label'+elt_id;
+		var eltvalues = "";
+		if(info!=null) {
+			labelvalue = info['label'];
+			if('values' in info) {
+				eltvalues = info['values'].join();
+			}
+		}
+		if(elt == 'textarea') {
+			form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="textarea" data-id="'+elt_id+'"/>';
+			form_elt += '<textarea id="form'+elt_id+'"></textarea>';
+		}
+        else if(elt == 'text') {
+            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="text" data-id="'+elt_id+'"/>';
+            form_elt += '<input type="text" id="form'+elt_id+'"/>';
+        }
+        else if(elt == 'checkbox') {
+            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="checkbox" data-id="'+elt_id+'"/>';
+            form_elt += '<input type="checkbox" id="form'+elt_id+'"/>';
+        }
+        else if(elt == 'single' || elt=='single choice') {
+            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="single" data-id="'+elt_id+'"/>';
+		    form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
+            form_elt += '<select id="form'+elt_id+'"></select>';
+        }
+        else if(elt == 'multiple' || elt == 'multiple choice') {
+            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="multiple" data-id="'+elt_id+'"/>';
+            form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
+            form_elt += '<select id="form'+elt_id+'" multiple="multiple"></select>';
+        }
+
+		form_elt += "</div>";
+		//$("#form_element").append(form_elt);
+		//var dynamic_elt = document.getElementById("elt"+elt_id);
+		//ko.applyBindings(viewModel, dynamic_elt);
+		return form_elt;
+    }
+
+    function addProject() {
+        panelNewProject();
+    }
+
+    function panelProjects() {
+        viewModel.manageItems(false);
+        viewModel.showProjects(true);
+        viewModel.showProject(false);
+        viewModel.editProject(false);
+    }
+
+    function panelNewProject() {
+        viewModel.manageItems(false);
+        viewModel.showProjects(false);
+        viewModel.showProject(true);
+        viewModel.editProject(false);
+    }
+
+    function panelEditProject(project_id) {
+				viewModel.manageItems(false);
+        viewModel.showProjects(false);
+        viewModel.showProject(false);
+        viewModel.editProject(true);
+    }
+
+	function panelManageItems(project_id) {
+        viewModel.showProjects(false);
+        viewModel.showProject(false);
+        viewModel.editProject(false);
+				viewModel.manageItems(true);
+				var project = viewModel.project_current();
+        $.getJSON("/project/"+project_id+"/image", function(data) {
+            viewModel.image_list(data);
+        });
+	}
+
+
+  </script>

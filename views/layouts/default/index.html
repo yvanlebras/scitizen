@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scitizen</title>
+    <link rel='stylesheet' href='/stylesheets/foundation.min.css' />
+    <link rel='stylesheet' href='/themes/default/stylesheets/main.css' />
+
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/icons/foundation-icons/foundation-icons.css' />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Playfair+Display:400italic' rel='stylesheet' type='text/css' />
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ apikey }}&sensor=FALSE">
+    </script>
+    <script src="/javascripts/markerclusterer.min.js"></script>
+    <script type='text/javascript' src='/javascripts/jquery-2.0.3.min.js'></script>
+    <script type='text/javascript' src='/javascripts/knockout-3.1.0.js'></script>
+    <script type='text/javascript' src='/js/foundation.min.js'></script>
+    <script type='text/javascript' src='/javascripts/scitizen.js'></script>
+
+  <script type='text/javascript' src='/javascripts/Markdown.Converter.js'></script>
+  </head>
+  <body>
+<div class="row">
+  <div class="large-12 columns">
+
+    <!-- Navigation -->
+      <nav class="top-bar">
+        <ul class="title-area">
+          <!-- Title Area -->
+          <li class="name">
+            <h1>
+              <a href="#">
+                Scitizen
+              </a>
+            </h1>
+          </li>
+        <li class="toggle-topbar menu-icon"><a href="#"><span>menu</span></a></li>
+      </ul>
+
+      <section class="top-bar-section">
+        <ul class="left">
+          <li><a href="#" data-bind="click: register">Register</a></li>
+          <li><a href="#" data-bind="click login">Login</a></li>
+        </ul>
+
+      </section>
+      </nav>
+
+
+    <!-- End Navigation -->
+    </div>
+  </div>
+
+   {{{ yield }}}
+
+    <!-- End Content -->
+
+
+    <!-- Footer -->
+
+  <footer class="row">
+    <div class="large-12 columns">
+      <hr>
+      <div class="row">
+        <div class="large-6 columns">
+          <p>&copy; Copyright 2013 GenOuest platform - IRISA.</p>
+        </div>
+        <div class="large-6 columns">
+          <ul class="inline-list right">
+            <li><a href="https://www.e-biogenouest.org/">e-biogenouest</a></li>
+            <li><a href="http://www.genouest.org">GenOuest platform</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  </body>
+</html>

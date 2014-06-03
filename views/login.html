@@ -1,0 +1,29 @@
+  <div class="row">
+    <div class="large-4 large-centered columns">
+      <div class="row">
+
+    <!-- Content -->
+{{#messages}}
+   <span class="alert label"> {{ messages }} </span>
+{{/messages}}
+
+<form action="/login" method="post">
+    <div>
+        <label>Username:</label>
+        <input type="text" name="username"/>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password"/>
+    </div>
+    <div>
+        <!--<a href="#" class="button">Log In</a>-->
+        <button>Log In</button>
+    </div>
+</form>
+
+    <!-- End Content -->
+
+      </div>
+    </div>
+  </div>

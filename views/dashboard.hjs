@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ project }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/foundation.min.css' />
+    <script type='text/javascript' src='/javascripts/jquery-2.0.3.min.js'></script>
+    <script type='text/javascript' src='/javascripts/foundation.min.js'></script>
+  </head>
+  <body>
+<div class="row">
+  <div class="large-12 columns">
+
+    <!-- Navigation -->
+      <nav class="top-bar">
+        <ul class="title-area">
+          <!-- Title Area -->
+          <li class="name">
+            <h1>
+              <a href="#">
+                Scitizen: {{ project }}
+              </a>
+            </h1>
+          </li>
+          <li class="toggle-topbar menu-icon"><a href="#"><span>menu</span></a></li>
+        </ul>
+
+        <section class="top-bar-section">
+          <ul class="left">
+            <li><a href="#">Link 1</a></li>
+            <li><a href="#">Link 2</a></li>
+          </ul>
+
+          <ul class="right">
+            <li class="search">
+              <form>
+                <input type="search">
+              </form>
+            </li>
+
+            <li class="has-button">
+              <a class="small button" href="#">Search</a>
+            </li>
+          </ul>
+        </section>
+      </nav>
+
+    <!-- End Navigation -->
+
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="large-12 columns">
+
+    <!-- Desktop Slider -->
+
+      <div class="hide-for-small">
+        <div id="featured">
+              <img src="http://osallou.genouest.org:3000/media/{{ file }}" alt="last image" />
+              <!-- <img src="http://placehold.it/1000x400&text=Slide Image" alt="slide image">
+              <img src="http://placehold.it/1000x400&text=Slide Image" alt="slide image"> -->
+          </div>
+        </div>
+
+    <!-- End Desktop Slider -->
+
+
+    <!-- Mobile Header -->
+
+
+    <div class="row">
+      <div class="small-12 show-for-small"><br>
+        <img src="http://placehold.it/1000x600&text=For Small Screens" />
+      </div>
+    </div>
+
+
+  <!-- End Mobile Header -->
+
+    </div>
+  </div><br>
+
+  <div class="row">
+    <div class="large-12 columns">
+      <div class="row" id="thumbnails">
+
+    <!-- Thumbnails -->
+        {{# thumbfiles }}
+        <div class="large-3 small-6 columns">
+          <img src="http://osallou.genouest.org:3000/media/{{ file }}" />
+          <h6 class="panel">Recent upload</h6>
+        </div>
+        {{/ thumbfiles }}
+
+    <!-- End Thumbnails -->
+
+        <div class="large-3 small-6 columns">
+          <a href="/project/{{project}}/map">
+          <img src="http://osallou.genouest.org:3000/images/map.jpg" />
+          <h6 class="panel">Locations</h6>
+          </a>
+        </div>
+
+
+    <!-- Twitter -->
+	<div class="large-3 small-6 columns">
+	<a class="twitter-timeline" href="https://twitter.com/osallou" data-widget-id="365356468553265152">Tweets by @osallou</a>
+	</div>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+     <!-- End Twitter -->
+
+
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="large-12 columns">
+      <div class="row">
+
+    <!-- Content -->
+
+        <div class="large-8 columns">
+          <div class="panel radius">
+
+          <div class="row">
+          <div class="large-6 small-6 columns">
+
+            <h4>Header</h4><hr/>
+            <h5 class="subheader">Risus ligula, aliquam nec fermentum vitae, sollicitudin eget urna. Donec dignissim nibh fermentum odio ornare sagittis.
+            </h5>
+
+          <div class="show-for-small" align="center">
+            <a href="#" class="small radius button">Call To Action!</a><br>
+
+            <a href="#" class="small radius button">Call To Action!</a>
+          </div>
+
+          </div>
+          <div class="large-6 small-6 columns">
+
+            <p>Suspendisse ultrices ornare tempor. Aenean eget ultricies libero. Phasellus non ipsum eros. Vivamus at dignissim massa. Aenean dolor libero, blandit quis interdum et, malesuada nec ligula. Nullam erat erat, eleifend sed pulvinar ac. Suspendisse ultrices ornare tempor. Aenean eget ultricies libero.
+          </p>
+        </div>
+
+        </div>
+        </div>
+        </div>
+
+        <div class="large-4 columns hide-for-small">
+
+          <h4>More!</h4><hr/>
+
+          <a href="/project/{{project}}/random">
+          <div class="radius button" align="center">
+            <strong>Help us to curate data!</strong>
+          </div>
+          </a>
+
+        </div>
+
+    <!-- End Content -->
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer -->
+
+  <footer class="row">
+    <div class="large-12 columns">
+      <hr>
+      <div class="row">
+        <div class="large-6 columns">
+          <p>&copy; Copyright 2013 GenOuest platform - IRISA.</p>
+        </div>
+        <div class="large-6 columns">
+          <ul class="inline-list right">
+            <li><a href="https://www.e-biogenouest.org/">e-biogenouest</a></li>
+            <li><a href="http://www.genouest.org">GenOuest platform</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  </body>
+</html>
