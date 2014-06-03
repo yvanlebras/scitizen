@@ -1,0 +1,57 @@
+<div class="row">
+  <div data-alert id="message"></div>
+</div>
+<div class="row large-6">
+  <form action="#" id="register_form">
+    <label for="login">Email address</label>
+    <input type="email" name="login" id="login" value=""/>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" value=""/>
+    <label for="password_confirm">Confirm password</label>
+    <input type="password" name="password_confirm" id="password_confirm" value=""/>
+    <button type="button" class="btn btn-large" id="register">Register</button>
+  </form>
+
+</div>
+
+
+<script>
+$(document).ready(function() {
+  $("#register").click(function(){
+    $("#message").removeClass("alert-box");
+    $("#message").removeClass("success");
+    $("#message").removeClass("alert");
+    $.ajax({
+  url: "/users/register",
+  type: 'POST',
+  data:  { login: $("#login").val(), password: $("#password").val(), password_confirm: $("#password_confirm").val() },
+  dataType: "json",
+  success: function(data, textStatus, jqXHR)
+  {
+
+    if(data.err!=0) {
+        $("#message").html("An error occured: "+data.msg);
+        $("#message").addClass("alert-box alert");
+    }
+    else {
+      $("#message").html("Request has been sent, a confirmation email has been sent to your email address. After confirmation you will be able to login.");
+      $("#message").addClass("alert-box success");
+    }
+
+  },
+  error: function(jqXHR, textStatus, errorThrown)
+  {
+      /*
+      var message = '<div data-alert class="alert-box alert">';
+      message += jqXHR.responseText;
+      message += '<a href="#" class="close">&times;</a>'
+      message += '</div>';
+      */
+      $("#message").addClass("alert-box alert");
+      $("#message").html("An error occured");
+  }
+});
+  });
+});
+
+</script>

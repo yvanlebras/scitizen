@@ -180,6 +180,9 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/my', ensureAuthenticated, user.my);
 app.get('/users', user.list);
+app.get('/users/register', user.register_new);
+app.post('/users/register', user.register);
+app.get('/users/confirm', user.confirm);
 app.get('/project', project.list);
 app.post('/project', project.add);
 app.get('/projects', project.list);

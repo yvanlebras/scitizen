@@ -103,7 +103,6 @@ exports.delete = function(req, res) {
 }
 
 exports.list = function(req, res) {
-        console.log("list projects");
         projects_db.find({}, function(err,projects) {
             url_parts = url.parse(req.url, true);
             url_callback = url_parts.query.jsoncallback;

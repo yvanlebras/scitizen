@@ -6,6 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "nodemailer": "*",
     "express": "3.3.4",
     "hogan-express": "*",
     "mongodb": "*",
