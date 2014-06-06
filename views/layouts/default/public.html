@@ -41,7 +41,8 @@
           <ul class="right" id="user_view">
             <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: login}">Login</a></li>
             <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: register}">Register</a></li>
-			<li data-bind="if: user_logged"><span data-bind="text: user"></span></li>
+			      <li data-bind="if: user_logged"><a href="#" data-bind="text: user"></a></li>
+            <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: my}">My projects</a>
             <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: logout}">Logout</a></li>
           </ul>
 

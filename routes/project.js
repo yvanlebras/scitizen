@@ -18,7 +18,7 @@ var monk = require('monk')
 
 var CONFIG = require('config');
 
-var storage = scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
+scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
 
 /*
 var SWIFT_CONFIG = require('config').Swift;
@@ -187,7 +187,7 @@ exports.dashboard =  function(req, res){
         username = req.user.username;
     }
     projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-        res.render('dashboard', { layout: "layouts/default/public", project: project, apikey: CONFIG.google.apikey, messages: req.flash('info'), user: username });
+        res.render('dashboard', { layout: "layouts/default/public", project: project, apikey: CONFIG.Google.apikey, messages: req.flash('info'), user: username });
 
     });
 };
@@ -264,7 +264,7 @@ function upload_file(req, res, project) {
                 res.status(500).send("Error while saving item");
             }
             var metadata = { project:  image.project, name: image.name };
-            storage.put(image._id.toHexString(), files.image.path, metadata,
+            scitizen_storage.put(image._id.toHexString(), files.image.path, metadata,
                         function(err, result) {
                           if(err!=0) {
                             res.status(err).send('Could not save image');

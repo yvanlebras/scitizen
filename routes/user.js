@@ -34,7 +34,7 @@ exports.login = function(req, res){
 };
 
 exports.my = function(req, res){
-    users_db.findOne({username: req.user.name}, function(err, user) {
+    users_db.findOne({username: req.user.username}, function(err, user) {
         if(! user) {
             res.redirect('/login');
         }

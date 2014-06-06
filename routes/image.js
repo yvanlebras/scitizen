@@ -28,7 +28,7 @@ var rackspace = pkgcloud.storage.createClient({
 */
 var CONFIG = require('config');
 
-var storage = scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
+scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
 
 
 var LRU = require("lru-cache")
@@ -100,7 +100,7 @@ exports.delete = function(req, res) {
             fs.unlink(CONFIG.dir + '/' + image_id, function(err) {});
         }
     });
-    storage.delete(image_id, function(err,res) {
+    scitizen_storage.delete(image_id, function(err,res) {
       if(err>0) {
         console.log("Failed to delete "+image_id+" from S3");
       }
@@ -120,10 +120,14 @@ exports.delete = function(req, res) {
 }
 
 exports.get = function(req, res) {
-    var image_id= req.param('id');
+  var image_id= req.param('id');
+  if(image_id==0) {
+    res.status(404).send('Image not found');
+    return;
+  }
 
   images_db.findOne({ _id: images_db.id(image_id) }, function(err, image) {
-    storage.get(image_id, function(err, result) {
+    scitizen_storage.get(image_id, function(err, result) {
       if(err>0) {
         res.status(err).send('Could not retreive image');
       }

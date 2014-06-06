@@ -163,11 +163,12 @@
     });
 
     var viewModel = {
-      user: ko.observable({{user}}),
+      user: ko.observable('{{user}}'),
       user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
       home: ko.observable('/'),
       login: ko.observable('/login'),
       logout: ko.observable('/logout'),
+			my: ko.observable('/my'),
       register: ko.observable('/users/register'),
 						manageItems: ko.observable(false),
 						form_elements: ko.observable(''),

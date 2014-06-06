@@ -22,6 +22,7 @@
     "pkgcloud": "*",
     "config": "*",
     "yaml": "*",
-    "lru-cache": "*"
+    "lru-cache": "*",
+    "scitizen-storage": "git+ssh://git@bitbucket.org:osallou/scitizen-storage.git"
   }
 }

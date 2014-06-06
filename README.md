@@ -64,6 +64,7 @@ in config/default.yaml
     general:
         url: "http://localhost:3000/"
         admin: [ "admin@mydomain.com" ]
+        storage: "s3"
     mail:
         host: "my.smtp.provider.host"
         port: 465
@@ -71,13 +72,13 @@ in config/default.yaml
         user: "XXXX"
         password: "XXXX"
         origin: do-not-reply@mydomain.com
-Swift:
-    username: ""
-    region: "RegionOne"
-    password: ""
-    authUrl: ""
-    container: "scitizen"
-    dir: "/tmp/scitizen"
+    storage:
+        username: ""
+        region: "RegionOne"
+        password: ""
+        authUrl: ""
+        container: "scitizen"
+        path: "/tmp/scitizen"
 
-Google:
-    apikey: ""  # Google maps API
+    Google:
+      apikey: ""  # Google maps API
