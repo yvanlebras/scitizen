@@ -14,8 +14,6 @@
     <script type='text/javascript' src='/javascripts/jquery-2.0.3.min.js'></script>
     <script type='text/javascript' src='/javascripts/knockout-3.1.0.js'></script>
     <script type='text/javascript' src='/js/foundation.min.js'></script>
-    <script type='text/javascript' src='/javascripts/scitizen.js'></script>
-
   <script type='text/javascript' src='/javascripts/Markdown.Converter.js'></script>
   </head>
   <body>
@@ -40,14 +38,19 @@
             <li><a href="#" data-bind="click: goto_home_panel">Home</a></li>
             <li><a href="#" data-bind="if: project_ready, click: goto_addnew_panel">Contribute</a></li>
           </ul>
+          <ul class="right" id="user_view">
+            <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: login}">Login</a></li>
+            <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: register}">Register</a></li>
+			<li data-bind="if: user_logged"><span data-bind="text: user"></span></li>
+            <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: logout}">Logout</a></li>
+          </ul>
 
         </section>
       </nav>
-
     <!-- End Navigation -->
-
-   {{{ yield }}}
-
+    <section id="content_view">
+      {{{ yield }}}
+    </section>
     <!-- End Content -->
 
 
@@ -70,6 +73,7 @@
       </div>
     </div>
   </footer>
+  <script type='text/javascript' src='/javascripts/scitizen.js'></script>
 
   </body>
 </html>

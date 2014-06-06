@@ -4,6 +4,7 @@ var path = require("path");
 var fs = require("fs");
 var formidable = require("formidable");
 var pkgcloud = require("pkgcloud");
+var scitizen_storage = require("scitizen-storage");
 
 var MongoClient = require('mongodb').MongoClient;
 
@@ -13,6 +14,7 @@ var monk = require('monk')
   , projects_db = db.get('projects')
   , images_db = db.get('images');
 
+/*
 var CONFIG = require('config').Swift;
 
 var rackspace = pkgcloud.storage.createClient({
@@ -23,6 +25,11 @@ var rackspace = pkgcloud.storage.createClient({
     password: CONFIG.password,
     authUrl: CONFIG.authUrl
   });
+*/
+var CONFIG = require('config');
+
+var storage = scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
+
 
 var LRU = require("lru-cache")
   , options = { max: 100
@@ -93,11 +100,18 @@ exports.delete = function(req, res) {
             fs.unlink(CONFIG.dir + '/' + image_id, function(err) {});
         }
     });
+    storage.delete(image_id, function(err,res) {
+      if(err>0) {
+        console.log("Failed to delete "+image_id+" from S3");
+      }
+    });
+    /*
     rackspace.removeFile(CONFIG.container, image_id, function(err) {
         if(err!=null) {
             console.log("Failed to delete "+image_id+" from S3");
         }
     });
+    */
     images_db.remove({_id: image_id}, function(err) {
         if(err) { console.log(err); }
         res.json({_id: image_id});
@@ -107,9 +121,24 @@ exports.delete = function(req, res) {
 
 exports.get = function(req, res) {
     var image_id= req.param('id');
+
+  images_db.findOne({ _id: images_db.id(image_id) }, function(err, image) {
+    storage.get(image_id, function(err, result) {
+      if(err>0) {
+        res.status(err).send('Could not retreive image');
+      }
+      else {
+        console.log("##DEBUG contentype: "+image.contentType);
+        serve_image(image_id, image.contentType, req, res);
+      }
+    });
+  });
+    /*
     var image = cache.get(image_id);
     if(image==null || image==undefined) {
         var myFile = fs.createWriteStream(CONFIG.dir+'/'+image_id);
+
+
         rackspace.download({
             container: CONFIG.container,
             remote: image_id
@@ -128,10 +157,12 @@ exports.get = function(req, res) {
             }
             // handle the download result
         }).pipe(myFile);
+
     }
     else {
         serve_image(image_id, image, req, res);
     }
+    */
 }
 
 exports.list = function(req, res) {

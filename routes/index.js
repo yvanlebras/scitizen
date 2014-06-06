@@ -7,5 +7,9 @@ var monk = require('monk')
  */
 
 exports.index = function(req, res){
-        res.render('index', { layout: "layouts/default/index"});
+    var username = '';
+    if(req.user) {
+        username = req.user.username;
+    }
+        res.render('index', { layout: "layouts/default/public", user: username});
 };

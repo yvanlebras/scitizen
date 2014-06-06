@@ -18,7 +18,7 @@ Ensure 2d index on db location  :
 
 ## General
 
-* Manage user curation
+* Manage user login/logout in interface (menu status)
 * check permissions : public or private with api key
 * registration/user management/password encryption
 * Statistics on project page (per image, global?)
@@ -41,7 +41,7 @@ Ensure 2d index on db location  :
 ## forms
 
 * add tags
-  
+
 ## dashboard
 
 * page for scitizen presentation/access/project selection
@@ -61,6 +61,16 @@ Ensure 2d index on db location  :
 
 in config/default.yaml
 
+    general:
+        url: "http://localhost:3000/"
+        admin: [ "admin@mydomain.com" ]
+    mail:
+        host: "my.smtp.provider.host"
+        port: 465
+        secure: true
+        user: "XXXX"
+        password: "XXXX"
+        origin: do-not-reply@mydomain.com
 Swift:
     username: ""
     region: "RegionOne"
@@ -71,4 +81,3 @@ Swift:
 
 Google:
     apikey: ""  # Google maps API
-

@@ -149,11 +149,12 @@ function initialize() {
     var project =  { _id: '{{ project._id }}', name: '', description: '' };
 
     var viewModel = {
-      //message: ko.observable(''),
-      //has_message: ko.computed(function() { return viewModel.message()==''; }, viewModel),
-      //clear_message: function() {
-      //  viewModel.message('');
-      //},
+      user: ko.observable({{user}}),
+      user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+      home: ko.observable('/'),
+      login: ko.observable('/login'),
+      logout: ko.observable('/logout'),
+      register: ko.observable('/users/register'),
       message: function(msg) {
         alert(msg);
       },

@@ -4,6 +4,7 @@ var path = require("path");
 var fs = require("fs");
 var formidable = require("formidable");
 var pkgcloud = require("pkgcloud");
+var scitizen_storage = require("scitizen-storage");
 
 
 var MongoClient = require('mongodb').MongoClient;
@@ -14,9 +15,13 @@ var monk = require('monk')
   , projects_db = db.get('projects')
   , images_db = db.get('images');
 
-var SWIFT_CONFIG = require('config').Swift;
-var GOOGLE_CONFIG = require('config').Google;
 
+var CONFIG = require('config');
+
+var storage = scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
+
+/*
+var SWIFT_CONFIG = require('config').Swift;
 var rackspace = pkgcloud.storage.createClient({
     provider: 'openstack',
     username: SWIFT_CONFIG.username,
@@ -24,7 +29,7 @@ var rackspace = pkgcloud.storage.createClient({
     password: SWIFT_CONFIG.password,
     authUrl: SWIFT_CONFIG.authUrl
   });
-
+*/
 
 
 var version = null;
@@ -52,10 +57,6 @@ function can_upload(user, project, key) {
         return false;
     }
 }
-
-/*
- * GET users listing.
- */
 
 exports.upload = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
@@ -181,37 +182,21 @@ exports.map  =  function(req, res){
 }
 
 exports.dashboard =  function(req, res){
-    /*
-    MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
-        if(err) throw err;
-        var collection = db.collection('citizen');
-	   collection.find({"project": req.params.id}, { limit: 3, sort: {"_id": -1}}).toArray(function(err, results) {
-           db.close();
-           var lastimg = '';
-           if(results.length>0) {
-               lastimg = results[0]['file'].replace('/tmp/','');
-           }
-           var thumbs = [];
-           for(var j=1;j<Math.min(3,results.length);j++) {
-              thumbs.push({'file': results[j]['file'].replace('/tmp/','')});
-           }
-           res.render('dashboard', { file: lastimg, project: req.params.id, last: JSON.stringify(results), thumbfiles: thumbs })
-       });
-  });
-  */
-   projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-        res.render('dashboard', { layout: "layouts/default/public", project: project, apikey: GOOGLE_CONFIG.apikey, messages: req.flash('info') });
+    var username = '';
+    if(req.user) {
+        username = req.user.username;
+    }
+    projects_db.findOne({ _id : req.param('id')}, function(err,project) {
+        res.render('dashboard', { layout: "layouts/default/public", project: project, apikey: CONFIG.google.apikey, messages: req.flash('info'), user: username });
 
     });
 };
 
 exports.random = function(req, res){
-    console.log("select random element");
     MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
         if(err) throw err;
         var collection = db.collection('citizen');
-	collection.find({"project": req.params.id}).toArray(function(err, results) {
-            console.log(results);
+        collection.find({"project": req.params.id}).toArray(function(err, results) {
             var nbelts = results.length;
             db.close();
             if(results.length==0) {
@@ -219,7 +204,6 @@ exports.random = function(req, res){
             }
             else {
             var randomelt = Math.floor((Math.random()*nbelts));
-            console.log(randomelt);
             res.render('random', { jsonobject: JSON.stringify(results[randomelt]), file: results[randomelt]['file'].replace('/tmp/',''), project: req.params.id });
             }
         });
@@ -267,15 +251,31 @@ function upload_file(req, res, project) {
         fields["loc"]  = {"type" :  "Point", "coordinates" : fields["location"]};
       }
 
-      var item = {project: images_db.id(req.param('id')), fields: fields, name: files.image.name, validated: false, spam: false, favorite: false};
+      var item = {project: images_db.id(req.param('id')),
+                  contentType: files.image.type,
+                  fields: fields,
+                  name: files.image.name,
+                  validated: false,
+                  spam: false,
+                  favorite: false};
 
       images_db.insert(item, function(err, image) {
            if(err!=null) {
                 res.status(500).send("Error while saving item");
             }
-
+            var metadata = { project:  image.project, name: image.name };
+            storage.put(image._id.toHexString(), files.image.path, metadata,
+                        function(err, result) {
+                          if(err!=0) {
+                            res.status(err).send('Could not save image');
+                          }
+                          else {
+                            res.json(image);
+                          }
+            });
+            /*
             rackspace.upload({
-            container:  SWIFT_CONFIG.container,
+            container:  CONFIG.Swift.container,
             remote: image._id.toHexString(),
             local: files.image.path,
             metadata: { project:  image.project, name: image.name }
@@ -294,6 +294,7 @@ function upload_file(req, res, project) {
                 //res.redirect('/project/'+req.params.id+'/dashboard');
                 res.json(image);
             });
+            */
       });
 
     });

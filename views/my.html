@@ -163,6 +163,12 @@
     });
 
     var viewModel = {
+      user: ko.observable({{user}}),
+      user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+      home: ko.observable('/'),
+      login: ko.observable('/login'),
+      logout: ko.observable('/logout'),
+      register: ko.observable('/users/register'),
 						manageItems: ko.observable(false),
 						form_elements: ko.observable(''),
 						image_show: function(image) {
@@ -332,7 +338,7 @@
 						var new_form_elements = $("#form_element").html("");
 						viewModel.form_elements(new_form_elements);
 					  },
-                      project_form_elements: ko.observableArray(['single choice', 'multiple choice', 'textarea', 'text', 'checkbox'])
+            project_form_elements: ko.observableArray(['single choice', 'multiple choice', 'textarea', 'text', 'checkbox'])
                     };
 
     ko.applyBindings(viewModel);

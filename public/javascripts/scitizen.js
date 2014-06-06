@@ -1,3 +1,17 @@
+/*
+var scitizen_user_model = {
+        user: ko.observable({ username: null }),
+        home: ko.observable('/'),
+        login: ko.observable('/login'),
+        logout: ko.observable('/logout'),
+        register: ko.observable('/register')
+}
+
+
+if(document.getElementById('user_view')!=null) {
+  ko.applyBindings(scitizen_user_model, document.getElementById('user_view'))
+}
+*/
 
 /**
  * parses and returns URI query parameters

@@ -26,17 +26,28 @@ exports.list = function(req, res){
 };
 
 exports.login = function(req, res){
-    res.render('login', { messages:  req.flash('error') });
+    var username = '';
+    if(req.user) {
+        username = req.user.username;
+    }
+    res.render('login', { messages: req.flash('error'), user: username });
 };
 
 exports.my = function(req, res){
-    res.render('my', { user: req.user.username });
+    users_db.findOne({username: req.user.name}, function(err, user) {
+        if(! user) {
+            res.redirect('/login');
+        }
+        else {
+            res.render('my', { layout: "layouts/default/index", user: req.user.username });
+        }
+    });
 };
 
 var salt = null;
 
 exports.register_new = function(req, res) {
-  res.render('register');
+  res.render('register', { layout: "layouts/default/public", user: ''});
 }
 
 exports.register = function(req, res) {
@@ -62,14 +73,14 @@ exports.register = function(req, res) {
 exports.confirm = function(req, res) {
   var login = req.param("user");
   var regkey = req.param("regkey");
-  users_db.findOne({name: login}, function(err, user) {
+  users_db.findOne({username: login}, function(err, user) {
     if(! user) {
       res.render("error", { msg: "User id or key is not valid"});
       return;
     }
     else {
         if(user.regkey == regkey) {
-          users_db.update({ _id: user._id}, { registered: true}, function(err) {});
+          users_db.update({ _id: user._id}, { $set: { registered: true}}, function(err) {});
           res.redirect("/login");
           return;
         }
@@ -84,9 +95,13 @@ exports.confirm = function(req, res) {
 
 
 function createUser(login, password) {
-  var hash = bcrypt.hashSync('passwd', salt);
+  var hash = bcrypt.hashSync(password, salt);
   var regkey = Math.random().toString(36).substring(7);
-  users_db.insert({ username: login, password: hash, group: ['default'], registered: false, regkey: regkey });
+  var groups = ['default'];
+  if(GENERAL_CONFIG.admin.indexOf(login)>-1) {
+    groups.push('admin');
+  }
+  users_db.insert({ username: login, password: hash, group: groups, registered: false, regkey: regkey });
   var link = GENERAL_CONFIG.url+encodeURI("users/confirm?user="+login+"&regkey="+regkey);
   var mailOptions = {
     from: MAIL_CONFIG.origin, // sender address
@@ -94,5 +109,10 @@ function createUser(login, password) {
     subject: "Scitizen registration", // Subject line
     text: "You have created an account in Scitizen project, please confirm your subscription at the following link: "+link, // plaintext body
     html: "You have created an account in Scitizen project, please confirm your subscription at the following link: <a href=\""+link+"\">"+link+"</a>" // html body
-}
+  };
+  transport.sendMail(mailOptions, function(error, response){
+    if(error){
+        console.log(error);
+    }
+  });
 }

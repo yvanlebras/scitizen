@@ -23,12 +23,13 @@ var express = require('express')
   , path = require('path');
 
 
-var CONFIG = require('config').Swift;
+//var CONFIG = require('config').Swift;
 var pkgcloud = require("pkgcloud");
 
 
 var flash = require('connect-flash');
 
+/*
 var rackspace = pkgcloud.storage.createClient({
     provider: 'openstack',
     username: CONFIG.username,
@@ -36,6 +37,7 @@ var rackspace = pkgcloud.storage.createClient({
     password: CONFIG.password,
     authUrl: CONFIG.authUrl
   });
+*/
 
 // app.get('/userlist', routes.userlist(db));  db.get('users'); users.find(..);
 
@@ -48,12 +50,12 @@ sciconfig.findOne( { name: 'default'}, function(err, config) {
     if(!config) {
         salt = bcrypt.genSaltSync(10);
         sciconfig.insert({ name: 'default', salt: salt }, function(err) {
-            createAdmin();
+            //createAdmin();
         });
     }
     else {
         salt = config.salt;
-        createAdmin();
+        //createAdmin();
     }
 });
 
@@ -91,7 +93,7 @@ images.findOne({ name: 'sample_image' }, function (err, image) {
 });
 */
 
-
+/*
 // Swift container?
 rackspace.getContainer("scitizen", function(err, container) {
     if(err!=null && 'statusCode' in err && err['statusCode']==404) {
@@ -106,6 +108,7 @@ rackspace.getContainer("scitizen", function(err, container) {
     }
 
 });
+*/
 
 
 
@@ -128,14 +131,17 @@ passport.deserializeUser(function(id, done) {
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    console.log("DEBUG: use local strategy");
     users.findOne({ username: username }, function (err, user) {
       console.log(user);
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
+      if(! user.registered) {
+        return done(null, false, { message: 'Registration not yet completed'});
+      }
       var hash = bcrypt.hashSync(password, salt);
+      console.log(user.password+" =? "+hash);
       if (user.password!=hash) {
         return done(null, false, { message: 'Incorrect password.' });
       }
@@ -160,7 +166,7 @@ app.use(passport.session());
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
-app.set('layout', 'layouts/default');
+app.set('layout', 'layouts/default/public');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());

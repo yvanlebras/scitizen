@@ -27,3 +27,20 @@
       </div>
     </div>
   </div>
+
+<script>
+var viewModel = {
+  project_list: ko.observableArray(),
+  project_ready: ko.observable(false),
+  goto_home_panel: function() {},
+  goto_addnew_panel: function() {},
+  user: ko.observable({{user}}),
+  user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+  home: ko.observable('/'),
+  login: ko.observable('/login'),
+  logout: ko.observable('/logout'),
+  register: ko.observable('/users/register')
+};
+//ko.applyBindings(viewModel, document.getElementById('content_view'));
+ko.applyBindings(viewModel);
+</script>
