@@ -1,0 +1,27 @@
+<div class="row">
+  <h2>Help us adding new data</h2>
+</div>
+<form id="image_form" action="/project/{{ project._id }}" enctype="multipart/form-data" method="post">
+  <div class="row">
+    <div class="large-4 columns">
+      <h3>Please fill the following form</h3>
+      <div id="dynaform"></div>
+    </div>
+    <div class="large-8 columns">
+      <h3>Upload image/photo</h3>
+      <label for="image">Image file upload</label>
+      <input type="file" name="image" id="image" size="40" required>
+
+      <div class="row" id="location"  data-bind="visible: geo" >
+        <h3>Location</h3>
+        <label for="geo">Select location</label>
+        <input type="hidden" name="location" id="geo" value=""/>
+        <div id="map-canvas">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="button expand action" id="send" name="send" value="item">Send</button>
+  </div>
+</form>

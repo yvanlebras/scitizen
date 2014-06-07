@@ -47,17 +47,88 @@ MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
 * Checks if a user can submit a new item to a project
 */
 function can_upload(user, project, key) {
+    // Is admin ?
+    if(CONFIG.general.admin.indexOf(user.username)>-1) {
+      return true;
+    }
     if(project.public) {
         return true;
     }
     else {
-        if(project.api==key) {
+        // Has key or memeber of project ?
+        if(project.api==key || project.users.indexOf(user.username)>-1) {
             return true;
         }
         return false;
     }
 }
 
+
+/**
+* Checks if user can read project elements
+*
+* If public, yes
+* If private, only admin or project members logged or via API
+*/
+function can_read(user, project, key) {
+  // Is admin ?
+  if(CONFIG.general.admin.indexOf(user.username)>-1) {
+    return true;
+  }
+  if(project.public) {
+    return true;
+  }
+  else {
+    // Has key or memeber of project ?
+    if(project.api==key || project.users.indexOf(user.username)>-1) {
+        return true;
+    }
+    return false;
+  }
+}
+
+/**
+* Checks if project can be edited (admin or owner)
+*/
+function can_edit(user, project, key) {
+  // Is admin ?
+  if(CONFIG.general.admin.indexOf(user.username)>-1) {
+    return true;
+  }
+  // Has key or memeber of project ?
+  if(project.api==key || project.owner == user.username) {
+      return true;
+  }
+  return false;
+}
+
+/**
+* Checks if user can add new elements
+*
+* If public, yes
+* If private, only admin or members logged or via API key
+*/
+function can_add(user, project, key) {
+  // Is admin ?
+  if(CONFIG.general.admin.indexOf(user.username)>-1) {
+    return true;
+  }
+  if(project.public) {
+    return true;
+  }
+  else {
+    // Has key or memeber of project ?
+    if(project.api==key || project.users.indexOf(user.username)>-1) {
+        return true;
+    }
+    return false;
+  }
+}
+
+/**
+* Upload a new item (must be logged or via API)
+*
+*/
 exports.upload = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
         if(can_upload(req.user, project, req.param('api'))) {
@@ -68,6 +139,10 @@ exports.upload = function(req, res) {
     });
 };
 
+/**
+* Creates a new project, parameters are pname, pdesc.
+*
+*/
 exports.add = function(req, res) {
     var key = (Math.random() + 1).toString(36).substring(7);
     projects_db.insert({ name: req.param('pname'),
@@ -86,11 +161,27 @@ exports.add = function(req, res) {
     });
 }
 
+/**
+* Update project information, user must be owner of the project.
+*
+*/
 exports.edit = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(project.owner == req.user.username || req.user.username == 'admin') {
+        if(can_edit(req.user, project, req.param('api'))) {
+        //if(project.owner == req.user.username || req.user.username == 'admin') {
             // check params and update
+            for(elt in req.body) {
+              if(req.body[elt] == 'false') {
+                req.body[elt] = false;
+              }
+              if(req.body[elt] == 'true') {
+                req.body[elt] = true;
+              }
+            }
             projects_db.update({ _id: req.param('id') }, {$set: req.body}, function(err) {
+              if(err) {
+                console.log(err);
+              }
                 res.json({});
             });
         }
@@ -100,9 +191,14 @@ exports.edit = function(req, res) {
     });
 }
 
+/**
+* Delete a project, user must be owner of the project
+*
+*/
 exports.delete = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(project.owner == req.user.username || req.user.username == 'admin') {
+        if(can_edit(req.user, project, req.param('api'))) {
+        //if(project.owner == req.user.username || req.user.username == 'admin') {
             projects_db.remove({ _id: req.param('id') }, function(err) {
                 res.json({});
             });
@@ -113,17 +209,22 @@ exports.delete = function(req, res) {
     });
 }
 
+/**
+* Get all projects that can be seen by the user i.e. public projects
+* or projects where user is listed in <i>users</i> field list.
+*
+*/
 exports.list = function(req, res) {
       var isAdmin = false;
       var filter = {};
       if(req.user == undefined) {
-        filter = { public: true };
+        filter['public'] = true;
+        filter['status'] = true;
       }
       else if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
         // Not admin, search "is in user" or "public = true"
         filter = { $or: [{ public: true},{ users: { $elemMatch: req.user.username }}]};
       }
-      var filter = {};
       projects_db.find(filter, function(err,projects) {
             url_parts = url.parse(req.url, true);
             url_callback = url_parts.query.jsoncallback;
@@ -139,6 +240,10 @@ exports.list = function(req, res) {
       });
 };
 
+/**
+* Get a project
+*
+*/
 exports.get = function(req, res){
     projects_db.findOne({ _id : req.param('id')}, function(err,project) {
         if (! project.form) { project.form = {} };
@@ -155,10 +260,56 @@ exports.get = function(req, res){
     });
 };
 
+/**
+* Returns available items around a position
+*
+* Query parameters: long, lat, dist (distance in km).
+*/
 exports.around = function(req,res) {
     url_parts = url.parse(req.url, true);
     url_callback = url_parts.query.callback;
-    console.log("looking around "+req.params.long+","+req.params.lat+" for dist "+req.params.dist+" km");
+    console.log('looking around '+req.param('long')+','+req.param('lat')+" for dist "+req.param('dist')+' km');
+    var filter= { "project": images_db.id(req.param('id')),
+                  "fields.location": {
+                    "$within": {
+                      "$centerSphere": [[ parseFloat(req.params.long),
+                                          parseFloat(req.params.lat)
+                                        ],
+                                        parseInt(req.params.dist)/6378.137
+                                        ]
+                                      }
+                                    }
+                };
+    if(version>=4) {
+        // For mongo 2.4, distance in m, so we multiply to get km
+        filter = {"project": images_db.id(req.param('id')),
+                  "fields.loc" : {
+                    "$near" : {
+                      "$geometry" :  {
+                        "type" : "Point",
+                        "coordinates" : [ parseFloat(req.params.long),
+                                          parseFloat(req.params.lat)
+                                        ] }},
+                                        "$maxDistance" : parseInt(req.params.dist) * 1000
+                                      }
+                  };
+    }
+    images_db.find(filter, function(err, images) {
+      if(err) {
+        console.log(err);
+        res.json([]);
+        return;
+      }
+      if(url_callback != undefined && url_callback!=null) {
+          res.set('Content-Type', 'application/json');
+          res.write(url_callback+'('+JSON.stringify(nearmatches)+')');
+          res.end();
+      }
+      else {
+          res.json(images);
+      }
+    });
+    /*
     MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
         if(err) throw err;
         var collection = db.collection('citizen');
@@ -186,8 +337,10 @@ exports.around = function(req,res) {
 
          });
     });
+    */
 };
 
+/*
 exports.map  =  function(req, res){
     MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
         if(err) throw err;
@@ -200,18 +353,51 @@ exports.map  =  function(req, res){
     });
 
 }
+*/
 
+/**
+*
+* Public user page for a project
+* Loads view 'themes/my_theme/dashboard.html', using layout
+* layout/my_theme/public.html
+*
+* Provides to template:
+* <ul>
+*  <li>project</li>
+*  <li>username</li>
+*  <li>Google maps API key</li>
+* </ul>
+*
+* To include the "contribute" a partial can be included with name <b>part</b>:
+*
+* <code>{{> part}}</code>
+*/
 exports.dashboard =  function(req, res){
     var username = '';
     if(req.user) {
         username = req.user.username;
     }
     projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-        res.render('dashboard', { layout: 'layouts/'+project.theme+'/public', project: project, apikey: CONFIG.Google.apikey, messages: req.flash('info'), user: username });
-
+      if(project.public == false && (username=='' || project.users.indexOf(username)==-1)) {
+        // Project is private and user is not logged or part of members
+        res.status(503).send('You are not allowed to access this project');
+        return;
+      }
+        var theme_view = 'dashboard';
+        if(project.theme!='default') {
+          theme_view = 'themes/'+project.theme+'/dashboard';
+        }
+        res.render(theme_view,
+                    { layout: 'layouts/'+project.theme+'/public',
+                      partials: { part: 'new_item' },
+                      project: project,
+                      apikey: CONFIG.Google.apikey,
+                      messages: req.flash('info'),
+                      user: username });
     });
 };
 
+/*
 exports.random = function(req, res){
     MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
         if(err) throw err;
@@ -230,6 +416,7 @@ exports.random = function(req, res){
 
     });
 };
+*/
 
 function upload_file(req, res, project) {
     var form = new formidable.IncomingForm();
@@ -293,29 +480,6 @@ function upload_file(req, res, project) {
                             res.json(image);
                           }
             });
-            /*
-            rackspace.upload({
-            container:  CONFIG.Swift.container,
-            remote: image._id.toHexString(),
-            local: files.image.path,
-            metadata: { project:  image.project, name: image.name }
-            }, function(err, result) {
-                //fs.unlink(files.image.path);
-                if(err!=null) {
-                    images_db.remove({ _id: image._id});
-                    console.log(err);
-                    if('statusCode' in err) {
-                        res.status(err['statusCode']).send('Could not save image');
-                    }
-                    else {
-                        res.status(500).send(err['errno']);
-                    }
-                }
-                //res.redirect('/project/'+req.params.id+'/dashboard');
-                res.json(image);
-            });
-            */
-      });
-
+        });
     });
 }

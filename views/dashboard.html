@@ -6,21 +6,22 @@
 -->
 <div id="main" data-bind="visible: main_panel">
   <div id="last_images" class="block row section_dark" data-bind="if: has_images">
-  <div class="large-6 columns main_image">
+    <div class="large-6 columns main_image">
         <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)}" alt="selected image" />
-  </div>
-  <div class="large-4 columns" data-bind="foreach: last_10_images">
+    </div>
+    <div class="large-4 columns" data-bind="foreach: last_10_images">
       <div class="large-2">
         <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)}" alt="last 10 images" />
       </div>
-  </div>
+    </div>
   </div>
 
-<div class="row">
-  <div data-alert class="alert-box">
-  Help us curating the database, give your advice on the random selected item.
+
+  <div class="row">
+    <div data-alert class="alert-box">
+      Help us curating the database, give your advice on the random selected item.
+    </div>
   </div>
-</div>
 
   <div class="block row">
     <!-- help, about -->
@@ -59,46 +60,16 @@
     <h2><i class="fi-compass"></i> Browse the world...</h2>
     <div id="cluster-canvas" >
     <!-- map -->
-
     </div>
   </div>
-
-
 </div>
+
 <!-- end main panel -->
 
 <div id="newitem" class="section_white" data-bind="visible: newitem_panel">
-<div class="row">
-<h2>Help us adding new data</h2>
-</div>
-<form id="image_form" action="/project/{{ project._id }}" enctype="multipart/form-data" method="post">
-<div class="row">
-<div class="large-4 columns">
-  <h3>Please fill the following form</h3>
-<div id="dynaform"></div>
-</div>
-<div class="large-8 columns">
-<h3>Upload image/photo</h3>
-<label for="image">Image file upload</label>
-
-<input type="file" name="image" id="image" size="40" required>
-
-<div class="row" id="location"  data-bind="visible: geo" >
-<h3>Location</h3>
-<label for="geo">Select location</label>
-<input type="hidden" name="location" id="geo" value=""/>
-<div id="map-canvas" />
-</div>
-</div>
-</div>
-<div class="row">
-<button class="button expand action" id="send" name="send" value="item">Send</button>
-</div>
-</form>
-</div>
+  {{> part}}
 </div>
 <!-- end new item -->
-
 
 
 <script type="text/javascript">
@@ -109,7 +80,12 @@ var infowindow = new google.maps.InfoWindow();;
 var event_position = new google.maps.LatLng(48.112047191207964, -1.6814074292778969);
 var marker=null;
 
-function initialize2() {
+  /**
+  * Adds a clickable Google map on element "map-canvas",
+  * centered on <i>event_position</i>
+  */
+  function initialize_map(event_position) {
+	  if(document.getElementById("map-canvas")!=null) {
       var mapOptions = {
         center: event_position,
         zoom: 8
@@ -128,29 +104,35 @@ function initialize2() {
           map: map,
           title: 'Event'
       });
-    $("#geo").val(lat+","+lng);
+      $("#geo").val(lat+","+lng);
     });
-}
-
-function initialize() {
-
-
-  var cluster_mapOptions = {
-    zoom: 3,
-    center: event_position,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
   }
-  cluster_map = new google.maps.Map(document.getElementById('cluster-canvas'),
-   cluster_mapOptions);
 
-}
+  /**
+  * Adds a Google cluster map on element "cluster-canvas",
+  * centered on <i>event_position</i>
+  */
+  function initialize_cluster(event_position) {
 
+  if(document.getElementById("cluster-canvas")!=null) {
+    var cluster_mapOptions = {
+      zoom: 3,
+      center: event_position,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    cluster_map = new google.maps.Map(document.getElementById('cluster-canvas'),
+                                      cluster_mapOptions);
+  }
 
-    var project =  { _id: '{{ project._id }}', name: '', description: '' };
+  }
 
-    var viewModel = {
+  var project =  { _id: '{{ project._id }}', name: '', description: '' };
+
+  var viewModel = {
       user: ko.observable('{{user}}'),
-      user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+      user_logged: ko.computed(function() { return '{{user}}'!=''; },
+                                viewModel),
       home: ko.observable('/'),
       login: ko.observable('/login'),
       logout: ko.observable('/logout'),
@@ -159,7 +141,9 @@ function initialize() {
       message: function(msg) {
         alert(msg);
       },
-      project: ko.observable({ _id: '{{ project._id }}', name: '', description: '' }),
+      project: ko.observable({ _id: '{{ project._id }}',
+                                name: '',
+                                description: '' }),
       project_ready: ko.observable(false),
       project_description: ko.observable(''),
       selected_image: ko.observable({_id:0}),
@@ -171,7 +155,7 @@ function initialize() {
         viewModel.main_panel(false);
         viewModel.newitem_panel(true);
         if(map==null) {
-          initialize2();
+          initialize_map(event_position);
         }
       },
       goto_home_panel: function() {
@@ -223,9 +207,7 @@ function initialize() {
     };
     ko.applyBindings(viewModel);
 
-    viewModel.random_image.subscribe(function(newValue) {
-      // TODO update form
-    });
+
 
     function changeRandomImage() {
       var data = viewModel.images();
@@ -253,7 +235,7 @@ function initialize() {
 
 
     $(document).ready(function() {
-      initialize();
+      initialize_cluster();
       $.getJSON("/project/"+project._id, function(data) {
         project = data;
         viewModel.project(data);
@@ -279,8 +261,6 @@ function initialize() {
           viewModel.images(data);
           viewModel.last_10_images(data.slice(0,9));
           viewModel.selected_image(data[0]);
-          //var random_elt = Math.floor((Math.random() * data.length));
-          //viewModel.random_image(data[random_elt]);
           changeRandomImage();
           update_map();
         }
@@ -351,7 +331,6 @@ function initialize() {
     google.maps.event.addListener(marker, 'click', function() {
       contentString = '<div>';
       contentString += '<img src="/image/'+result['_id']+'" width="300"/>';
-      console.log(project);
       for(field in result['fields']) {
         if(field!="loc" && field!="send") {
           for(i in project["form"]) {
@@ -369,7 +348,5 @@ function initialize() {
   }
 
 	function panelProjects() { }
-
-  //google.maps.event.addDomListener(window, 'load', initialize);
 
 </script>
