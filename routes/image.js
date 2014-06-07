@@ -14,22 +14,9 @@ var monk = require('monk')
   , projects_db = db.get('projects')
   , images_db = db.get('images');
 
-/*
-var CONFIG = require('config').Swift;
-
-var rackspace = pkgcloud.storage.createClient({
-    provider: 'openstack',
-    username: CONFIG.username,
-    //apiKey: '',
-    region: CONFIG.region,
-    password: CONFIG.password,
-    authUrl: CONFIG.authUrl
-  });
-*/
 var CONFIG = require('config');
 
 scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
-
 
 var LRU = require("lru-cache")
   , options = { max: 100
@@ -48,21 +35,27 @@ var LRU = require("lru-cache")
 
 /**
 * Serve image to client
+*
+* image: image object returned by get method
 */
-function serve_image(image_id, contentType, req, res) {
-    fs.readFile(CONFIG.dir + '/' + image_id, function(error, content) {
+function serve_image(image, req, res) {
+    fs.readFile(image.path, function(error, content) {
         if (error) {
             console.log(error);
             res.writeHead(500);
             res.end();
         }
         else {
-            res.writeHead(200, { 'Content-Type': contentType});
+            res.writeHead(200, { 'Content-Type': image.contentType});
             res.end(content, 'utf-8');
         }
     });
 }
 
+/**
+* Curation by users
+*
+*/
 exports.curate = function(req, res) {
     var image_id= req.param('id');
     if(req.param('spam')==1) {
@@ -105,13 +98,6 @@ exports.delete = function(req, res) {
         console.log("Failed to delete "+image_id+" from S3");
       }
     });
-    /*
-    rackspace.removeFile(CONFIG.container, image_id, function(err) {
-        if(err!=null) {
-            console.log("Failed to delete "+image_id+" from S3");
-        }
-    });
-    */
     images_db.remove({_id: image_id}, function(err) {
         if(err) { console.log(err); }
         res.json({_id: image_id});
@@ -132,63 +118,14 @@ exports.get = function(req, res) {
         res.status(err).send('Could not retreive image');
       }
       else {
-        console.log("##DEBUG contentype: "+image.contentType);
-        serve_image(image_id, image.contentType, req, res);
+        serve_image(result, req, res);
       }
     });
   });
-    /*
-    var image = cache.get(image_id);
-    if(image==null || image==undefined) {
-        var myFile = fs.createWriteStream(CONFIG.dir+'/'+image_id);
-
-
-        rackspace.download({
-            container: CONFIG.container,
-            remote: image_id
-        }, function(err, result) {
-            if(err!=null) {
-                if('statusCode' in err) {
-                    res.status(err['statusCode']).send('Could not retreive image');
-                }
-                else {
-                    res.status(500).send(err['errno']);
-                }
-            }
-            else {
-                cache.set(image_id, result);
-                serve_image(image_id, result.contentType, req, res);
-            }
-            // handle the download result
-        }).pipe(myFile);
-
-    }
-    else {
-        serve_image(image_id, image, req, res);
-    }
-    */
 }
 
 exports.list = function(req, res) {
-    console.log("list images for project "+req.param('id'));
     images_db.find({ project: images_db.id(req.param('id')) }, function(err, images) {
         res.json(images);
     });
-    /*
-    var files = rackspace.getFiles("scitizen", function(err, files) {
-        if(err!=null && ('statusCode' in err) && (err['statusCode']==404)) {
-            rackspace.createContainer({ name: "scitizen" },function(err, files)             {
-                if(err!=null && 'statusCode' in err) {
-                    res.status(err['statusCode']).send(err);
-                }
-                else {
-                    res.json([]);
-                }
-            });
-        }
-        else {
-            res.json(files);
-        }
-    });
-    */
 };

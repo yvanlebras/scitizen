@@ -18,24 +18,21 @@ Ensure 2d index on db location  :
 
 ## General
 
-* Manage user login/logout in interface (menu status)
-* check permissions : public or private with api key
-* registration/user management/password encryption
+* check permissions : public or private (looged or with api key)
 * Statistics on project page (per image, global?)
 
 ## Items
 
+* list: add $limit and $skip option (to limit number of items to show)
 * anti-spam on submission
 * require approval option on submission
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache
-* Manage S3 or pairtree storage
-
 
 ## project creation
 
 * check name duplicates
-* add optional url for projects managing themselves  the web page
+* add optional url for projects managing themselves the web page
 * add optional image
 
 ## forms
@@ -44,7 +41,6 @@ Ensure 2d index on db location  :
 
 ## dashboard
 
-* page for scitizen presentation/access/project selection
 * 1 page for projects with themes
 
 ## projet setup
@@ -52,6 +48,10 @@ Ensure 2d index on db location  :
 * project themes
 * provide main page image
 * user defined themes
+
+## Admin
+
+* manage users
 
 # Issues:
 
@@ -73,11 +73,14 @@ in config/default.yaml
         password: "XXXX"
         origin: do-not-reply@mydomain.com
     storage:
+        # For s3
+        provider: "openstack"
         username: ""
         region: "RegionOne"
         password: ""
         authUrl: ""
         container: "scitizen"
+        # For s3 and pairtree
         path: "/tmp/scitizen"
 
     Google:

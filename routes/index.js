@@ -11,5 +11,8 @@ exports.index = function(req, res){
     if(req.user) {
         username = req.user.username;
     }
-        res.render('index', { layout: "layouts/default/public", user: username});
+    var project = { name: "Project list", theme: "default" }
+        res.render('index', { layout: "layouts/default/public",
+                              user: username,
+                              project: project});
 };

@@ -70,9 +70,19 @@ exports.upload = function(req, res) {
 
 exports.add = function(req, res) {
     var key = (Math.random() + 1).toString(36).substring(7);
-    projects_db.insert({ name: req.param('pname'), description:
-req.param('pdesc'), owner: req.user.username, validation: false, geo: true, status: false,  public: true, api: key, form: {} }, function(err, project) {
-        res.json(project);
+    projects_db.insert({ name: req.param('pname'),
+                          description: req.param('pdesc'),
+                          theme: 'default',
+                          owner: req.user.username,
+                          users: [ req.user.username ],
+                          validation: false,
+                          geo: true,
+                          status: false,
+                          public: true,
+                          api: key,
+                          form: {}
+                        }, function(err, project) {
+                          res.json(project);
     });
 }
 
@@ -104,7 +114,17 @@ exports.delete = function(req, res) {
 }
 
 exports.list = function(req, res) {
-        projects_db.find({}, function(err,projects) {
+      var isAdmin = false;
+      var filter = {};
+      if(req.user == undefined) {
+        filter = { public: true };
+      }
+      else if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
+        // Not admin, search "is in user" or "public = true"
+        filter = { $or: [{ public: true},{ users: { $elemMatch: req.user.username }}]};
+      }
+      var filter = {};
+      projects_db.find(filter, function(err,projects) {
             url_parts = url.parse(req.url, true);
             url_callback = url_parts.query.jsoncallback;
             if(url_callback != undefined && url_callback!=null) {
@@ -116,7 +136,7 @@ exports.list = function(req, res) {
                 res.json(projects);
             }
 
-        });
+      });
 };
 
 exports.get = function(req, res){
@@ -187,7 +207,7 @@ exports.dashboard =  function(req, res){
         username = req.user.username;
     }
     projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-        res.render('dashboard', { layout: "layouts/default/public", project: project, apikey: CONFIG.Google.apikey, messages: req.flash('info'), user: username });
+        res.render('dashboard', { layout: 'layouts/'+project.theme+'/public', project: project, apikey: CONFIG.Google.apikey, messages: req.flash('info'), user: username });
 
     });
 };

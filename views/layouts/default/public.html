@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>{{ project }}</title>
+    <title>{{ project.name }}</title>
     <link rel='stylesheet' href='/stylesheets/foundation.min.css' />
-    <link rel='stylesheet' href='/themes/default/stylesheets/main.css' />
+    <link rel='stylesheet' href='/themes/{{ project.theme }}/stylesheets/main.css' />
 
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/icons/foundation-icons/foundation-icons.css' />
@@ -24,7 +24,7 @@
           <!-- Title Area -->
           <li class="name">
             <h1>
-              <a href="#">
+              <a href="/">
                 Scitizen: {{ project.name }}
               </a>
             </h1>
@@ -36,7 +36,7 @@
           <ul class="left">
             <li><a href="/">Projects</a></li>
             <li><a href="#" data-bind="click: goto_home_panel">Home</a></li>
-            <li><a href="#" data-bind="if: project_ready, click: goto_addnew_panel">Contribute</a></li>
+            <li data-bind="if: project_ready"><a href="#" data-bind="click: goto_addnew_panel">Contribute</a></li>
           </ul>
           <ul class="right" id="user_view">
             <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: login}">Login</a></li>
