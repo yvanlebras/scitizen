@@ -30,7 +30,10 @@ exports.login = function(req, res){
     if(req.user) {
         username = req.user.username;
     }
-    res.render('login', { messages: req.flash('error'), user: username });
+    var project = { theme: 'default' };
+    res.render('login', { messages: req.flash('error'),
+                          project: project,
+                          user: username });
 };
 
 exports.my = function(req, res){
@@ -47,7 +50,10 @@ exports.my = function(req, res){
 var salt = null;
 
 exports.register_new = function(req, res) {
-  res.render('register', { layout: "layouts/default/public", user: ''});
+  var project = { theme: 'default' };
+  res.render('register', { layout: "layouts/default/public",
+                           user: '',
+                           project: project});
 }
 
 exports.register = function(req, res) {

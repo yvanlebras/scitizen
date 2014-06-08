@@ -6,6 +6,8 @@ var formidable = require("formidable");
 var pkgcloud = require("pkgcloud");
 var scitizen_storage = require("scitizen-storage");
 
+var scitizen_auth = require("../lib/auth.js");
+
 
 var MongoClient = require('mongodb').MongoClient;
 
@@ -20,17 +22,6 @@ var CONFIG = require('config');
 
 scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
 
-/*
-var SWIFT_CONFIG = require('config').Swift;
-var rackspace = pkgcloud.storage.createClient({
-    provider: 'openstack',
-    username: SWIFT_CONFIG.username,
-    region: SWIFT_CONFIG.region,
-    password: SWIFT_CONFIG.password,
-    authUrl: SWIFT_CONFIG.authUrl
-  });
-*/
-
 
 var version = null;
 
@@ -43,87 +34,8 @@ MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
 
 });
 
-/**
-* Checks if a user can submit a new item to a project
-*/
-function can_upload(user, project, key) {
-    // Is admin ?
-    if(CONFIG.general.admin.indexOf(user.username)>-1) {
-      return true;
-    }
-    if(project.public) {
-        return true;
-    }
-    else {
-        // Has key or memeber of project ?
-        if(project.api==key || project.users.indexOf(user.username)>-1) {
-            return true;
-        }
-        return false;
-    }
-}
 
 
-/**
-* Checks if user can read project elements
-*
-* If public, yes
-* If private, only admin or project members logged or via API
-*/
-function can_read(user, project, key) {
-  // Is admin ?
-  if(CONFIG.general.admin.indexOf(user.username)>-1) {
-    return true;
-  }
-  if(project.public) {
-    return true;
-  }
-  else {
-    // Has key or memeber of project ?
-    if(project.api==key || project.users.indexOf(user.username)>-1) {
-        return true;
-    }
-    return false;
-  }
-}
-
-/**
-* Checks if project can be edited (admin or owner)
-*/
-function can_edit(user, project, key) {
-  // Is admin ?
-  if(CONFIG.general.admin.indexOf(user.username)>-1) {
-    return true;
-  }
-  // Has key or memeber of project ?
-  if(project.api==key || project.owner == user.username) {
-      return true;
-  }
-  return false;
-}
-
-/**
-* Checks if user can add new elements
-*
-* If public, yes
-* If private, only admin or members logged or via API key
-*/
-function can_add(user, project, key) {
-  // Is admin ?
-  if(CONFIG.general.admin.indexOf(user.username)>-1) {
-    return true;
-  }
-  if(project.public) {
-    return true;
-  }
-  else {
-    // Has key or memeber of project ?
-    if(project.api==key || project.users.indexOf(user.username)>-1) {
-        return true;
-    }
-    return false;
-  }
-}
 
 /**
 * Upload a new item (must be logged or via API)
@@ -131,7 +43,8 @@ function can_add(user, project, key) {
 */
 exports.upload = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(can_upload(req.user, project, req.param('api'))) {
+        if(scitizen_auth.can_add(req.user, project, req.param('api'))) {
+        //if(can_upload(req.user, project, req.param('api'))) {
 	        upload_file(req, res, project);
         }
         else { res.status(401).send('You\'re not authorized to submit elements'); }
@@ -167,7 +80,7 @@ exports.add = function(req, res) {
 */
 exports.edit = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(can_edit(req.user, project, req.param('api'))) {
+        if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
         //if(project.owner == req.user.username || req.user.username == 'admin') {
             // check params and update
             for(elt in req.body) {
@@ -197,7 +110,7 @@ exports.edit = function(req, res) {
 */
 exports.delete = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(can_edit(req.user, project, req.param('api'))) {
+        if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
         //if(project.owner == req.user.username || req.user.username == 'admin') {
             projects_db.remove({ _id: req.param('id') }, function(err) {
                 res.json({});

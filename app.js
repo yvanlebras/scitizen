@@ -29,17 +29,6 @@ var pkgcloud = require("pkgcloud");
 
 var flash = require('connect-flash');
 
-/*
-var rackspace = pkgcloud.storage.createClient({
-    provider: 'openstack',
-    username: CONFIG.username,
-    region: CONFIG.region,
-    password: CONFIG.password,
-    authUrl: CONFIG.authUrl
-  });
-*/
-
-// app.get('/userlist', routes.userlist(db));  db.get('users'); users.find(..);
 
 /**
 * Create admin user if none

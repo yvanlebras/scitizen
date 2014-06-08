@@ -39,7 +39,7 @@ var LRU = require("lru-cache")
 * image: image object returned by get method
 */
 function serve_image(image, req, res) {
-    fs.readFile(image.path, function(error, content) {
+    fs.readFile(CONFIG.storage.path+ '/' +image.path, function(error, content) {
         if (error) {
             console.log(error);
             res.writeHead(500);
