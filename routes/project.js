@@ -34,7 +34,21 @@ MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
 
 });
 
-
+/**
+* Sets current project in session
+*
+*/
+exports.current = function(req, res) {
+    // If same project, do not update session
+    if(req.session.project_current._id == req.param('id')) {
+        res.json(req.session.project);
+        return;
+    }
+    projects_db.findOne({ _id: req.param('id') }, function(err, project) {
+        req.session.project_current = project;
+        res.json(project);
+    });
+}
 
 
 /**

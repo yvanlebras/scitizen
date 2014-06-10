@@ -186,6 +186,7 @@ app.delete('/project/:id', project.delete);
 app.put('/project/:id', project.edit);
 app.post('/project/:id', project.upload);
 app.get('/project/:id/dashboard', project.dashboard);
+app.get('/project/:id/current', project.current);
 //app.get('/project/:id/random', project.random);
 //app.get('/project/:id/map', project.map);
 app.get('/project/:id/around/:long/:lat/:dist', project.around);
