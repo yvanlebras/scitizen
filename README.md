@@ -16,16 +16,26 @@ Ensure 2d index on db location  :
 
 # TODO
 
+## Questions
+
+* For "free" plan, limit size of image (rescale) ?
+* what should we block/do when quota is reached ? (block uploads etc... bad experience for end user, warn project owner before manual blocking?)
+* Quotas for Google maps API (remove map when reached ?) or force user to get a google api key ?
+
 ## General
 
-* check permissions : public or private (looged or with api key)
-* Statistics on project page (per image, global?)
+* Add quotas per project, admin can increase plan
+
+* In my/ edit_project, use :with project_current binding instead of specific
+fields
+
+
 
 ## Items
 
 * list: add $limit and $skip option (to limit number of items to show)
-* anti-spam on submission
-* require approval option on submission
+* anti-spam on submission (integrate with Askimet with user key)
+* item approval if project require approval
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache
 
@@ -34,6 +44,7 @@ Ensure 2d index on db location  :
 * check name duplicates
 * add optional url for projects managing themselves the web page
 * add optional image
+* add users
 
 ## forms
 
@@ -52,16 +63,21 @@ Ensure 2d index on db location  :
 ## Admin
 
 * manage users
+* manage project quotas
+
 
 # Issues:
 
 * form creation: when not saved, adding new fields reset values
+* my.html : Delete member does not work, delete click not triggered
+* On project deletion, all images (mongodb AND storage) should be deleted too, should manage this in background task *tasks* object.
 
 # Configuration
 
 in config/default.yaml
 
     general:
+        db: "scitizen"
         url: "http://localhost:3000/"
         admin: [ "admin@mydomain.com" ]
         storage: "s3"

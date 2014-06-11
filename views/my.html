@@ -22,6 +22,11 @@
 				<span data-bind="text: stats.spam"></span>
 			</td>
 			<td>
+			<div data-bind="ifnot: validated">
+				<div data-alert class="alert-box warning round">
+					<i class="fi-check" data-bind="click: $parent.image_validate">Validate</i>
+				</div>
+			</div>
 			<i class="fi-trash" data-bind="click: $parent.image_trash">Trash</i>
 			<i class="fi-monitor" data-bind="click: $parent.image_show">Stats</i>
 			</td>
@@ -36,26 +41,42 @@
 	</div>
     <div class="row" data-bind="visible: editProject">
     <div class="large-4 columns">
-		<div>
-			<label>API</label>
-			<input type="text" data-bind="attr: {value: project_current().api}" disabled/>
-			<label for="project_short_desc_edit">Short description</label>
-			<textarea rows="20" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
-			<label for="project_desc_edit">Description (MarkDown support)</label>
-			<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
-			<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
+			<div>
+				<h2>Information</h2>
+				<label for="project_api">API</label>
+				<input id="project_api" type="text" data-bind="attr: {value: project_current().api}" disabled/>
+				<label for="project_short_desc_edit">Short description</label>
+				<textarea rows="20" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
+				<label for="project_desc_edit">Description (MarkDown support)</label>
+				<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
+				<label for="project_google_edit">Google Maps API key (optional)</label>
+				<input name="project_google_edit" id="project_google_edit" type="text" data-bind="value: project_google"/>
+				<label for="project_askimet_edit">Antispam Askimet API key (optional)</label>
+				<input name="project_askimet_edit" id="project_askimet_edit" type="text" data-bind="value: project_askimet"/>
+				<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
+			</div>
+			<div data-bind="with: project_current">
+				<h2>Members</h2>
+				<table data-bind="foreach: users">
+					<tr><td data-bind="text: $data"></td><td><i class="fi-trash" data-bind="click: $parent.project_delete_member"> Delete</i></td></tr>
+				</table>
+				<input type="text" id="add_member" value=""/>
+				<button type="button" class="button tiny" data-bind="click: $parent.project_add_member">Add member</button>
+			</div>
+			<div>
+				<h2>Form</h2>
+      	<form>
+        	<label>Form selection (Markdown supported)</label>
+        	<select data-bind="options: project_form_elements, optionsCaption: 'Choose from ...', value: selected_form_element">
+        	</select>
+					<div class="columns">
+        	<button type="button" class="button tiny" data-bind="click: add_project_form_element">Add</button>
+					<button type="button" class="button tiny" data-bind="click: render_project_form_element">Render</button>
+					<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
+					</div>
+      	</form>
 		</div>
-        <form>
-        <label>Form selection (Markdown supported)</label>
-        <select data-bind="options: project_form_elements, optionsCaption: 'Choose from ...', value: selected_form_element">
-        </select>
-		<div class="columns">
-        <button type="button" class="button tiny" data-bind="click: add_project_form_element">Add</button>
-		<button type="button" class="button tiny" data-bind="click: render_project_form_element">Render</button>
-		<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
-		</div>
-        </form>
-        <div id="form_element" data-bind="html: form_elements"></div>
+      <div id="form_element" data-bind="html: form_elements"></div>
     </div>
     <div class="large-8 columns" id="form_render">
     </div>
@@ -164,20 +185,28 @@
 
     var viewModel = {
       user: ko.observable('{{user}}'),
+			user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
       user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
       home: ko.observable('/'),
       login: ko.observable('/login'),
       logout: ko.observable('/logout'),
 			my: ko.observable('/my'),
       register: ko.observable('/users/register'),
-						manageItems: ko.observable(false),
-						form_elements: ko.observable(''),
-						image_show: function(image) {
+			manageItems: ko.observable(false),
+			form_elements: ko.observable(''),
+			image_show: function(image) {
 							//console.log(image.stats);
 							//var stat_html = "";
 							$("#image_stats").html("");
 							for(stat in image.stats) {
-								var data = {labels: [], datasets:[ { fillColor : "rgba(151,187,205,0.5)", strokeColor : "rgba(151,187,205,1)",data: [] }]};
+								var data = {labels: [],
+														datasets:[
+														{ fillColor : "rgba(151,187,205,0.5)",
+															strokeColor : "rgba(151,187,205,1)",
+															data: []
+														}
+														]
+													};
 								//stat_html += "<div>";
 								project = viewModel.project_current();
 								var label=null;
@@ -212,7 +241,6 @@
 								var myNewChart = new Chart(ctx).Bar(data);
 							}
 							//$("#image_stats").html(stat_html);
-;
 						},
 					  image_list: ko.observableArray(),
 						image_trash: function(image) {
@@ -224,16 +252,69 @@
 										}
 									});
 						},
+            image_validate: function(image) {
+              $.ajax({
+                  url: '/image/'+image._id+'/validate',
+                  type: 'PUT',
+                  success: function(result) {
+										image['validated'] = true;
+                  }
+                  });
+            },
             project_list: ko.observableArray(),
             showProjects: ko.observable(true),
             showProject: ko.observable(false),
             editProject: ko.observable(false),
-					  project_current: ko.observable({}),
+					  project_current: ko.observable({ users: []}),
+						project_delete_member: function(user) {
+							if(user == '{{user}}') {
+								// Can't delete ourselves
+								return false;
+							}
+							var index = viewModel.project_current().users.indexOf(user);
+							viewModel.project_current().users.splice(index, 1);
+							$.ajax({
+								url: '/project/'+viewModel.project_current()._id,
+								type: 'PUT',
+								data: {
+									users: viewModel.project_current().users,
+								},
+								success: function(result) {
+									$.getJSON("/project", function(data) {
+										viewModel.project_list(data);
+									});
+								}
+							});
+						},
+						project_add_member: function() {
+							var user_new = $("#add_member").val();
+							if(user_new=="") {
+								return false;
+							}
+							viewModel.project_current().users.push(user_new);
+							$.ajax({
+								url: '/project/'+viewModel.project_current()._id,
+								type: 'PUT',
+								data: {
+									users: viewModel.project_current().users,
+								},
+								success: function(result) {
+									$.getJSON("/project", function(data) {
+										viewModel.project_list(data);
+									});
+								}
+							});
+						},
 						project_update: function() {
 								$.ajax({
 										url: '/project/'+viewModel.project_current()._id,
 										type: 'PUT',
-										data: {description: viewModel.project_description(), short_description: viewModel.project_short_description()},
+										data: {
+													description: viewModel.project_description(),
+													short_description: viewModel.project_short_description(),
+													google_api: viewModel.project_google(),
+													askimet_api: viewModel.project_askimet()
+												},
 										success: function(result) {
 											$.getJSON("/project", function(data) {
 													viewModel.project_list(data);
@@ -243,61 +324,66 @@
 						},
             project_name: ko.observable(''),
 					  project_description: ko.observable(''),
+						project_google: ko.observable(''),
+						project_askimet: ko.observable(''),
 						project_short_description: ko.observable(''),
             project_owner: ko.observable('{{user}}'),
             project_status: ko.observable(false),
 					  project_public: ko.observable(true),
 					  project_switch_on_off: function(project) {
-                            $.ajax({
-                                url: '/project/'+project._id,
-                                type: 'PUT',
-                                data: {status: project.status},
-                                success: function(result) {
-                                }
-                            });
+            	$.ajax({
+              	url: '/project/'+project._id,
+                type: 'PUT',
+                data: {status: project.status},
+                success: function(result) {
+                }
+            });
 						return true;
 					  },
             project_switch_public: function(project) {
-                            $.ajax({
-                                url: '/project/'+project._id,
-                                type: 'PUT',
-                                data: {public: project.public},
-                                success: function(result) {
-                                }
-                            });
-                        return true;
-                      },
+            	$.ajax({
+              	url: '/project/'+project._id,
+                type: 'PUT',
+                data: {public: project.public},
+                success: function(result) {
+              	}
+              });
+              return true;
+            },
             project_switch_geo: function(project) {
-                            $.ajax({
-                                url: '/project/'+project._id,
-                                type: 'PUT',
-                                data: {geo: project.geo},
-                                success: function(result) {
-                                }
-                            });
-                        return true;
-                      },
+            	$.ajax({
+              	url: '/project/'+project._id,
+                type: 'PUT',
+                data: {geo: project.geo},
+                success: function(result) {
+                					}
+              });
+              return true;
+            },
             project_switch_validation: function(project) {
-                            $.ajax({
-                                url: '/project/'+project._id,
-                                type: 'PUT',
-                                data: {validation: project.validation},
-                                success: function(result) {
-                                }
-                            });
-                        return true;
-                      },
+            	$.ajax({
+              	url: '/project/'+project._id,
+                type: 'PUT',
+                data: {validation: project.validation},
+                success: function(result) {}
+              });
+              return true;
+            },
             add_project: function(){
-												viewModel.project_description('');
-                        $.post( "/project", { pname: this.project_name(), pdesc: this.project_description() }, function(data) {
-                            viewModel.project_list.push(data);
-                        } );
-                        panelProjects();
-                      },
+							viewModel.project_description('');
+              $.post( "/project", { pname: this.project_name(),
+											  pdesc: this.project_description()
+												}, function(data) {
+              						viewModel.project_list.push(data);
+              });
+              panelProjects();
+            },
             edit_project: function(project) {
 							viewModel.project_current(project);
 							viewModel.project_description(project.description);
 							viewModel.project_short_description(project.short_description);
+							viewModel.project_google(project.google_api);
+							viewModel.project_askimet(project.askimet_api);
 							//$("#form_element").html("");
 							$("#form_render").html("");
 							var form_elts = project['form'];
@@ -314,33 +400,41 @@
 							panelManageItems(project._id);
 					  },
             delete_project: function(project) {
-                            $.ajax({
-                                url: '/project/'+project._id,
-                                type: 'DELETE',
-                                success: function(result) {
-                                    viewModel.project_list.remove(function(item) { return item._id == project._id })
-                                }
-                            });
-                      },
-            selected_form_element: ko.observable(),
+            	$.ajax({
+              	url: '/project/'+project._id,
+                type: 'DELETE',
+                success: function(result) {
+                    viewModel.project_list.remove(function(item) {
+											return item._id == project._id
+										})
+                }
+              });
+            },
+          	selected_form_element: ko.observable(),
 					  render_project_form_element: function() {
-                        render_form();
-                      },
+            	render_form();
+            },
 					  save_project_form_element: function() {
-                        save_form();
-                      },
+            	save_form();
+            },
             add_project_form_element: function() {
-												var previous_form = viewModel.form_elements();
-                        var new_element = add_to_form(this.selected_form_element());
-												viewModel.form_elements(previous_form + new_element);
-                      },
+							var previous_form = viewModel.form_elements();
+              var new_element = add_to_form(this.selected_form_element());
+							viewModel.form_elements(previous_form + new_element);
+            },
 					  delete_project_form_element: function(data, form_elt) {
-						$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
-						var new_form_elements = $("#form_element").html("");
-						viewModel.form_elements(new_form_elements);
+							$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
+							var new_form_elements = $("#form_element").html("");
+							viewModel.form_elements(new_form_elements);
 					  },
-            project_form_elements: ko.observableArray(['single choice', 'multiple choice', 'textarea', 'text', 'checkbox'])
-                    };
+            project_form_elements: ko.observableArray([
+							'single choice',
+							'multiple choice',
+							'textarea',
+							'text',
+							'checkbox'
+							])
+    };
 
     ko.applyBindings(viewModel);
 
@@ -358,7 +452,7 @@
 		project_form.push(form_elt);
 		});
         $.ajax({
-			url: '/project/'+viewModel.project_current()._id,
+						url: '/project/'+viewModel.project_current()._id,
             type: 'PUT',
             data: {form: project_form},
             success: function(result) {
@@ -399,7 +493,7 @@
 		add_to_form(elt,null);
 	}
 
-    function add_to_form(elt, info) {
+  function add_to_form(elt, info) {
 		if(elt == undefined) {
 			return;
 		}

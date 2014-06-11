@@ -9,16 +9,18 @@ var scitizen_storage = require("scitizen-storage");
 var scitizen_auth = require("../lib/auth.js");
 
 
+var CONFIG = require('config');
+
 var MongoClient = require('mongodb').MongoClient;
 
 var monk = require('monk')
-  , db = monk('localhost:27017/scitizen')
+  , db = monk('localhost:27017/'+CONFIG.general.db)
   , users_db = db.get('users')
   , projects_db = db.get('projects')
+  , tasks_db = db.get('tasks')
   , images_db = db.get('images');
 
 
-var CONFIG = require('config');
 
 scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
 
@@ -82,6 +84,10 @@ exports.add = function(req, res) {
                           status: false,
                           public: true,
                           api: key,
+                          google_api: '',
+                          askimet_api: '',
+                          quota: 0,
+                          stats: {api: 0, google: 0, quota: 0},
                           form: {}
                         }, function(err, project) {
                           res.json(project);
@@ -127,7 +133,24 @@ exports.delete = function(req, res) {
         if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
         //if(project.owner == req.user.username || req.user.username == 'admin') {
             projects_db.remove({ _id: req.param('id') }, function(err) {
+              if(err) {
+                console.log(err);
                 res.json({});
+                return;
+              }
+              else {
+                // TODO should remove with a background task all images of project
+                // quick for mongodb images, but for storage need to treat each image separatly
+                tasks_db.insert({ type: 'remove',
+                                  object: 'images',
+                                  objectid: req.param('id')
+                                }, function(err, task) {
+                                    if(err) {
+                                      console.log(err);
+                                    }
+                                      res.json({});
+                });
+              }
             });
         }
         else {
@@ -236,35 +259,6 @@ exports.around = function(req,res) {
           res.json(images);
       }
     });
-    /*
-    MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
-        if(err) throw err;
-        var collection = db.collection('citizen');
-        // For mongo 2.2, distance in km
-        // db.citizen.find( { "fields.location": { $within: { $centerSphere: [[ -1.675708, 48.113475 ], 3/6378.137 ] }}})
-        var filter= { "project": req.params.id, "fields.location": { "$within": { "$centerSphere": [[ parseFloat(req.params.long) , parseFloat(req.params.lat) ], parseInt(req.params.dist)/6378.137 ] }}};
-        if(version>=4) {
-            // For mongo 2.4, distance in m, so we multiply to get km
-            filter = {"project": req.params.id, "fields.loc" : { "$near" : { "$geometry" :  { "type" : "Point", "coordinates" : [ parseFloat(req.params.long) , parseFloat(req.params.lat)] }}, "$maxDistance" : parseInt(req.params.dist) * 1000}};
-        }
-        collection.find( filter ).toArray(function(err, results) {
-        if(err!=null) {
-            console.log(err);
-        }
-        db.close();
-        nearmatches = { project: req.params.id, locations: JSON.stringify(results) };
-        if(url_callback != undefined && url_callback!=null) {
-            res.set('Content-Type', 'application/json');
-            res.write(url_callback+'('+JSON.stringify(nearmatches)+')');
-            res.end();
-        }
-        else {
-            res.json(nearmatches);
-        }
-
-         });
-    });
-    */
 };
 
 /*
@@ -314,11 +308,20 @@ exports.dashboard =  function(req, res){
         if(project.theme!='default') {
           theme_view = 'themes/'+project.theme+'/dashboard';
         }
+        var google_api = CONFIG.Google.apikey;
+        if(project.google_api!=undefined && project.google_api!='') {
+            google_api = project.google_api;
+        }
+        else {
+            projects_db.update({_id : project._id},
+                               {$inc: { 'stats.google': 1 }},
+                               function(err){ console.log(err);});
+        }
         res.render(theme_view,
                     { layout: 'layouts/'+project.theme+'/public',
                       partials: { part: 'new_item' },
                       project: project,
-                      apikey: CONFIG.Google.apikey,
+                      apikey: google_api,
                       messages: req.flash('info'),
                       user: username });
     });
@@ -385,11 +388,24 @@ function upload_file(req, res, project) {
         fields["loc"]  = {"type" :  "Point", "coordinates" : fields["location"]};
       }
 
+      var validated = true;
+
+      if(project.validation) {
+        validated = false;
+      }
+      var need_control = false;
+      if(project.askimet_api!='') {
+        //TODO call askimet
+        need_control = true;
+      }
+
       var item = {project: images_db.id(req.param('id')),
                   contentType: files.image.type,
                   fields: fields,
                   name: files.image.name,
-                  validated: false,
+                  validated: validated,
+                  need_spam_control: need_control,
+                  size: files.image.size,
                   spam: false,
                   favorite: false};
 
@@ -404,6 +420,9 @@ function upload_file(req, res, project) {
                             res.status(err).send('Could not save image');
                           }
                           else {
+                            projects_db.update({_id: image.project},
+                                              {$inc: { 'stats.quota': image.size}},
+                                              function(err){});
                             res.json(image);
                           }
             });

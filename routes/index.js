@@ -1,5 +1,7 @@
+var CONFIG = require('config');
+
 var monk = require('monk')
-  , db = monk('localhost:27017/scitizen')
+  , db = monk('localhost:27017/'+CONFIG.general.db)
   , projects_db = db.get('projects');
 
 /*

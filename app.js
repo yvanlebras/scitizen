@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 
+var CONFIG = require('config');
 
 var express = require('express')
   , routes = require('./routes')
@@ -14,7 +15,7 @@ var express = require('express')
   , formidable = require('formidable')
   , mongo = require('mongodb')
   , monk = require('monk')
-  , db = monk('localhost:27017/scitizen')
+  , db = monk('localhost:27017/'+CONFIG.general.db)
   , users = db.get('users')
   , projects = db.get('projects')
   , images = db.get('images')
@@ -23,7 +24,6 @@ var express = require('express')
   , path = require('path');
 
 
-//var CONFIG = require('config').Swift;
 var pkgcloud = require("pkgcloud");
 
 
@@ -61,44 +61,6 @@ function createAdmin() {
     }
 });
 }
-
-/*
-projects.findOne({ name: 'sample' }, function (err, project) {
-    if(!project) {
-        projects.insert({ name: 'sample', short_description: '...', description: 'sample desc', validation: false, geo: true, status: false, owner: 'admin', public: true, api: "1234", form: [ { "label": "how is he?", "type" : "single", "values": ["happy","sad", "angry"] }, { "label": "where is he?", "type": "multiple", "values" : ["office", "home"] }] })
-        console.log("Create fake project 'citizen'");
-    }
-});
-*/
-
-/*
-images.findOne({ name: 'sample_image' }, function (err, image) {
-    if(!image) {
-        projects.findOne({ name: 'sample' }, function (err, sampleproject) {
-            images.insert({ name: 'sample_image', project: sampleproject._id});
-            console.log("Create fake image");
-        });
-    }
-});
-*/
-
-/*
-// Swift container?
-rackspace.getContainer("scitizen", function(err, container) {
-    if(err!=null && 'statusCode' in err && err['statusCode']==404) {
-        console.log("container does not exists, creating it...");
-        rackspace.createContainer({ name: "scitizen" },function(err, container)
-{
-        if(err!=null) {
-            console.log(err);
-        }
-
-        });
-    }
-
-});
-*/
-
 
 
 /**
@@ -174,6 +136,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/my', ensureAuthenticated, user.my);
+app.get('/admin', ensureAuthenticated, user.admin);
 app.get('/users', user.list);
 app.get('/users/register', user.register_new);
 app.post('/users/register', user.register);
@@ -194,6 +157,8 @@ app.get('/project/:id/image', image.list);
 app.delete('/image/:id', image.delete);
 app.get('/image/:id', image.get);
 app.put('/image/:id', image.curate);
+app.put('/image/:id/validate', image.validate);
+app.get('/image/:id/control', image.control);
 
 app.get('/login', user.login);
 app.post('/login',

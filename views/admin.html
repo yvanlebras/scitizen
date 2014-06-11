@@ -1,0 +1,48 @@
+<div class="row" >
+	<table>
+	<thead>
+			<tr><th>Name</th><th>Owner</th><th>API calls</th><th>Google API calls</th><th>Quota stats</th></tr>
+	</thead>
+	<tbody data-bind="foreach: project_list">
+			<tr>
+					<td data-bind="text: name"></td>
+					<td data-bind="text: owner"></td>
+					<td data-bind="text: stats.api"></td>
+					<td data-bind="text: stats.google"></td>
+					<td data-bind="text: stats.quota"></td>
+			</tr>
+	</tbody>
+	</table>
+</div>
+
+<script>
+	var my_projects = [];
+
+	var project =  { name: '',
+									owner: '',
+									description: '',
+									status: false }
+
+	$(document).ready(function() {
+			$.getJSON("/project", function(data) {
+					viewModel.project_list(data);
+			});
+	});
+
+	var viewModel = {
+					user: ko.observable('{{user}}'),
+					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
+					user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+					home: ko.observable('/'),
+					login: ko.observable('/login'),
+					logout: ko.observable('/logout'),
+					my: ko.observable('/my'),
+					register: ko.observable('/users/register'),
+					project_list: ko.observableArray(),
+					project_current: ko.observable({ users: []}),
+	};
+
+	ko.applyBindings(viewModel);
+
+
+</script>

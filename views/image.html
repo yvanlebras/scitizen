@@ -1,0 +1,19 @@
+<div class="row">
+{{{ image_text }}}
+</div>
+
+
+<script>
+var viewModel = {
+  user: ko.observable('{{user}}'),
+  user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+  home: ko.observable('/'),
+  login: ko.observable('/login'),
+  logout: ko.observable('/logout'),
+  register: ko.observable('/users/register'),
+  my: ko.observable('/my')
+}
+ko.applyBindings(viewModel);
+
+
+</script>

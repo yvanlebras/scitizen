@@ -1,5 +1,7 @@
+var GENERAL_CONFIG = require('config').general;
+
 var monk = require('monk')
-  , db = monk('localhost:27017/scitizen')
+  , db = monk('localhost:27017/'+GENERAL_CONFIG.db)
   , users_db = db.get('users')
   , sciconfig = db.get('config')
   , bcrypt = require('bcryptjs');
@@ -9,9 +11,10 @@ var nodemailer = require("nodemailer");
  * GET users listing.
  */
 var MAIL_CONFIG = require('config').mail;
-var GENERAL_CONFIG = require('config').general;
+var transport = null;
 
-var transport = nodemailer.createTransport("SMTP", {
+if(MAIL_CONFIG.host!="fake") {
+  transport = nodemailer.createTransport("SMTP", {
     host: MAIL_CONFIG.host, // hostname
     secureConnection: MAIL_CONFIG.secure, // use SSL
     port: MAIL_CONFIG.port, // port for secure SMTP
@@ -19,7 +22,8 @@ var transport = nodemailer.createTransport("SMTP", {
         user: MAIL_CONFIG.user,
         pass: MAIL_CONFIG.password
     }
-});
+  });
+}
 
 exports.list = function(req, res){
   res.send("respond with a resource");
@@ -42,7 +46,23 @@ exports.my = function(req, res){
             res.redirect('/login');
         }
         else {
-            res.render('my', { layout: "layouts/default/index", user: req.user.username });
+            var isAdmin = false;
+            if(GENERAL_CONFIG.admin.indexOf(req.user.username)>-1) {
+              isAdmin = true;
+            }
+            res.render('my', { layout: "layouts/default/index", user: req.user.username, isAdmin: isAdmin });
+        }
+    });
+};
+
+exports.admin = function(req, res){
+    users_db.findOne({username: req.user.username}, function(err, user) {
+        if(GENERAL_CONFIG.admin.indexOf(req.user.username)==-1) {
+            res.redirect('/');
+        }
+        else {
+            isAdmin = true;
+            res.render('admin', { layout: "layouts/default/index", user: req.user.username, isAdmin: isAdmin });
         }
     });
 };
@@ -116,9 +136,11 @@ function createUser(login, password) {
     text: "You have created an account in Scitizen project, please confirm your subscription at the following link: "+link, // plaintext body
     html: "You have created an account in Scitizen project, please confirm your subscription at the following link: <a href=\""+link+"\">"+link+"</a>" // html body
   };
-  transport.sendMail(mailOptions, function(error, response){
-    if(error){
+  if(transport!=null) {
+    transport.sendMail(mailOptions, function(error, response){
+      if(error){
         console.log(error);
-    }
-  });
+      }
+    });
+  }
 }

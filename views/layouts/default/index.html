@@ -35,12 +35,13 @@
 
       <section class="top-bar-section">
         <ul class="left">
-          <li><a href="#" data-bind="click: panelProjects">Projects</a></li>
+          <li><a href="/">Projects</a></li>
         </ul>
         <ul class="right" id="user_view">
 			<li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: login}">Login</a></li>
             <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: register}">Register</a></li>
             <li data-bind="if: user_logged"><a href="#" data-bind="text: user"></a></li>
+            <li data-bind="if: user_admin"><a href="/admin">Admin</a></li>
             <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: my}">My projects</a>
             <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: logout}">Logout</a></li>
 
