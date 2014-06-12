@@ -58,7 +58,7 @@
 			<div data-bind="with: project_current">
 				<h2>Members</h2>
 				<table data-bind="foreach: users">
-					<tr><td data-bind="text: $data"></td><td><i class="fi-trash" data-bind="click: $parent.project_delete_member"> Delete</i></td></tr>
+					<tr><td data-bind="text: $data"></td><td data-bind="click: viewModel.project_delete_member"><i class="fi-trash"> Delete</i></td></tr>
 				</table>
 				<input type="text" id="add_member" value=""/>
 				<button type="button" class="button tiny" data-bind="click: $parent.project_add_member">Add member</button>
@@ -150,8 +150,8 @@
     <form>
         <label for="pname">Project name</label>
         <input name="pname" id="pname" type="text" data-bind="value: project_name"/>
-				<label for="pdesc">Project description</label>
-        <textarea name="pdesc" id="pdesc" data-bind="value: project_description"></textarea>
+				<label for="pdesc">Project short description</label>
+        <textarea name="pdesc" id="pdesc" data-bind="value: project_short_description"></textarea>
         <button type="button" data-bind="click: add_project">Create</button>
     </form>
     </div>
@@ -257,7 +257,9 @@
                   url: '/image/'+image._id+'/validate',
                   type: 'PUT',
                   success: function(result) {
+										image_list.remove(image);
 										image['validated'] = true;
+										image_list.push(image);
                   }
                   });
             },
@@ -267,21 +269,25 @@
             editProject: ko.observable(false),
 					  project_current: ko.observable({ users: []}),
 						project_delete_member: function(user) {
+							console.log("delete user "+user);
 							if(user == '{{user}}') {
 								// Can't delete ourselves
 								return false;
 							}
 							var index = viewModel.project_current().users.indexOf(user);
-							viewModel.project_current().users.splice(index, 1);
+							var project = viewModel.project_current();
+							var new_users = project.users.splice(index, 1);
+							project.users = new_users;
 							$.ajax({
-								url: '/project/'+viewModel.project_current()._id,
+								url: '/project/'+project._id,
 								type: 'PUT',
 								data: {
-									users: viewModel.project_current().users,
+									users: new_users,
 								},
 								success: function(result) {
 									$.getJSON("/project", function(data) {
 										viewModel.project_list(data);
+										viewModel.project_current(project);
 									});
 								}
 							});
@@ -418,9 +424,25 @@
             	save_form();
             },
             add_project_form_element: function() {
-							var previous_form = viewModel.form_elements();
-              var new_element = add_to_form(this.selected_form_element());
-							viewModel.form_elements(previous_form + new_element);
+							//var previous_form = viewModel.form_elements();
+							// Save existing form status
+							var form_elts = [];
+							$("#form_element .label").each(function(elt) {
+								var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
+								if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
+									var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
+									form_elt['values'] = values;
+								}
+								form_elts.push(form_elt);
+							});
+							var new_elements = '';
+							for(var i=0;i<form_elts.length;i++){
+								var form_elt = form_elts[i];
+								new_elements += add_to_form(form_elt['type'],form_elt);
+							}
+							new_elements += add_to_form(this.selected_form_element());
+							viewModel.form_elements(new_elements);
+
             },
 					  delete_project_form_element: function(data, form_elt) {
 							$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
@@ -449,7 +471,7 @@
 				var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
 				form_elt['values'] = values;
 			}
-		project_form.push(form_elt);
+			project_form.push(form_elt);
 		});
         $.ajax({
 						url: '/project/'+viewModel.project_current()._id,
@@ -457,8 +479,11 @@
             data: {form: project_form},
             success: function(result) {
 							var old = viewModel.project_current();
+							viewModel.project_current.remove(old);
 							old.form = project_form;
 							viewModel.project_current(old);
+							viewModel.project_list.push(old);
+							/*
 							var plist = viewModel.project_list();
 							for(var i=0;i<plist.length;i++){
 								if(plist[i]._id == old._id) {
@@ -466,6 +491,7 @@
 									break;
 								}
 							}
+							*/
 
             }
         });

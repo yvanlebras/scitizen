@@ -75,7 +75,8 @@ exports.upload = function(req, res) {
 exports.add = function(req, res) {
     var key = (Math.random() + 1).toString(36).substring(7);
     projects_db.insert({ name: req.param('pname'),
-                          description: req.param('pdesc'),
+                          short_description: req.param('pdesc'),
+                          description: '',
                           theme: 'default',
                           owner: req.user.username,
                           users: [ req.user.username ],
@@ -103,12 +104,14 @@ exports.edit = function(req, res) {
         if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
         //if(project.owner == req.user.username || req.user.username == 'admin') {
             // check params and update
-            for(elt in req.body) {
-              if(req.body[elt] == 'false') {
-                req.body[elt] = false;
-              }
-              if(req.body[elt] == 'true') {
-                req.body[elt] = true;
+            for(elt in req.body.form) {
+              if(! Array.isArray(req.body.form[elt].values)) {
+                if(req.body.form[elt].values == 'false') {
+                  req.body.form[elt].values = false;
+                }
+                if(req.body.form[elt].values == 'true') {
+                  req.body.form[elt].values = true;
+                }
               }
             }
             projects_db.update({ _id: req.param('id') }, {$set: req.body}, function(err) {
