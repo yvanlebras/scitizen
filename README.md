@@ -68,8 +68,6 @@ fields
 
 # Issues:
 
-* form creation: when not saved, adding new fields reset values
-* my.html : Delete member does not work, delete click not triggered
 * On project deletion, all images (mongodb AND storage) should be deleted too, should manage this in background task *tasks* object.
 
 # Configuration
