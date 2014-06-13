@@ -5,26 +5,27 @@
 
 var CONFIG = require('config');
 
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , project = require('./routes/project')
-  , image = require('./routes/image')
-  , http = require('http')
-  , url = require('url')
-  , formidable = require('formidable')
-  , mongo = require('mongodb')
-  , monk = require('monk')
-  , db = monk('localhost:27017/'+CONFIG.general.db)
-  , users = db.get('users')
-  , projects = db.get('projects')
-  , images = db.get('images')
-  , sciconfig = db.get('config')
-  , bcrypt = require('bcryptjs')
-  , path = require('path');
+var express = require('express'),
+   routes = require('./routes'),
+   index = require('./routes/index'),
+   user = require('./routes/user'),
+   project = require('./routes/project'),
+   image = require('./routes/image'),
+   http = require('http'),
+   url = require('url'),
+   formidable = require('formidable'),
+   mongo = require('mongodb'),
+   monk = require('monk'),
+   db = monk('localhost:27017/'+CONFIG.general.db),
+   users = db.get('users'),
+   projects = db.get('projects'),
+   images = db.get('images'),
+   sciconfig = db.get('config'),
+   bcrypt = require('bcryptjs'),
+   path = require('path');
 
 
-var pkgcloud = require("pkgcloud");
+var pkgcloud = require('pkgcloud');
 
 
 var flash = require('connect-flash');
@@ -52,11 +53,11 @@ function createAdmin() {
     users.findOne({ username: 'admin' }, function (err, user) {
     if(!user) {
         var hash = bcrypt.hashSync('passwd', salt);
-        users.insert({ username: 'admin', password: hash, group: ['admin']})
-        console.log("Create admin user with password: passwd");
+        users.insert({ username: 'admin', password: hash, group: ['admin']});
+        console.log('Create admin user with password: passwd');
     }
     else {
-        console.log("admin user already exists");
+        console.log('admin user already exists');
         console.log(user);
     }
 });
@@ -66,8 +67,8 @@ function createAdmin() {
 /**
 * Authentication
 */
-var passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
+var passport = require('passport'),
+   LocalStrategy = require('passport-local').Strategy;
 
 passport.serializeUser(function(user, done) {
   done(null, user.username);
@@ -92,7 +93,6 @@ passport.use(new LocalStrategy(
         return done(null, false, { message: 'Registration not yet completed'});
       }
       var hash = bcrypt.hashSync(password, salt);
-      console.log(user.password+" =? "+hash);
       if (user.password!=hash) {
         return done(null, false, { message: 'Incorrect password.' });
       }
@@ -134,7 +134,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+app.get('/', index.index);
+app.get('/projects', index.projects);
 app.get('/my', ensureAuthenticated, user.my);
 app.get('/admin', ensureAuthenticated, user.admin);
 app.get('/users', user.list);

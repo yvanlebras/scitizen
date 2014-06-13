@@ -12,3 +12,46 @@ body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
     background-color: white;
 }
 
+#general {
+  max_height: 400px;
+  background-position: center top;
+  background-image: url(/images/bear.jpg);
+}
+#scientist{
+  background-color: orange;
+}
+
+#faq {
+
+}
+
+#citizen {
+background-image: url(/images/world.png);
+background-size: cover;
+background-repeat: no-repeat;
+}
+
+
+.band {
+
+}
+
+.main_info_text {
+  background-color: white;
+}
+.main_info_title {
+  font-size: 4em;
+
+}
+.main_info_image{
+  padding-top: 10px;
+  padding-left: 10px;
+  width: 100px;
+}
+.main_info {
+  padding: 30px;
+  font-family: 'Open Sans Condensed', sans-serif;
+  min-height: 400px;
+  font-size: 1.2em;
+  background-color: white;
+}

@@ -1,20 +1,20 @@
 var GENERAL_CONFIG = require('config').general;
 
-var monk = require('monk')
-  , db = monk('localhost:27017/'+GENERAL_CONFIG.db)
-  , users_db = db.get('users')
-  , sciconfig = db.get('config')
-  , bcrypt = require('bcryptjs');
+var monk = require('monk'),
+    db = monk('localhost:27017/'+GENERAL_CONFIG.db),
+    users_db = db.get('users'),
+    sciconfig = db.get('config'),
+    bcrypt = require('bcryptjs');
 
-var nodemailer = require("nodemailer");
+var nodemailer = require('nodemailer');
 /*
  * GET users listing.
  */
 var MAIL_CONFIG = require('config').mail;
 var transport = null;
 
-if(MAIL_CONFIG.host!="fake") {
-  transport = nodemailer.createTransport("SMTP", {
+if(MAIL_CONFIG.host!='fake') {
+  transport = nodemailer.createTransport('SMTP', {
     host: MAIL_CONFIG.host, // hostname
     secureConnection: MAIL_CONFIG.secure, // use SSL
     port: MAIL_CONFIG.port, // port for secure SMTP
@@ -26,7 +26,7 @@ if(MAIL_CONFIG.host!="fake") {
 }
 
 exports.list = function(req, res){
-  res.send("respond with a resource");
+  res.send('respond with a resource');
 };
 
 exports.login = function(req, res){
@@ -50,7 +50,11 @@ exports.my = function(req, res){
             if(GENERAL_CONFIG.admin.indexOf(req.user.username)>-1) {
               isAdmin = true;
             }
-            res.render('my', { layout: "layouts/default/index", user: req.user.username, isAdmin: isAdmin });
+            res.render('my', {
+                                layout: 'layouts/default/index',
+                                user: req.user.username,
+                                isAdmin: isAdmin
+                              });
         }
     });
 };
@@ -62,7 +66,10 @@ exports.admin = function(req, res){
         }
         else {
             isAdmin = true;
-            res.render('admin', { layout: "layouts/default/index", user: req.user.username, isAdmin: isAdmin });
+            res.render('admin', {
+                                  layout: 'layouts/default/index',
+                                  user: req.user.username,
+                                  isAdmin: isAdmin });
         }
     });
 };
@@ -71,53 +78,53 @@ var salt = null;
 
 exports.register_new = function(req, res) {
   var project = { theme: 'default' };
-  res.render('register', { layout: "layouts/default/public",
+  res.render('register', { layout: 'layouts/default/public',
                            user: '',
                            project: project});
-}
+};
 
 exports.register = function(req, res) {
-  var login = req.param("login");
-  var password = req.param("password");
-  var confirm = req.param("password_confirm");
+  var login = req.param('login');
+  var password = req.param('password');
+  var confirm = req.param('password_confirm');
   if(password!=confirm) {
-    res.json({ err: 503, msg: "Passwords do not match"});
+    res.json({ err: 503, msg: 'Passwords do not match'});
     return;
   }
   sciconfig.findOne( { name: 'default'}, function(err, config) {
       if(!config) {
-          res.json({ err: 500, msg: "Application is not configured"})
+          res.json({ err: 500, msg: 'Application is not configured'});
       }
       else {
           salt = config.salt;
           createUser(login, password);
-          res.json({ err: 0, msg: "User created"});
+          res.json({ err: 0, msg: 'User created'});
       }
   });
-}
+};
 
 exports.confirm = function(req, res) {
-  var login = req.param("user");
-  var regkey = req.param("regkey");
+  var login = req.param('user');
+  var regkey = req.param('regkey');
   users_db.findOne({username: login}, function(err, user) {
     if(! user) {
-      res.render("error", { msg: "User id or key is not valid"});
+      res.render('error', { msg: 'User id or key is not valid'});
       return;
     }
     else {
         if(user.regkey == regkey) {
-          users_db.update({ _id: user._id}, { $set: { registered: true}}, function(err) {});
-          res.redirect("/login");
+          users_db.update({ _id: user._id},
+                          { $set: { registered: true}}, function(err) {});
+          res.redirect('/login');
           return;
         }
         else {
-          res.render("error", { msg: "key is not valid"});
+          res.render('error', { msg: 'key is not valid'});
           return;
         }
     }
   });
-
-}
+};
 
 
 function createUser(login, password) {
@@ -127,16 +134,26 @@ function createUser(login, password) {
   if(GENERAL_CONFIG.admin.indexOf(login)>-1) {
     groups.push('admin');
   }
-  users_db.insert({ username: login, password: hash, group: groups, registered: false, regkey: regkey });
-  var link = GENERAL_CONFIG.url+encodeURI("users/confirm?user="+login+"&regkey="+regkey);
+  users_db.insert({ username: login,
+                    password: hash,
+                    group: groups,
+                    registered: false,
+                    regkey: regkey
+                  });
+  var link = GENERAL_CONFIG.url +
+              encodeURI('users/confirm?user='+login+'&regkey='+regkey);
   var mailOptions = {
     from: MAIL_CONFIG.origin, // sender address
     to: login, // list of receivers
-    subject: "Scitizen registration", // Subject line
-    text: "You have created an account in Scitizen project, please confirm your subscription at the following link: "+link, // plaintext body
-    html: "You have created an account in Scitizen project, please confirm your subscription at the following link: <a href=\""+link+"\">"+link+"</a>" // html body
+    subject: 'Scitizen registration', // Subject line
+    text: 'You have created an account in Scitizen project,' +
+          'please confirm your subscription at the following link: '+
+          link, // plaintext body
+    html: 'You have created an account in Scitizen project, please confirm '+
+           'your subscription at the following link: <a href="'+link+'">'+
+           link+'</a>' // html body
   };
-  if(transport!=null) {
+  if(transport!==null) {
     transport.sendMail(mailOptions, function(error, response){
       if(error){
         console.log(error);

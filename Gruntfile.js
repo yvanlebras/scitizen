@@ -8,6 +8,13 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        jshint: {
+            files: ['gruntfile.js', 'app.js', 'lib/*.js', 'routes/*.js'],
+            options: {
+                maxlen: 80,
+                quotmark: 'single'
+            }
+        },
         simplemocha: {
             options: {
                 globals: ['expect'],
@@ -21,10 +28,11 @@ module.exports = function(grunt) {
     });
 
   // Load the plugin that provides the "uglify" task.
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
 
     grunt.registerTask('default',
-        ['simplemocha']);
+        ['jshint', 'simplemocha']);
 
 
 };

@@ -13,6 +13,16 @@ Ensure 2d index on db location  :
     db.images.ensureIndex({ "fields.loc" : "2dsphere" })
 
 
+# License
+
+MIT
+
+# Credits:
+
+Copyright: 2014 IRISA, Olivier Sallou <olivier.sallou@irisa.fr>
+
+Thanks to: JQuery, Foundation, KnockoutJS, Google maps API
+Main page icons: from OpenClipArt
 
 # TODO
 

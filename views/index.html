@@ -1,24 +1,44 @@
 
 
-<div class="row">
-Scitizen is a colllaborative citizen science project. You can.....
 
-High usage: use your own Google maps API (see https://code.google.com/apis/console/?noredirect).
+<div class="">
+  <div class="" id="intro">
+    <div class="row main_info" id="general">
+      <div class="main_info_title">Science by crowd, Citizenship for science...</div>
+    </div>
+    <div class="row main_info" id="scientist">
+      <div class="large-2 column">
+        <img class="main_info_image" src="/images/Science_Girl.png"/>
+      </div>
+      <div class="large-10 column">
+As a scientist you can create free project, and build a community of user to help you find valuable data and curate the tons of gathered information.
+....
+      </div>
+    </div>
+    <div class="row main_info" id="citizen">
+      <div class="large-2 column">
+        <img class="main_info_image" src="/images/rg1024_Cartoon_Camera.png"/>
+      </div>
+      <div class="large-10 columns main_info_text">
+As a community science citizen you can help scientists gather information and help them curate their data.
+Seen something of interest, take a photo and send it with geo data.
 
-Anti spam with your Askimet key
 
-Quota
-</div>
-<div class="row" id="project_selection" data-bind="foreach: project_list">
-  <div class="row project_selection">
-    <a data-bind="attr: {href: '/project/'+ko.utils.unwrapObservable(_id)+'/dashboard'}">
-      <div class="large-2 columns project_heading" data-bind="text: name"></div>
-      <div class="large-6 columns project_description" data-bind="text: short_description"></div>
-  </a>
+anonymous ....
+      </div>
   </div>
+  <div class="band">
+    <img src="/images/band1.png"/>
+  </div>
+  <div class="row main_info" id="faq">
+    Scitizen is a colllaborative citizen science project. You can.....
+    High usage: use your own Google maps API (see https://code.google.com/apis/console/?noredirect).
+    Anti spam with your Askimet key
+    Quota
+  </div>
+  </div>
+
 </div>
-
-
 
 <script type="text/javascript">
 
@@ -38,10 +58,5 @@ Quota
     //ko.applyBindings(viewModel, document.getElementById('content_view'));
     ko.applyBindings(viewModel);
 
-    $(document).ready(function() {
-      $.getJSON("/project/", function(data) {
-        viewModel.project_list(data);
-      });
-    });
 
 </script>

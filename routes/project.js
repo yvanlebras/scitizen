@@ -1,24 +1,24 @@
-var url = require("url");
+var url = require('url');
 var util = require('util');
-var path = require("path");
-var fs = require("fs");
-var formidable = require("formidable");
-var pkgcloud = require("pkgcloud");
-var scitizen_storage = require("scitizen-storage");
+var path = require('path');
+var fs = require('fs');
+var formidable = require('formidable');
+var pkgcloud = require('pkgcloud');
+var scitizen_storage = require('scitizen-storage');
 
-var scitizen_auth = require("../lib/auth.js");
+var scitizen_auth = require('../lib/auth.js');
 
 
 var CONFIG = require('config');
 
 var MongoClient = require('mongodb').MongoClient;
 
-var monk = require('monk')
-  , db = monk('localhost:27017/'+CONFIG.general.db)
-  , users_db = db.get('users')
-  , projects_db = db.get('projects')
-  , tasks_db = db.get('tasks')
-  , images_db = db.get('images');
+var monk = require('monk'),
+   db = monk('localhost:27017/'+CONFIG.general.db),
+   users_db = db.get('users'),
+   projects_db = db.get('projects'),
+   tasks_db = db.get('tasks'),
+   images_db = db.get('images');
 
 
 
@@ -30,7 +30,7 @@ var version = null;
 MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
     db.admin().serverInfo(function(err, result){
          console.log(result);
-         version = result["versionArray"][1];
+         version = result.versionArray[1];
          db.close();
      });
 
@@ -50,7 +50,7 @@ exports.current = function(req, res) {
         req.session.project_current = project;
         res.json(project);
     });
-}
+};
 
 
 /**
@@ -63,7 +63,9 @@ exports.upload = function(req, res) {
         //if(can_upload(req.user, project, req.param('api'))) {
 	        upload_file(req, res, project);
         }
-        else { res.status(401).send('You\'re not authorized to submit elements'); }
+        else {
+          res.status(401).send('You\'re not authorized to submit elements');
+        }
 
     });
 };
@@ -93,7 +95,7 @@ exports.add = function(req, res) {
                         }, function(err, project) {
                           res.json(project);
     });
-}
+};
 
 /**
 * Update project information, user must be owner of the project.
@@ -102,9 +104,8 @@ exports.add = function(req, res) {
 exports.edit = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
         if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
-        //if(project.owner == req.user.username || req.user.username == 'admin') {
             // check params and update
-            for(elt in req.body.form) {
+            for(var elt in req.body.form) {
               if(! Array.isArray(req.body.form[elt].values)) {
                 if(req.body.form[elt].values == 'false') {
                   req.body.form[elt].values = false;
@@ -114,18 +115,20 @@ exports.edit = function(req, res) {
                 }
               }
             }
-            projects_db.update({ _id: req.param('id') }, {$set: req.body}, function(err) {
-              if(err) {
-                console.log(err);
-              }
-                res.json({});
-            });
+            projects_db.update({ _id: req.param('id') },
+                                {$set: req.body},
+                                function(err) {
+                                  if(err) {
+                                    console.log(err);
+                                  }
+                                  res.json({});
+                                });
         }
         else {
-            res.json({err: "You do not own this project"});
+            res.json({err: 'You do not own this project'});
         }
     });
-}
+};
 
 /**
 * Delete a project, user must be owner of the project
@@ -134,7 +137,6 @@ exports.edit = function(req, res) {
 exports.delete = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
         if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
-        //if(project.owner == req.user.username || req.user.username == 'admin') {
             projects_db.remove({ _id: req.param('id') }, function(err) {
               if(err) {
                 console.log(err);
@@ -142,8 +144,10 @@ exports.delete = function(req, res) {
                 return;
               }
               else {
-                // TODO should remove with a background task all images of project
-                // quick for mongodb images, but for storage need to treat each image separatly
+                // TODO should remove with a background task all
+                // images of project
+                // quick for mongodb images, but for storage need to treat
+                // each image separatly
                 tasks_db.insert({ type: 'remove',
                                   object: 'images',
                                   objectid: req.param('id')
@@ -157,10 +161,10 @@ exports.delete = function(req, res) {
             });
         }
         else {
-            res.json({err: "You do not own this project"});
+            res.json({err: 'You do not own this project'});
         }
     });
-}
+};
 
 /**
 * Get all projects that can be seen by the user i.e. public projects
@@ -170,21 +174,25 @@ exports.delete = function(req, res) {
 exports.list = function(req, res) {
       var isAdmin = false;
       var filter = {};
-      if(req.user == undefined) {
-        filter['public'] = true;
-        filter['status'] = true;
+      if(req.user === undefined) {
+        filter.public = true;
+        filter.status = true;
       }
       else if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
         // Not admin, search "is in user" or "public = true"
-        filter = { $or: [{ public: true},{ users: { $elemMatch: req.user.username }}]};
+        filter = { $or: [
+                        { public: true},
+                        { users: { $elemMatch: req.user.username }}
+                        ]
+                  };
       }
       projects_db.find(filter, function(err,projects) {
             url_parts = url.parse(req.url, true);
             url_callback = url_parts.query.jsoncallback;
-            if(url_callback != undefined && url_callback!=null) {
+            if(url_callback !== undefined && url_callback!==null) {
                 res.set('Content-Type', 'application/json');
                 res.write(url_callback+'('+JSON.stringify(projects)+')');
-                res.end()
+                res.end();
             }
             else {
                 res.json(projects);
@@ -199,10 +207,10 @@ exports.list = function(req, res) {
 */
 exports.get = function(req, res){
     projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-        if (! project.form) { project.form = {} };
+        if (! project.form) { project.form = {}; }
         url_parts = url.parse(req.url, true);
         url_callback = url_parts.query.jsoncallback;
-        if(url_callback != undefined && url_callback!=null) {
+        if(url_callback !== undefined && url_callback!==null) {
             res.set('Content-Type', 'application/json');
             res.write(url_callback+'('+JSON.stringify(project)+')');
             res.end();
@@ -221,11 +229,12 @@ exports.get = function(req, res){
 exports.around = function(req,res) {
     url_parts = url.parse(req.url, true);
     url_callback = url_parts.query.callback;
-    console.log('looking around '+req.param('long')+','+req.param('lat')+" for dist "+req.param('dist')+' km');
-    var filter= { "project": images_db.id(req.param('id')),
-                  "fields.location": {
-                    "$within": {
-                      "$centerSphere": [[ parseFloat(req.params.long),
+    console.log('looking around '+req.param('long')+','+
+                req.param('lat')+' for dist '+req.param('dist')+' km');
+    var filter= { 'project': images_db.id(req.param('id')),
+                  'fields.location': {
+                    '$within': {
+                      '$centerSphere': [[ parseFloat(req.params.long),
                                           parseFloat(req.params.lat)
                                         ],
                                         parseInt(req.params.dist)/6378.137
@@ -235,15 +244,15 @@ exports.around = function(req,res) {
                 };
     if(version>=4) {
         // For mongo 2.4, distance in m, so we multiply to get km
-        filter = {"project": images_db.id(req.param('id')),
-                  "fields.loc" : {
-                    "$near" : {
-                      "$geometry" :  {
-                        "type" : "Point",
-                        "coordinates" : [ parseFloat(req.params.long),
+        filter = {'project': images_db.id(req.param('id')),
+                  'fields.loc': {
+                    '$near': {
+                      '$geometry':  {
+                        'type': 'Point',
+                        'coordinates': [ parseFloat(req.params.long),
                                           parseFloat(req.params.lat)
                                         ] }},
-                                        "$maxDistance" : parseInt(req.params.dist) * 1000
+                                '$maxDistance': parseInt(req.params.dist) * 1000
                                       }
                   };
     }
@@ -253,7 +262,7 @@ exports.around = function(req,res) {
         res.json([]);
         return;
       }
-      if(url_callback != undefined && url_callback!=null) {
+      if(url_callback !== undefined && url_callback!==null) {
           res.set('Content-Type', 'application/json');
           res.write(url_callback+'('+JSON.stringify(nearmatches)+')');
           res.end();
@@ -264,20 +273,7 @@ exports.around = function(req,res) {
     });
 };
 
-/*
-exports.map  =  function(req, res){
-    MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
-        if(err) throw err;
-        var collection = db.collection('citizen');
-        collection.find({"project": req.params.id}).toArray(function(err, results) {
-           db.close();
-            res.render('map', { project: req.params.id, locations: JSON.stringify(results) })
 
-         });
-    });
-
-}
-*/
 
 /**
 *
@@ -301,8 +297,9 @@ exports.dashboard =  function(req, res){
     if(req.user) {
         username = req.user.username;
     }
-    projects_db.findOne({ _id : req.param('id')}, function(err,project) {
-      if(project.public == false && (username=='' || project.users.indexOf(username)==-1)) {
+    projects_db.findOne({ _id : req.param('id')},
+      function(err,project) {
+      if(! scitizen_auth.can_read(req.user, project, req.param('api'))){
         // Project is private and user is not logged or part of members
         res.status(503).send('You are not allowed to access this project');
         return;
@@ -312,7 +309,7 @@ exports.dashboard =  function(req, res){
           theme_view = 'themes/'+project.theme+'/dashboard';
         }
         var google_api = CONFIG.Google.apikey;
-        if(project.google_api!=undefined && project.google_api!='') {
+        if(project.google_api!==undefined && project.google_api!=='') {
             google_api = project.google_api;
         }
         else {
@@ -330,26 +327,6 @@ exports.dashboard =  function(req, res){
     });
 };
 
-/*
-exports.random = function(req, res){
-    MongoClient.connect('mongodb://127.0.0.1:27017/citizen', function(err, db) {
-        if(err) throw err;
-        var collection = db.collection('citizen');
-        collection.find({"project": req.params.id}).toArray(function(err, results) {
-            var nbelts = results.length;
-            db.close();
-            if(results.length==0) {
-              res.render('random', {jsonobject: {}, file: '', project: req.params.id });
-            }
-            else {
-            var randomelt = Math.floor((Math.random()*nbelts));
-            res.render('random', { jsonobject: JSON.stringify(results[randomelt]), file: results[randomelt]['file'].replace('/tmp/',''), project: req.params.id });
-            }
-        });
-
-    });
-};
-*/
 
 function upload_file(req, res, project) {
     var form = new formidable.IncomingForm();
@@ -362,7 +339,7 @@ function upload_file(req, res, project) {
     if (!properfields[name]) {
       properfields[name] = value;
     } else {
-      if (properfields[name].constructor.toString().indexOf("Array") > -1) { // is array
+      if(Array.isArray(properfields[name])) {
         properfields[name].push(value);
       } else { // not array
         var tmp = properfields[name];
@@ -371,24 +348,24 @@ function upload_file(req, res, project) {
         properfields[name].push(value);
       }
     }
-    });
+  });
 
 
     form.parse(req, function(err, fields, files) {
       //console.log(util.inspect({fields: fields, files: files}));
       //console.log(properfields);
       fields = properfields;
-      if(project['geo'] && fields["location"]=="") {
-        res.status(400).send("Geo position is missing");
+      if(project.geo && fields.location==='') {
+        res.status(400).send('Geo position is missing');
         return;
       }
 
-      fields["location"] =  fields["location"].split(',');
-      fields["location"][0] = parseFloat(fields["location"][0]);
-      fields["location"][1] = parseFloat(fields["location"][1]);
+      fields.location =  fields.location.split(',');
+      fields.location[0] = parseFloat(fields.location[0]);
+      fields.location[1] = parseFloat(fields.location[1]);
       if(version>=4) {
         // Add GeoJSON
-        fields["loc"]  = {"type" :  "Point", "coordinates" : fields["location"]};
+        fields.loc  = {'type': 'Point', 'coordinates': fields.location};
       }
 
       var validated = true;
@@ -397,7 +374,7 @@ function upload_file(req, res, project) {
         validated = false;
       }
       var need_control = false;
-      if(project.askimet_api!='') {
+      if(project.askimet_api!=='') {
         //TODO call askimet
         need_control = true;
       }
@@ -413,19 +390,24 @@ function upload_file(req, res, project) {
                   favorite: false};
 
       images_db.insert(item, function(err, image) {
-           if(err!=null) {
-                res.status(500).send("Error while saving item");
+           if(err!==null) {
+                res.status(500).send('Error while saving item');
             }
             var metadata = { project:  image.project, name: image.name };
-            scitizen_storage.put(image._id.toHexString(), files.image.path, metadata,
+            scitizen_storage.put(image._id.toHexString(),
+                        files.image.path,
+                        metadata,
                         function(err, result) {
-                          if(err!=0) {
+                          if(err!==0) {
                             res.status(err).send('Could not save image');
                           }
                           else {
                             projects_db.update({_id: image.project},
-                                              {$inc: { 'stats.quota': image.size}},
-                                              function(err){});
+                                              {$inc: {
+                                                'stats.quota': image.size
+                                              }},
+                                              function(err){}
+                                            );
                             res.json(image);
                           }
             });

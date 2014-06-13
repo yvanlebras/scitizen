@@ -1,0 +1,42 @@
+<div class="row">
+
+  </div>
+  <div class="" id="projects">
+    <div class="row" id="project_selection" data-bind="foreach: project_list">
+      <div class="row project_selection">
+        <a data-bind="attr: {href: '/project/'+ko.utils.unwrapObservable(_id)+'/dashboard'}">
+          <div class="large-2 columns project_heading" data-bind="text: name"></div>
+          <div class="large-6 columns project_description" data-bind="text: short_description"></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    var viewModel = {
+      project_list: ko.observableArray(),
+      project_ready: ko.observable(false),
+      goto_home_panel: function() {},
+      goto_addnew_panel: function() {},
+      user: ko.observable('{{user}}'),
+      user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+      home: ko.observable('/'),
+      login: ko.observable('/login'),
+      logout: ko.observable('/logout'),
+      register: ko.observable('/users/register'),
+      my: ko.observable('/my')
+    };
+    //ko.applyBindings(viewModel, document.getElementById('content_view'));
+    ko.applyBindings(viewModel);
+
+    $(document).ready(function() {
+      $.getJSON("/project/", function(data) {
+        viewModel.project_list(data);
+      });
+    });
+
+</script>

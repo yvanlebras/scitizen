@@ -1,22 +1,22 @@
-var url = require("url");
+var url = require('url');
 var util = require('util');
-var path = require("path");
-var fs = require("fs");
-var formidable = require("formidable");
-var pkgcloud = require("pkgcloud");
-var scitizen_storage = require("scitizen-storage");
-var scitizen_auth = require("../lib/auth.js");
+var path = require('path');
+var fs = require('fs');
+var formidable = require('formidable');
+var pkgcloud = require('pkgcloud');
+var scitizen_storage = require('scitizen-storage');
+var scitizen_auth = require('../lib/auth.js');
 
 
 var MongoClient = require('mongodb').MongoClient;
 
 var CONFIG = require('config');
 
-var monk = require('monk')
-  , db = monk('localhost:27017/'+CONFIG.general.db)
-  , users_db = db.get('users')
-  , projects_db = db.get('projects')
-  , images_db = db.get('images');
+var monk = require('monk'),
+   db = monk('localhost:27017/'+CONFIG.general.db),
+   users_db = db.get('users'),
+   projects_db = db.get('projects'),
+   images_db = db.get('images');
 
 
 scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
@@ -49,7 +49,7 @@ exports.control = function(req, res) {
   images_db.findOne({_id:image_id}, function(err, image) {
     var image_text = '';
     if(! err) {
-      for(elt in image.fields) {
+      for(var elt in image.fields) {
         if(elt=='loc') { continue; }
         if(Array.isArray(image.fields.elt)) {
           for(var i=0;i<image.fields.elt.length;i++) {
@@ -63,7 +63,7 @@ exports.control = function(req, res) {
     }
     res.render('image',{image_text: image_text});
   });
-}
+};
 
 exports.validate = function(req, res) {
   var image_id= req.param('id');
@@ -72,13 +72,16 @@ exports.validate = function(req, res) {
       projects_db.findOne({_id: image.project}, function(err, project) {
         if(err) {res.status(503).send('Not authorized'); return; }
         if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
-          images_db.update({_id:image_id},{ $set: {validated: true}}, function(err){});
+          images_db.update({_id:image_id},
+                            { $set: {validated: true}},
+                            function(err){}
+                          );
           res.json({});
         }
-        else { res.status(503).send('Not authorized'); };
+        else { res.status(503).send('Not authorized'); }
       });
   });
-}
+};
 
 /**
 * Curation by users
@@ -93,8 +96,8 @@ exports.curate = function(req, res) {
             if(scitizen_storage.can_add(req.user, project, req.param('api'))) {
               if(req.param('spam')==1) {
                 images_db.update({_id: image_id},
-                                  {$inc: {"stats.vote": 1,
-                                          "stats.spam": 1
+                                  {$inc: {'stats.vote': 1,
+                                          'stats.spam': 1
                                           }
                                   },
                                   function(err) {
@@ -103,16 +106,16 @@ exports.curate = function(req, res) {
               }
               else {
                 var forms = req.param('form_elts').split(',');
-                var stats = { "stats.vote": 1};
+                var stats = { 'stats.vote': 1};
                 for(var i =0;i<forms.length;i++) {
                   var param = req.param(forms[i]);
                   if(param instanceof Array) {
                     for(var j=0;j<param.length;j++) {
-                      stats["stats." + forms[i] + "." + param[j]] = 1;
+                      stats['stats.' + forms[i] + '.' + param[j]] = 1;
                     }
                   }
                   else {
-                    stats["stats." + forms[i] + "." + param] = 1;
+                    stats['stats.' + forms[i] + '.' + param] = 1;
                   }
                 }
                 var to_update = { $inc : stats };
@@ -122,10 +125,10 @@ exports.curate = function(req, res) {
                 });
               }
             }
-            else { res.status(503).send('Not authorized'); };
+            else { res.status(503).send('Not authorized'); }
         });
     });
-}
+};
 
 exports.delete = function(req, res) {
     var image_id= req.param('id');
@@ -136,7 +139,7 @@ exports.delete = function(req, res) {
             if(scitizen_storage.can_edit(req.user, project, req.param('api'))) {
                 scitizen_storage.delete(image_id, function(err,res) {
                 if(err>0) {
-                    console.log("Failed to delete "+image_id+" from S3");
+                    console.log('Failed to delete '+image_id+' from storage');
                 }
                 images_db.remove({_id: image_id}, function(err) {
                   if(err) { console.log(err); }
@@ -151,12 +154,11 @@ exports.delete = function(req, res) {
             else { res.status(503).send('Not authorized'); }
         });
     });
-
-}
+};
 
 exports.get = function(req, res) {
   var image_id= req.param('id');
-  if(image_id==0) {
+  if(image_id===0) {
     res.status(404).send('Image not found');
     return;
   }
@@ -171,7 +173,7 @@ exports.get = function(req, res) {
       }
     });
   });
-}
+};
 
 exports.list = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
@@ -179,8 +181,8 @@ exports.list = function(req, res) {
             var filter = { project: images_db.id(req.param('id')) };
             // If not a project member, show only validated images
             if(! req.user || project.users.indexOf(req.user.username)==1) {
-                filter['validated'] = true;
-                filter['need_spam_control'] = false;
+                filter.validated = true;
+                filter.need_spam_control = false;
             }
             images_db.find(filter, function(err, images) {
                 res.json(images);
