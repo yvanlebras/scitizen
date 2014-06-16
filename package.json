@@ -19,6 +19,7 @@
     "lru-cache": "*",
     "mongodb": "*",
     "monk": "*",
+    "node-akismet": "0.0.2",
     "nodemailer": "*",
     "passport": "0.2.0",
     "passport-facebook": "*",

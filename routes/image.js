@@ -177,8 +177,10 @@ exports.get = function(req, res) {
 
 exports.list = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
+        console.log("list images");
         if(scitizen_auth.can_read(req.user, project, req.param('api'))) {
             var filter = { project: images_db.id(req.param('id')) };
+            console.log("filter ");
             // If not a project member, show only validated images
             if(! req.user || project.users.indexOf(req.user.username)==1) {
                 filter.validated = true;

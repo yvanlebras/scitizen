@@ -314,7 +314,7 @@ exports.dashboard =  function(req, res){
             google_api = project.google_api;
         }
         else {
-            scitizen_stats.increment(projec, 'google', 1);
+            scitizen_stats.increment(project, 'google', 1);
         }
         res.render(theme_view,
                     { layout: 'layouts/'+project.theme+'/public',
@@ -405,11 +405,78 @@ function upload_file(req, res, project) {
                                               {$inc: {
                                                 'stats.quota': image.size
                                               }},
-                                              function(err){}
+                                              function(err){
+                                                if(need_control) {
+                                                  check_spam(project, image);
+                                                }
+                                              }
                                             );
                             res.json(image);
                           }
             });
         });
     });
+}
+
+
+function get_content(image) {
+  var comment = '';
+  for(var elt in image.fields) {
+    if(elt=='loc') { continue; }
+    if(Array.isArray(image.fields.elt)) {
+      for(var i=0;i<image.fields.elt.length;i++) {
+        comment += +elt+':'+image.fields.elt[i]+"\n";
+      }
+    }
+    else {
+      comment += elt+':'+image.fields[elt]+"\n";
+    }
+  }
+  return comment;
+}
+
+function check_spam(project, image) {
+  var akismet_options = {
+    apikey: project.askimet_api, // required: your akismet api key
+    blog: CONFIG.general.url, // required: your root level url
+    headers:  // optional, but akismet likes it if you set this
+    {
+        'User-Agent': 'testhost/1.0 | node-akismet/0.0.1'
+    }
+  };
+  var args = {
+    permalink: '/image/'+image._id+'/control',
+    comment_content: get_content(image),
+    comment_type: 'comment'
+  };
+
+  var Akismet = require('akismet').client(akismet_options);
+
+  Akismet.checkSpam(args, function(isSpam) {
+    if (isSpam) {
+        // quarantine that
+        images_db.remove({_id: image._id},
+                  function(err){
+                    if(err) {
+                      console.log(err);
+                    }
+                  });
+        scitizen_storage.delete(image._id.toHexString(), function(err, result){
+          if(err>0) { console.log(err);}
+        });
+    }
+    else {
+      images_db.update({_id: image._id},
+                  {$set: {
+                    'need_spam_control': false
+                  }},
+                  function(err){
+                    if(err) {
+                      console.log(err);
+                    }
+                  }
+                );
+    }
+  });
+
 }

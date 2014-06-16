@@ -18,7 +18,11 @@ body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
   background-image: url(/images/bear.jpg);
 }
 #scientist{
-  background-color: orange;
+  background-color: #6CBEEB;
+  background-size: 100px;
+  background-image: url(/images/240px-Methane-3D-balls.png);
+  background-repeat: no-repeat;
+  background-position: right bottom;
 }
 
 #faq {
@@ -36,8 +40,9 @@ background-repeat: no-repeat;
 
 }
 
-.main_info_text {
-  background-color: white;
+.main_info_text p{
+  font-size: 1.2em;
+  font-weight: bold !important;
 }
 .main_info_title {
   font-size: 4em;
