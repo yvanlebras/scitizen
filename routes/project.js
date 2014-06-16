@@ -7,6 +7,7 @@ var pkgcloud = require('pkgcloud');
 var scitizen_storage = require('scitizen-storage');
 
 var scitizen_auth = require('../lib/auth.js');
+var scitizen_stats = require('../lib/stats.js')
 
 
 var CONFIG = require('config');
@@ -90,7 +91,7 @@ exports.add = function(req, res) {
                           google_api: '',
                           askimet_api: '',
                           quota: 0,
-                          stats: {api: 0, google: 0, quota: 0},
+                          stats: {quota: 0},
                           form: {}
                         }, function(err, project) {
                           res.json(project);
@@ -313,9 +314,7 @@ exports.dashboard =  function(req, res){
             google_api = project.google_api;
         }
         else {
-            projects_db.update({_id : project._id},
-                               {$inc: { 'stats.google': 1 }},
-                               function(err){ console.log(err);});
+            scitizen_stats.increment(projec, 'google', 1);
         }
         res.render(theme_view,
                     { layout: 'layouts/'+project.theme+'/public',

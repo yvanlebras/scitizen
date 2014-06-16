@@ -43,9 +43,10 @@ fields
 
 ## Items
 
+* time based statistics for stats.api and stats.google instead of total count
+* using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
 * anti-spam on submission (integrate with Askimet with user key)
-* item approval if project require approval
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache
 
@@ -54,7 +55,6 @@ fields
 * check name duplicates
 * add optional url for projects managing themselves the web page
 * add optional image
-* add users
 
 ## forms
 
