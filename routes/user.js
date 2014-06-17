@@ -129,6 +129,7 @@ exports.confirm = function(req, res) {
 
 function createUser(login, password) {
   var hash = bcrypt.hashSync(password, salt);
+  var apikey = (Math.random() + 1).toString(36).substring(7);
   var regkey = Math.random().toString(36).substring(7);
   var groups = ['default'];
   if(GENERAL_CONFIG.admin.indexOf(login)>-1) {
@@ -138,7 +139,8 @@ function createUser(login, password) {
                     password: hash,
                     group: groups,
                     registered: false,
-                    regkey: regkey
+                    regkey: regkey,
+                    key: apikey
                   });
   var link = GENERAL_CONFIG.url +
               encodeURI('users/confirm?user='+login+'&regkey='+regkey);

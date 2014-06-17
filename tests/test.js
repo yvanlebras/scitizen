@@ -16,6 +16,8 @@ var monk = require('monk'),
    projects = db.get('projects');
 
 
+var test_context =  {};
+
 describe('projects', function() {
   before(function() {
     this.server = http.createServer(app).listen(app.get('port'));
@@ -30,13 +32,15 @@ describe('projects', function() {
         password: '123',
         group: ['default'],
         registered: true,
-        regkey: '123'
+        regkey: '123',
+        key: '123'
         }, function(err, user) {
+            test_context.user = user;
             if(err) {
-            console.log(err);
-            done(err);
+              console.log(err);
+              done(err);
             }
-            projects.insert({
+            projects.insert([{
                 name: 'test',
                 api: '123',
                 stats: {quota: 0},
@@ -47,11 +51,27 @@ describe('projects', function() {
                 status:true,
                 validation: false,
                 form: {}
-                }, function(err, project) {
+                },
+                {
+                name: 'test2',
+                api: '123',
+                stats: {quota: 0},
+                owner: 'test',
+                users: [ 'test' ],
+                public: false,
+                geo: true,
+                status:true,
+                validation: false,
+                form: {}
+                }
+                ], function(err, project) {
                     if(err) {
                         console.log(err);
                     }
-                    done();
+                    projects.find({}, function(err, projects){
+                      test_context.projects = projects;
+                      done();
+                    });
             });
     });
 
@@ -59,7 +79,7 @@ describe('projects', function() {
     });
 
   });
- 
+
   it('anonymous cannot create a project', function(done) {
     var options = {
         hostname: 'localhost',
@@ -94,12 +114,9 @@ describe('projects', function() {
         method: 'GET'
     };
     var req = http.request(options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
         expect(res.statusCode).to.equal(200);
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            console.log('BODY: ' + chunk);
             var projects = JSON.parse(chunk);
             expect(projects.length).to.equal(1);
             done();
@@ -111,12 +128,105 @@ describe('projects', function() {
         done();
     });
     req.end();
-
   });
- 
+
+  it('anonymous can get public project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id,
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          var project = JSON.parse(chunk);
+          expect(project._id).to.equal(test_context.projects[0]._id.toHexString());
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect.fail(e);
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
+  it('anonymous cannot get private project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id,
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect.fail(e);
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
+
+  it('user can get public project list with API key', function(done) {
+  var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project?api=123',
+      method: 'GET'
+  };
+  var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          var projects = JSON.parse(chunk);
+          expect(projects.length).to.equal(2);
+          done();
+      });
+  });
+  req.on('error', function(e) {
+      expect.fail(e);
+      console.log('problem with request: ' + e.message);
+      done();
+  });
+  req.end();
+  });
+
+  it('user can get private project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id+'?api=123',
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          var project = JSON.parse(chunk);
+          expect(project._id).to.equal(test_context.projects[1]._id.toHexString());
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect.fail(e);
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
   after(function(done) {
     var myapp = this.server;
     this.server.close(done);
   });
 });
-

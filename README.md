@@ -45,6 +45,8 @@ Main page icons: from OpenClipArt
 * In my/ edit_project, use :with project_current binding instead of specific
 fields
 
+* Manage account (password modification, API key show and regeneration)
+
 
 
 ## Items

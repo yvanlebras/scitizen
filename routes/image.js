@@ -71,7 +71,9 @@ exports.validate = function(req, res) {
       if(err) {res.status(503).send('Not authorized'); return; }
       projects_db.findOne({_id: image.project}, function(err, project) {
         if(err) {res.status(503).send('Not authorized'); return; }
-        if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
+        scitizen_auth.can_edit(req.user, project, req.param('api'),
+                              function(can_edit) {
+        if(can_edit) {
           images_db.update({_id:image_id},
                             { $set: {validated: true}},
                             function(err){}
@@ -79,6 +81,7 @@ exports.validate = function(req, res) {
           res.json({});
         }
         else { res.status(503).send('Not authorized'); }
+      });
       });
   });
 };
@@ -93,7 +96,9 @@ exports.curate = function(req, res) {
         if(err) {res.status(503).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
             if(err) {res.status(503).send('Not authorized'); return; }
-            if(scitizen_auth.can_add(req.user, project, req.param('api'))) {
+            scitizen_auth.can_add(req.user, project, req.param('api'),
+                                  function(can_add) {
+            if(can_add) {
               if(req.param('spam')==1) {
                 images_db.update({_id: image_id},
                                   {$inc: {'stats.vote': 1,
@@ -126,6 +131,7 @@ exports.curate = function(req, res) {
               }
             }
             else { res.status(503).send('Not authorized'); }
+          });
         });
     });
 };
@@ -136,7 +142,9 @@ exports.delete = function(req, res) {
         if(err) {res.status(503).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
             if(err) {res.status(503).send('Not authorized'); return; }
-            if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
+            scitizen_auth.can_edit(req.user, project, req.param('api'),
+                                  function(can_edit){
+            if(can_edit) {
                 scitizen_storage.delete(image_id, function(err,res) {
                 if(err>0) {
                     console.log('Failed to delete '+image_id+' from storage');
@@ -152,6 +160,7 @@ exports.delete = function(req, res) {
                 });
             }
             else { res.status(503).send('Not authorized'); }
+          });
         });
     });
 };
@@ -177,7 +186,9 @@ exports.get = function(req, res) {
 
 exports.list = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(scitizen_auth.can_read(req.user, project, req.param('api'))) {
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                              function(can_read) {
+        if(can_read) {
             var filter = { project: images_db.id(req.param('id')) };
             // If not a project member, show only validated images
             if(! req.user || project.users.indexOf(req.user.username)==1) {
@@ -191,6 +202,6 @@ exports.list = function(req, res) {
         else {
             res.status(503).send('You\'re not allowed to access this project');
         }
-
+      });
     });
 };

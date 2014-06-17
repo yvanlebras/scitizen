@@ -28,13 +28,13 @@ scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
 
 var version = null;
 
-MongoClient.connect('mongodb://127.0.0.1:27017/scitizen', function(err, db) {
-    db.admin().serverInfo(function(err, result){
-         console.log(result);
-         version = result.versionArray[1];
-         db.close();
-     });
-
+MongoClient.connect('mongodb://127.0.0.1:27017/'+CONFIG.general.db,
+                    function(err, db) {
+                        db.admin().serverInfo(function(err, result){
+                          console.log(result);
+                          version = result.versionArray[1];
+                          db.close();
+                        });
 });
 
 /**
@@ -60,14 +60,16 @@ exports.current = function(req, res) {
 */
 exports.upload = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(scitizen_auth.can_add(req.user, project, req.param('api'))) {
+        scitizen_auth.can_add(req.user, project, req.param('api'),
+                              function(can_add) {
+        if(can_add) {
         //if(can_upload(req.user, project, req.param('api'))) {
 	        upload_file(req, res, project);
         }
         else {
           res.status(401).send('You\'re not authorized to submit elements');
         }
-
+      });
     });
 };
 
@@ -104,7 +106,9 @@ exports.add = function(req, res) {
 */
 exports.edit = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
+      scitizen_auth.can_edit(req.user, project, req.param('api'),
+                            function(can_edit) {
+        if(can_edit) {
             // check params and update
             for(var elt in req.body.form) {
               if(! Array.isArray(req.body.form[elt].values)) {
@@ -128,6 +132,7 @@ exports.edit = function(req, res) {
         else {
             res.json({err: 'You do not own this project'});
         }
+      });
     });
 };
 
@@ -137,7 +142,9 @@ exports.edit = function(req, res) {
 */
 exports.delete = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
+      scitizen_auth.can_edit(req.user, project, req.param('api'),
+                              function(can_edit) {
+        if(can_edit) {
             projects_db.remove({ _id: req.param('id') }, function(err) {
               if(err) {
                 console.log(err);
@@ -164,6 +171,7 @@ exports.delete = function(req, res) {
         else {
             res.json({err: 'You do not own this project'});
         }
+      });
     });
 };
 
@@ -175,31 +183,54 @@ exports.delete = function(req, res) {
 exports.list = function(req, res) {
       var isAdmin = false;
       var filter = {};
-      if(req.user === undefined) {
-        filter.public = true;
-        filter.status = true;
+      if(req.param('api')) {
+        users_db.findOne({key: req.param('api')}, function(err, key_user){
+          if(err) {
+            res.status(500).send('api does not match');
+            return;
+          }
+
+          filter = { $or: [
+                          { public: true },
+                          { users: { '$in': [key_user.username] }}
+                          ]
+                  };
+          projects_db.find(filter, function(err,projects) {
+            if(err) {
+              console.log(err);
+              res.status(404).send('no match');
+              return;
+            }
+              res.json(projects);
+          });
+        });
       }
-      else if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
-        // Not admin, search "is in user" or "public = true"
-        filter = { $or: [
+      else {
+        if(req.user === undefined) {
+          filter.public = true;
+          filter.status = true;
+        }
+        else if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
+          // Not admin, search "is in user" or "public = true"
+          filter = { $or: [
                         { public: true},
-                        { users: { $elemMatch: req.user.username }}
+                        { users: { $in: [req.user.username] }}
                         ]
                   };
-      }
-      projects_db.find(filter, function(err,projects) {
-            url_parts = url.parse(req.url, true);
-            url_callback = url_parts.query.jsoncallback;
-            if(url_callback !== undefined && url_callback!==null) {
-                res.set('Content-Type', 'application/json');
-                res.write(url_callback+'('+JSON.stringify(projects)+')');
-                res.end();
-            }
-            else {
-                res.json(projects);
-            }
-
-      });
+        }
+        projects_db.find(filter, function(err,projects) {
+          url_parts = url.parse(req.url, true);
+          url_callback = url_parts.query.jsoncallback;
+          if(url_callback !== undefined && url_callback!==null) {
+            res.set('Content-Type', 'application/json');
+            res.write(url_callback+'('+JSON.stringify(projects)+')');
+            res.end();
+          }
+          else {
+            res.json(projects);
+          }
+        });
+    }
 };
 
 /**
@@ -207,7 +238,14 @@ exports.list = function(req, res) {
 *
 */
 exports.get = function(req, res){
-    projects_db.findOne({ _id : req.param('id')}, function(err,project) {
+    projects_db.findOne({ _id : req.param('id')}, function(err, project) {
+      if(err) {
+        res.status(404).send();
+        return;
+      }
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                            function(can_read) {
+      if(can_read) {
         if (! project.form) { project.form = {}; }
         url_parts = url.parse(req.url, true);
         url_callback = url_parts.query.jsoncallback;
@@ -219,6 +257,11 @@ exports.get = function(req, res){
         else {
             res.json(project);
         }
+      }
+      else {
+        res.status(503).send('You are not allowed to access this project');
+      }
+    });
     });
 };
 
@@ -300,7 +343,9 @@ exports.dashboard =  function(req, res){
     }
     projects_db.findOne({ _id : req.param('id')},
       function(err,project) {
-      if(! scitizen_auth.can_read(req.user, project, req.param('api'))){
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                            function(can_read) {
+      if(! can_read){
         // Project is private and user is not logged or part of members
         res.status(503).send('You are not allowed to access this project');
         return;
@@ -323,6 +368,7 @@ exports.dashboard =  function(req, res){
                       apikey: google_api,
                       messages: req.flash('info'),
                       user: username });
+        });
     });
 };
 
