@@ -93,7 +93,7 @@ exports.curate = function(req, res) {
         if(err) {res.status(503).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
             if(err) {res.status(503).send('Not authorized'); return; }
-            if(scitizen_storage.can_add(req.user, project, req.param('api'))) {
+            if(scitizen_auth.can_add(req.user, project, req.param('api'))) {
               if(req.param('spam')==1) {
                 images_db.update({_id: image_id},
                                   {$inc: {'stats.vote': 1,
@@ -136,7 +136,7 @@ exports.delete = function(req, res) {
         if(err) {res.status(503).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
             if(err) {res.status(503).send('Not authorized'); return; }
-            if(scitizen_storage.can_edit(req.user, project, req.param('api'))) {
+            if(scitizen_auth.can_edit(req.user, project, req.param('api'))) {
                 scitizen_storage.delete(image_id, function(err,res) {
                 if(err>0) {
                     console.log('Failed to delete '+image_id+' from storage');
@@ -158,12 +158,12 @@ exports.delete = function(req, res) {
 
 exports.get = function(req, res) {
   var image_id= req.param('id');
-  if(image_id===0) {
+  if(image_id==='0') {
     res.status(404).send('Image not found');
     return;
   }
 
-  images_db.findOne({ _id: images_db.id(image_id) }, function(err, image) {
+  images_db.findOne({ _id: image_id }, function(err, image) {
     scitizen_storage.get(image_id, function(err, result) {
       if(err>0) {
         res.status(err).send('Could not retreive image');
@@ -177,10 +177,8 @@ exports.get = function(req, res) {
 
 exports.list = function(req, res) {
     projects_db.findOne({ _id: req.param('id') }, function(err, project) {
-        console.log("list images");
         if(scitizen_auth.can_read(req.user, project, req.param('api'))) {
             var filter = { project: images_db.id(req.param('id')) };
-            console.log("filter ");
             // If not a project member, show only validated images
             if(! req.user || project.users.indexOf(req.user.username)==1) {
                 filter.validated = true;

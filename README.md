@@ -24,6 +24,12 @@ Copyright: 2014 IRISA, Olivier Sallou <olivier.sallou@irisa.fr>
 Thanks to: JQuery, Foundation, KnockoutJS, Google maps API
 Main page icons: from OpenClipArt
 
+# Development
+
+  To run with StrongOps
+    slc run
+
+
 # TODO
 
 ## Questions
@@ -43,10 +49,10 @@ fields
 
 ## Items
 
+* add possibility to point an element on an item (location on image of a specific item), at curation time.
 * time based statistics for stats.api and stats.google instead of total count
 * using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
-* anti-spam on submission (integrate with Askimet with user key)
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache
 

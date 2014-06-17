@@ -7,7 +7,7 @@ var pkgcloud = require('pkgcloud');
 var scitizen_storage = require('scitizen-storage');
 
 var scitizen_auth = require('../lib/auth.js');
-var scitizen_stats = require('../lib/stats.js')
+var scitizen_stats = require('../lib/stats.js');
 
 
 var CONFIG = require('config');
@@ -425,11 +425,11 @@ function get_content(image) {
     if(elt=='loc') { continue; }
     if(Array.isArray(image.fields.elt)) {
       for(var i=0;i<image.fields.elt.length;i++) {
-        comment += +elt+':'+image.fields.elt[i]+"\n";
+        comment += +elt+':'+image.fields.elt[i]+' ';
       }
     }
     else {
-      comment += elt+':'+image.fields[elt]+"\n";
+      comment += elt+':'+image.fields[elt]+' ';
     }
   }
   return comment;

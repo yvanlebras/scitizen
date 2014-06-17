@@ -143,7 +143,7 @@ app.get('/users/register', user.register_new);
 app.post('/users/register', user.register);
 app.get('/users/confirm', user.confirm);
 app.get('/project', project.list);
-app.post('/project', project.add);
+app.post('/project', ensureAuthenticated, project.add);
 //app.get('/projects', project.list);
 app.get('/project/:id', project.get);
 app.delete('/project/:id', project.delete);
@@ -182,6 +182,10 @@ function ensureAuthenticated(req, res, next) {
   }
 }
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
+module.exports = app;
+if (!module.parent) {
+  http.createServer(app).listen(app.get('port'), function(){
+    console.log('Server listening on port ' + app.get('port'));
+  });
+}
+
