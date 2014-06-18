@@ -78,7 +78,7 @@ exports.upload = function(req, res) {
 *
 */
 exports.add = function(req, res) {
-    var key = (Math.random() + 1).toString(36).substring(7);
+    //var key = (Math.random() + 1).toString(36).substring(7);
     projects_db.insert({ name: req.param('pname'),
                           short_description: req.param('pdesc'),
                           description: '',
@@ -89,7 +89,6 @@ exports.add = function(req, res) {
                           geo: true,
                           status: false,
                           public: true,
-                          api: key,
                           google_api: '',
                           askimet_api: '',
                           quota: 0,
@@ -120,6 +119,9 @@ exports.edit = function(req, res) {
                 }
               }
             }
+            if(elt == 'api') {
+              delete req.body.form[elt];
+            }
             projects_db.update({ _id: req.param('id') },
                                 {$set: req.body},
                                 function(err) {
@@ -130,7 +132,7 @@ exports.edit = function(req, res) {
                                 });
         }
         else {
-            res.json({err: 'You do not own this project'});
+            res.status(503).send('Not allowed to modify this project');
         }
       });
     });

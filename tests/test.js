@@ -15,10 +15,11 @@ var monk = require('monk'),
    users = db.get('users'),
    projects = db.get('projects');
 
+var querystring = require('querystring');
 
 var test_context =  {};
 
-describe('projects', function() {
+describe('Anonymous', function() {
   before(function() {
     this.server = http.createServer(app).listen(app.get('port'));
   });
@@ -26,22 +27,23 @@ describe('projects', function() {
   before(function(done){
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
-
-    users.insert({
+    test_context.users = [{
         username: 'test',
         password: '123',
         group: ['default'],
         registered: true,
         regkey: '123',
         key: '123'
-        }, function(err, user) {
-            test_context.user = user;
+      }];
+    users.insert(test_context.users, function(err, user) {
             if(err) {
               console.log(err);
               done(err);
             }
             projects.insert([{
                 name: 'test',
+                short_description: 'short',
+                description: 'long',
                 api: '123',
                 stats: {quota: 0},
                 owner: 'test',
@@ -54,6 +56,8 @@ describe('projects', function() {
                 },
                 {
                 name: 'test2',
+                short_description: 'short',
+                description: 'long',
                 api: '123',
                 stats: {quota: 0},
                 owner: 'test',
@@ -99,7 +103,7 @@ describe('projects', function() {
     });
     req.on('error', function(e) {
         console.log('problem with request: ' + e.message);
-        expect().fail(e);
+        expect(false).to.be.true;
         done();
     });
     req.end();
@@ -123,7 +127,7 @@ describe('projects', function() {
         });
     });
     req.on('error', function(e) {
-        expect.fail(e);
+        expect(false).to.be.true;
         console.log('problem with request: ' + e.message);
         done();
     });
@@ -147,7 +151,7 @@ describe('projects', function() {
       });
     });
     req.on('error', function(e) {
-      expect.fail(e);
+      expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
     });
@@ -169,15 +173,177 @@ describe('projects', function() {
       });
     });
     req.on('error', function(e) {
-      expect.fail(e);
+      expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
     });
     req.end();
   });
 
+  it('anonymous cannot edit a public project', function(done) {
+    var form = new FormData();
+    form.append('description', 'change');
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id,
+      method: 'PUT',
+      headers: form.getHeaders()
+    };
 
-  it('user can get public project list with API key', function(done) {
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    form.pipe(req);
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    //req.end();
+  });
+
+  it('anonymous cannot edit a private project', function(done) {
+    var form = new FormData();
+    form.append('description', 'change');
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id,
+      method: 'PUT',
+      headers: form.getHeaders()
+    };
+
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    form.pipe(req);
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+  });
+
+  it('anonymous cannot delete a public project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous can list images of a public project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous can get an image of a public project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous can curate an image of a public project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous cannot curate an image of a private project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous cannot add an image of a private project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  it('anonymous cannot delete an image of a private project', function(done) {
+    expect(false).to.be.true;
+  });
+
+  after(function(done) {
+    var myapp = this.server;
+    this.server.close(done);
+  });
+});
+
+
+describe('Authenticated', function() {
+  before(function() {
+    this.server = http.createServer(app).listen(app.get('port'));
+  });
+
+  before(function(done){
+    projects.remove({}, function(err) {
+    users.remove({}, function(err) {
+      test_context.users = [{
+          username: 'test',
+          password: '123',
+          group: ['default'],
+          registered: true,
+          regkey: '123',
+          key: '123'
+        },
+        {
+            username: 'testadmin',
+            password: '123',
+            group: ['default'],
+            registered: true,
+            regkey: '123',
+            key: '321'
+          }
+        ]
+
+    users.insert(test_context.users , function(err, user) {
+            if(err) {
+              console.log(err);
+              done(err);
+            }
+            projects.insert([{
+                name: 'test',
+                short_description: 'short',
+                description: 'long',
+                api: '123',
+                stats: {quota: 0},
+                owner: 'test',
+                users: [ 'test' ],
+                public: true,
+                geo: true,
+                status:true,
+                validation: false,
+                form: {}
+                },
+                {
+                name: 'test2',
+                short_description: 'short',
+                description: 'long',
+                api: '123',
+                stats: {quota: 0},
+                owner: 'test',
+                users: [ 'test' ],
+                public: false,
+                geo: true,
+                status:true,
+                validation: false,
+                form: {}
+                }
+                ], function(err, project) {
+                    if(err) {
+                        console.log(err);
+                    }
+                    projects.find({}, function(err, projects){
+                      test_context.projects = projects;
+                      done();
+                    });
+            });
+    });
+
+    });
+    });
+
+  });
+
+  it('user can get public and own project list with API key', function(done) {
   var options = {
       hostname: 'localhost',
       port: app.get('port'),
@@ -194,14 +360,14 @@ describe('projects', function() {
       });
   });
   req.on('error', function(e) {
-      expect.fail(e);
+      expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
   });
   req.end();
   });
 
-  it('user can get private project', function(done) {
+  it('user can get private project he is member of', function(done) {
     var options = {
       hostname: 'localhost',
       port: app.get('port'),
@@ -218,11 +384,57 @@ describe('projects', function() {
       });
     });
     req.on('error', function(e) {
-      expect.fail(e);
+      expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
     });
     req.end();
+  });
+
+  it('user can edit a private project he is member of', function(done) {
+
+    var form_data =  querystring.stringify({
+      description: 'change',
+      api: '123'
+    });
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id,
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
+    };
+
+
+    var req = http.request(options);
+    req.on('response', function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          projects.findOne({ _id: test_context.projects[1]._id },
+            function(err, project) {
+              if(err) { expect(false).to.be.true; }
+              expect(project.description).to.equal('change');
+              done();
+          });
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.write(form_data);
+    req.end();
+
+  });
+
+  it('user can delete a private project he is member of', function(done) {
+    expect(false).to.be.true;
   });
 
   after(function(done) {
