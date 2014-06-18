@@ -52,6 +52,7 @@ fields
 ## Items
 
 * add possibility to point an element on an item (location on image of a specific item), at curation time.
+* view all items (with progressive scrolldown)
 * time based statistics for stats.api and stats.google instead of total count
 * using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
@@ -82,6 +83,7 @@ fields
 
 * manage users
 * manage project quotas
+* add task for cron to manage *task* objects (bulk deletion...)
 
 
 # Issues:

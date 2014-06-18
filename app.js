@@ -158,6 +158,7 @@ app.get('/project/:id/image', image.list);
 app.delete('/image/:id', image.delete);
 app.get('/image/:id', image.get);
 app.put('/image/:id', image.curate);
+app.get('/image/:id/raw', image.getraw);
 app.put('/image/:id/validate', image.validate);
 app.get('/image/:id/control', image.control);
 
@@ -188,4 +189,3 @@ if (!module.parent) {
     console.log('Server listening on port ' + app.get('port'));
   });
 }
-

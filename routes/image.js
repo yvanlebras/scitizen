@@ -113,6 +113,7 @@ exports.curate = function(req, res) {
                 var forms = req.param('form_elts').split(',');
                 var stats = { 'stats.vote': 1};
                 for(var i =0;i<forms.length;i++) {
+                  if(forms[i]=='api') { continue; }
                   var param = req.param(forms[i]);
                   if(param instanceof Array) {
                     for(var j=0;j<param.length;j++) {
@@ -166,6 +167,45 @@ exports.delete = function(req, res) {
 };
 
 exports.get = function(req, res) {
+  var image_id= req.param('id');
+  if(image_id==='0') {
+    res.status(404).send('Image not found');
+    return;
+  }
+
+  images_db.findOne({ _id: image_id }, function(err, image) {
+
+    projects_db.findOne({ _id: image.project }, function(err, project) {
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                          function(can_read) {
+        if(can_read) {
+          // If anonymous or not project member
+          // limit access to validated images
+          if(! req.user || project.users.indexOf(req.user.username)==1) {
+            if(image.validated && !image.need_spam_control) {
+              res.json(image);
+            }
+            else {
+              res.status(503).send('Not authorized');
+            }
+          }
+          else {
+            res.json(image);
+          }
+        }
+        else {
+          res.status(503).send('Not authorized');
+        }
+      });
+    });
+
+  });
+};
+
+/**
+* Gets raw content of the item (image)
+*/
+exports.getraw = function(req, res) {
   var image_id= req.param('id');
   if(image_id==='0') {
     res.status(404).send('Image not found');

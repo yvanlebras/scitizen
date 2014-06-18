@@ -154,10 +154,8 @@ exports.delete = function(req, res) {
                 return;
               }
               else {
-                // TODO should remove with a background task all
-                // images of project
-                // quick for mongodb images, but for storage need to treat
-                // each image separatly
+                // Delay task because need to remove all items from storage too,
+                // can be time consuming
                 tasks_db.insert({ type: 'remove',
                                   object: 'images',
                                   objectid: req.param('id')
@@ -171,7 +169,7 @@ exports.delete = function(req, res) {
             });
         }
         else {
-            res.json({err: 'You do not own this project'});
+            res.status(503).send('You do not own this project');
         }
       });
     });

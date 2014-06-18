@@ -7,11 +7,11 @@
 <div id="main" data-bind="visible: main_panel">
   <div id="last_images" class="block row section_dark" data-bind="if: has_images">
     <div class="large-6 columns main_image">
-        <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)}" alt="selected image" />
+        <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)+'/raw'}" alt="selected image" />
     </div>
     <div class="large-4 columns" data-bind="foreach: last_10_images">
       <div class="large-2">
-        <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)}" alt="last 10 images" />
+        <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}" alt="last 10 images" />
       </div>
     </div>
   </div>
@@ -29,7 +29,7 @@
       <!-- random element -->
       <div class="row">
         <div class="large-6 columns">
-              <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)}" alt="random image from database" />
+              <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
         </div>
         <div class="large-6 columns">
         <form id="random_form" data-bind="html: curate_form_html">
@@ -330,7 +330,7 @@ var marker=null;
   function makeInfoWindowEvent(map, infowindow, result, marker) {
     google.maps.event.addListener(marker, 'click', function() {
       contentString = '<div>';
-      contentString += '<img src="/image/'+result['_id']+'" width="300"/>';
+      contentString += '<img src="/image/'+result['_id']+'/raw" width="300"/>';
       for(field in result['fields']) {
         if(field!="loc" && field!="send") {
           for(i in project["form"]) {

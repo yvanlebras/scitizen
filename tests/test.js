@@ -13,7 +13,9 @@ var CONFIG = require('config');
 var monk = require('monk'),
    db = monk('localhost:27017/'+CONFIG.general.db),
    users = db.get('users'),
-   projects = db.get('projects');
+   projects = db.get('projects'),
+   tasks = db.get('tasks'),
+   images = db.get('images');
 
 var querystring = require('querystring');
 
@@ -27,6 +29,7 @@ describe('Anonymous', function() {
   before(function(done){
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
+    images.remove({}, function(err) {
     test_context.users = [{
         username: 'test',
         password: '123',
@@ -74,11 +77,39 @@ describe('Anonymous', function() {
                     }
                     projects.find({}, function(err, projects){
                       test_context.projects = projects;
-                      done();
+                      var test_images = [
+                        { name: 'image1',
+                          project: test_context.projects[0]._id,
+                          validated: true,
+                          need_spam_control: false
+                        },
+                        { name: 'image2',
+                          project: test_context.projects[0]._id,
+                          validated: false,
+                          need_spam_control: false
+                        },
+                        { name: 'image3',
+                          project: test_context.projects[1]._id,
+                          validated: true,
+                          need_spam_control: false
+                        },
+                        { name: 'image4',
+                          project: test_context.projects[1]._id,
+                          validated: false,
+                          need_spam_control: false
+                        },
+                        ];
+                      images.insert(test_images, function(err) {
+                        images.find({}, function(err, images){
+                          test_context.images = images;
+                          done();
+                        });
+                      });
                     });
             });
     });
 
+    });
     });
     });
 
@@ -181,14 +212,19 @@ describe('Anonymous', function() {
   });
 
   it('anonymous cannot edit a public project', function(done) {
-    var form = new FormData();
-    form.append('description', 'change');
+    var form_data =  querystring.stringify({
+      description: 'change'
+    });
+
     var options = {
       hostname: 'localhost',
       port: app.get('port'),
       path: '/project/'+test_context.projects[0]._id,
       method: 'PUT',
-      headers: form.getHeaders()
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
     };
 
     var req = http.request(options, function(res) {
@@ -198,25 +234,32 @@ describe('Anonymous', function() {
           done();
       });
     });
-    form.pipe(req);
     req.on('error', function(e) {
       expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
     });
-    //req.end();
+    req.write(form_data);
+    req.end();
   });
 
   it('anonymous cannot edit a private project', function(done) {
-    var form = new FormData();
-    form.append('description', 'change');
+
+    var form_data =  querystring.stringify({
+      description: 'change'
+    });
+
     var options = {
       hostname: 'localhost',
       port: app.get('port'),
       path: '/project/'+test_context.projects[1]._id,
       method: 'PUT',
-      headers: form.getHeaders()
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
     };
+
 
     var req = http.request(options, function(res) {
       expect(res.statusCode).to.equal(503);
@@ -225,40 +268,232 @@ describe('Anonymous', function() {
           done();
       });
     });
-    form.pipe(req);
     req.on('error', function(e) {
       expect(false).to.be.true;
       console.log('problem with request: ' + e.message);
       done();
     });
+    req.write(form_data);
+    req.end();
   });
 
   it('anonymous cannot delete a public project', function(done) {
-    expect(false).to.be.true;
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id,
+      method: 'DELETE'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
   });
 
-  it('anonymous can list images of a public project', function(done) {
-    expect(false).to.be.true;
+  it('anonymous cannot delete a private project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id,
+      method: 'DELETE'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
   });
 
-  it('anonymous can get an image of a public project', function(done) {
+  it('anonymous can list validated images of a public project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id+'/image',
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var images = JSON.parse(chunk);
+        expect(images.length).to.equal(1);
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
+  it('anonymous can get a validated image of a public project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/image/'+test_context.images[0]._id,
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var image = JSON.parse(chunk);
+        expect(image.name).to.equal(test_context.images[0].name);
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
+  it('anonymous cannot get a non validated image of a public project',
+    function(done) {
+      var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/image/'+test_context.images[1]._id,
+        method: 'GET'
+      };
+      var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(503);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+          done();
+        });
+      });
+      req.on('error', function(e) {
+        expect(false).to.be.true;
+        console.log('problem with request: ' + e.message);
+        done();
+      });
+      req.end();
+  });
+
+  it('anonymous can post an image to a public project', function(done) {
     expect(false).to.be.true;
   });
 
   it('anonymous can curate an image of a public project', function(done) {
-    expect(false).to.be.true;
+    var form_data =  querystring.stringify({
+      form_elts: 'description,other',
+      description: 'change',
+      other: 'any'
+    });
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/image/'+test_context.images[0]._id,
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
+    };
+
+    var req = http.request(options);
+    req.on('response', function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          images.findOne({ _id: test_context.images[0]._id },
+            function(err, image) {
+              if(err) { expect(false).to.be.true; }
+              expect(image.stats.description.change).to.equal(1);
+              expect(image.stats.other.any).to.equal(1);
+              done();
+          });
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.write(form_data);
+    req.end();
+
   });
 
   it('anonymous cannot curate an image of a private project', function(done) {
-    expect(false).to.be.true;
+    var form_data =  querystring.stringify({
+      form_elts: 'description,other',
+      description: 'change',
+      other: 'any'
+    });
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/image/'+test_context.images[2]._id,
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
+    };
+
+    var req = http.request(options);
+    req.on('response', function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.write(form_data);
+    req.end();
   });
 
-  it('anonymous cannot add an image of a private project', function(done) {
-    expect(false).to.be.true;
-  });
 
   it('anonymous cannot delete an image of a private project', function(done) {
-    expect(false).to.be.true;
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/image/'+test_context.images[0]._id,
+      method: 'DELETE'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(503);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
   });
 
   after(function(done) {
@@ -276,6 +511,8 @@ describe('Authenticated', function() {
   before(function(done){
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
+    images.remove({}, function(err) {
+    tasks.remove({}, function(err) {
       test_context.users = [{
           username: 'test',
           password: '123',
@@ -333,11 +570,41 @@ describe('Authenticated', function() {
                     }
                     projects.find({}, function(err, projects){
                       test_context.projects = projects;
-                      done();
+                      var test_images = [
+                        { name: 'image1',
+                          project: test_context.projects[0]._id,
+                          validated: true,
+                          need_spam_control: false
+                        },
+                        { name: 'image2',
+                          project: test_context.projects[0]._id,
+                          validated: false,
+                          need_spam_control: false
+                        },
+                        { name: 'image3',
+                          project: test_context.projects[1]._id,
+                          validated: true,
+                          need_spam_control: false
+                        },
+                        { name: 'image4',
+                          project: test_context.projects[0]._id,
+                          validated: false,
+                          need_spam_control: false
+                        },
+                        ];
+                        images.insert(test_images, function(err) {
+                          images.find({}, function(err, images){
+                            test_context.images = images;
+                            done();
+                          });
+                        });
+
                     });
             });
     });
 
+    });
+    });
     });
     });
 

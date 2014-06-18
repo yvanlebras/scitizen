@@ -11,8 +11,8 @@
         <tr>
 			<td data-bind="text: name"></td>
 			<td>
-			<a class="th" data-bind="attr: {href: '/image/'+ko.utils.unwrapObservable(_id)}">
-			<img class="thumb" data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(_id)}"/>
+			<a class="th" data-bind="attr: {href: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}">
+			<img class="thumb" data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}"/>
 			</a>
 			</td>
 			<td data-bind="if: $data.stats">
