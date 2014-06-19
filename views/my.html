@@ -1,3 +1,7 @@
+	<div class="row" data-bind="visible: manageAccount">
+	</div>
+	<div class="row" data-bind="visible: manageUsers">
+	</div>
 	<div class="row" data-bind="visible: manageItems">
 		<div class="row">
 			<h2 data-bind="text: project_current().name"></h2>
@@ -191,6 +195,8 @@
 			my: ko.observable('/my'),
       register: ko.observable('/users/register'),
 			manageItems: ko.observable(false),
+			manageAccount: ko.observable(false),
+			manageUsers: ko.observable(false),
 			form_elements: ko.observable(''),
 			image_show: function(image) {
 							//console.log(image.stats);
@@ -572,11 +578,31 @@
         panelNewProject();
     }
 
+		function panelUsers() {
+				viewModel.manageItems(false);
+				viewModel.showProjects(false);
+				viewModel.showProject(false);
+				viewModel.editProject(false);
+				viewModel.manageAccount(false);
+				viewModel.manageUsers(true);
+		}
+
+		function panelAccount() {
+				viewModel.manageItems(false);
+				viewModel.showProjects(false);
+				viewModel.showProject(false);
+				viewModel.editProject(false);
+				viewModel.manageAccount(true);
+				viewModel.manageUsers(false);
+		}
+
     function panelProjects() {
         viewModel.manageItems(false);
         viewModel.showProjects(true);
         viewModel.showProject(false);
         viewModel.editProject(false);
+				viewModel.manageAccount(false);
+				viewModel.manageUsers(false);
     }
 
     function panelNewProject() {
@@ -584,6 +610,8 @@
         viewModel.showProjects(false);
         viewModel.showProject(true);
         viewModel.editProject(false);
+				viewModel.manageAccount(false);
+				viewModel.manageUsers(false);
     }
 
     function panelEditProject(project_id) {
@@ -591,6 +619,8 @@
         viewModel.showProjects(false);
         viewModel.showProject(false);
         viewModel.editProject(true);
+				viewModel.manageAccount(false);
+				viewModel.manageUsers(false);
     }
 
 	function panelManageItems(project_id) {
@@ -598,6 +628,8 @@
         viewModel.showProject(false);
         viewModel.editProject(false);
 				viewModel.manageItems(true);
+				viewModel.manageAccount(false);
+				viewModel.manageUsers(false);
 				var project = viewModel.project_current();
         $.getJSON("/project/"+project_id+"/image", function(data) {
             viewModel.image_list(data);

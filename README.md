@@ -41,21 +41,16 @@ Main page icons: from OpenClipArt
 ## General
 
 * Add quotas per project, admin can increase plan
-
-* In my/ edit_project, use :with project_current binding instead of specific
-fields
-
+* In my/ edit_project, use :with project_current binding instead of specific fields
 * Manage account (password modification, API key show and regeneration)
 
 
 
 ## Items
 
-* add possibility to point an element on an item (location on image of a
-* specific item), at curation time. In porject, define granularity (circle radius for user selection)
+* add possibility to point an element on an item (location on image of a specific item), at curation time. In porject, define granularity (circle radius for user selection)
 * view all items (with progressive scrolldown)
-* time based statistics for stats.api and stats.google instead of total count
-* using stats lib
+* time based statistics for stats.api and stats.google instead of total count using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache

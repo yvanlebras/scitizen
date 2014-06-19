@@ -154,6 +154,72 @@ describe('Anonymous', function() {
 
   });
 
+  it('anonymous cannot list users', function(done) {
+    var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users',
+        method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            done();
+        });
+    });
+    req.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+        expect(false).to.be.true;
+        done();
+    });
+    req.end();
+  });
+
+  it('anonymous cannot get a user info', function(done) {
+    var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id,
+        method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            done();
+        });
+    });
+    req.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+        expect(false).to.be.true;
+        done();
+    });
+    req.end();
+  });
+
+  it('anonymous cannot edit a user info', function(done) {
+    var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id,
+        method: 'PUT'
+    };
+    var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            done();
+        });
+    });
+    req.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+        expect(false).to.be.true;
+        done();
+    });
+    req.end();
+  });
+
   it('anonymous can get public project list', function(done) {
     var options = {
         hostname: 'localhost',
@@ -741,6 +807,70 @@ describe('Authenticated', function() {
     });
     });
     });
+
+  });
+
+  it('user can get his user info', function(done) {
+    var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id+"?api=123",
+        method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(200);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            done();
+        });
+    });
+    req.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+        expect(false).to.be.true;
+        done();
+    });
+    req.end();
+  });
+
+  it('user can edit its user data', function(done) {
+
+    var form_data =  querystring.stringify({
+      description: 'change',
+      api: '123'
+    });
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/users/'+test_context.users[0]._id,
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': form_data.length
+      }
+    };
+
+
+    var req = http.request(options);
+    req.on('response', function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          users.findOne({ _id: test_context.users[0]._id },
+            function(err, user) {
+              if(err) { expect(false).to.be.true; }
+              expect(user.description).to.equal('change');
+              done();
+          });
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.write(form_data);
+    req.end();
 
   });
 

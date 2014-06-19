@@ -13,6 +13,9 @@ var nodemailer = require('nodemailer');
 var MAIL_CONFIG = require('config').mail;
 var transport = null;
 
+var scitizen_auth = require('../lib/auth.js');
+
+
 if(MAIL_CONFIG.host!='fake') {
   transport = nodemailer.createTransport('SMTP', {
     host: MAIL_CONFIG.host, // hostname
@@ -26,7 +29,81 @@ if(MAIL_CONFIG.host!='fake') {
 }
 
 exports.list = function(req, res){
-  res.send('respond with a resource');
+  console.log(scitizen_auth.is_admin(req));
+  if(scitizen_auth.is_admin(req)) {
+    // is admin
+    users_db.find({}, function(err, users) {
+      res.json(users);
+    });
+  }
+  else {
+    res.status(401).send('respond with a resource');
+  }
+};
+
+exports.get = function(req, res){
+  if((req.user!==undefined && req.user.username!==undefined)||
+      req.param('api')!==undefined) {
+    users_db.findOne({_id: req.param('id')}, function(err, user){
+      // if current user or admin
+      if(!err &&
+        ((user.key == req.param('api')) ||
+        scitizen_auth.is_admin(req) ||
+        (user.username == req.user.username ))) {
+        res.json(user);
+      }
+    });
+  }
+  else {
+    res.status(401).send('respond with a resource');
+  }
+};
+
+exports.edit = function(req, res){
+  if((req.user!==undefined && req.user.username!==undefined) ||
+      req.param('api')!==undefined) {
+    users_db.findOne({_id: req.param('id')}, function(err, user){
+      // if current user or admin
+
+      if(!err &&
+        ((user.key == req.param('api')) ||
+        scitizen_auth.is_admin(req) ||
+        (user.username == req.user.username ))) {
+          for(var elt in req.body.form) {
+            // if not admin, do not allow changing username
+            if((elt == 'username' ||
+                elt == 'registered' ||
+                elt == 'group' ||
+                elt == 'api')&&
+                GENERAL_CONFIG.admin.indexOf(user.username) == -1) {
+              continue;
+            }
+            if(! Array.isArray(req.body.form[elt].values)) {
+              if(req.body.form[elt].values == 'false') {
+                req.body.form[elt].values = false;
+              }
+              if(req.body.form[elt].values == 'true') {
+                req.body.form[elt].values = true;
+              }
+            }
+          }
+          users_db.update({ _id: req.param('id') },
+                              {$set: req.body},
+                              function(err) {
+                                if(err) {
+                                  console.log(err);
+                                }
+                                res.json({});
+                              });
+      }
+      else {
+        res.status(401).send('Not authorized');
+      }
+    });
+  }
+  else {
+    res.status(401).send('You need to login first');
+  }
 };
 
 exports.login = function(req, res){

@@ -139,6 +139,8 @@ app.get('/projects', index.projects);
 app.get('/my', ensureAuthenticated, user.my);
 app.get('/admin', ensureAuthenticated, user.admin);
 app.get('/users', user.list);
+app.get('/users/:id', user.get);
+app.put('/users/:id', user.edit);
 app.get('/users/register', user.register_new);
 app.post('/users/register', user.register);
 app.get('/users/confirm', user.confirm);
