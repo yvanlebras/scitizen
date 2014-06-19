@@ -132,7 +132,7 @@ exports.edit = function(req, res) {
                                 });
         }
         else {
-            res.status(503).send('Not allowed to modify this project');
+            res.status(401).send('Not allowed to modify this project');
         }
       });
     });
@@ -169,7 +169,7 @@ exports.delete = function(req, res) {
             });
         }
         else {
-            res.status(503).send('You do not own this project');
+            res.status(401).send('You do not own this project');
         }
       });
     });
@@ -259,7 +259,7 @@ exports.get = function(req, res){
         }
       }
       else {
-        res.status(503).send('You are not allowed to access this project');
+        res.status(401).send('You are not allowed to access this project');
       }
     });
     });
@@ -347,7 +347,7 @@ exports.dashboard =  function(req, res){
                             function(can_read) {
       if(! can_read){
         // Project is private and user is not logged or part of members
-        res.status(503).send('You are not allowed to access this project');
+        res.status(401).send('You are not allowed to access this project');
         return;
       }
         var theme_view = 'dashboard';

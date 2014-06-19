@@ -51,7 +51,8 @@ fields
 
 ## Items
 
-* add possibility to point an element on an item (location on image of a specific item), at curation time.
+* add possibility to point an element on an item (location on image of a
+* specific item), at curation time. In porject, define granularity (circle radius for user selection)
 * view all items (with progressive scrolldown)
 * time based statistics for stats.api and stats.google instead of total count
 * using stats lib

@@ -68,9 +68,9 @@ exports.control = function(req, res) {
 exports.validate = function(req, res) {
   var image_id= req.param('id');
   images_db.findOne({_id:image_id}, function(err, image) {
-      if(err) {res.status(503).send('Not authorized'); return; }
+      if(err) {res.status(401).send('Not authorized'); return; }
       projects_db.findOne({_id: image.project}, function(err, project) {
-        if(err) {res.status(503).send('Not authorized'); return; }
+        if(err) {res.status(401).send('Not authorized'); return; }
         scitizen_auth.can_edit(req.user, project, req.param('api'),
                               function(can_edit) {
         if(can_edit) {
@@ -80,7 +80,7 @@ exports.validate = function(req, res) {
                           );
           res.json({});
         }
-        else { res.status(503).send('Not authorized'); }
+        else { res.status(401).send('Not authorized'); }
       });
       });
   });
@@ -93,9 +93,9 @@ exports.validate = function(req, res) {
 exports.curate = function(req, res) {
     var image_id= req.param('id');
     images_db.findOne({_id:image_id}, function(err, image) {
-        if(err) {res.status(503).send('Not authorized'); return; }
+        if(err) {res.status(401).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
-            if(err) {res.status(503).send('Not authorized'); return; }
+            if(err) {res.status(401).send('Not authorized'); return; }
             scitizen_auth.can_add(req.user, project, req.param('api'),
                                   function(can_add) {
             if(can_add) {
@@ -131,7 +131,7 @@ exports.curate = function(req, res) {
                 });
               }
             }
-            else { res.status(503).send('Not authorized'); }
+            else { res.status(401).send('Not authorized'); }
           });
         });
     });
@@ -140,9 +140,9 @@ exports.curate = function(req, res) {
 exports.delete = function(req, res) {
     var image_id= req.param('id');
     images_db.findOne({_id:image_id}, function(err, image) {
-        if(err) {res.status(503).send('Not authorized'); return; }
+        if(err) {res.status(401).send('Not authorized'); return; }
         projects_db.findOne({_id: image.project}, function(err, project) {
-            if(err) {res.status(503).send('Not authorized'); return; }
+            if(err) {res.status(401).send('Not authorized'); return; }
             scitizen_auth.can_edit(req.user, project, req.param('api'),
                                   function(can_edit){
             if(can_edit) {
@@ -160,7 +160,7 @@ exports.delete = function(req, res) {
                   res.json({_id: image_id});
                 });
             }
-            else { res.status(503).send('Not authorized'); }
+            else { res.status(401).send('Not authorized'); }
           });
         });
     });
@@ -186,7 +186,7 @@ exports.get = function(req, res) {
               res.json(image);
             }
             else {
-              res.status(503).send('Not authorized');
+              res.status(401).send('Not authorized');
             }
           }
           else {
@@ -194,7 +194,7 @@ exports.get = function(req, res) {
           }
         }
         else {
-          res.status(503).send('Not authorized');
+          res.status(401).send('Not authorized');
         }
       });
     });
@@ -240,7 +240,7 @@ exports.list = function(req, res) {
             });
         }
         else {
-            res.status(503).send('You\'re not allowed to access this project');
+            res.status(401).send('You\'re not allowed to access this project');
         }
       });
     });

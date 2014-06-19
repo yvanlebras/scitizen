@@ -21,6 +21,19 @@ var querystring = require('querystring');
 
 var test_context =  {};
 
+  function encodeFieldPart(boundary,name,value) {
+    var return_part = '--' + boundary + '\r\n';
+    return_part += 'Content-Disposition: form-data; name="' + name + '"\r\n\r\n';
+    return_part += value + '\r\n';
+    return return_part;
+  }
+  function encodeFilePart(boundary,type,name,filename) {
+    var return_part = '--' + boundary + '\r\n';
+    return_part += 'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n';
+    return_part += 'Content-Type: ' + type + '\r\n\r\n';
+    return return_part;
+  }
+
 describe('Anonymous', function() {
   before(function() {
     this.server = http.createServer(app).listen(app.get('port'));
@@ -197,7 +210,7 @@ describe('Anonymous', function() {
       method: 'GET'
     };
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
           done();
@@ -228,7 +241,7 @@ describe('Anonymous', function() {
     };
 
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
           done();
@@ -262,7 +275,7 @@ describe('Anonymous', function() {
 
 
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
           done();
@@ -285,7 +298,7 @@ describe('Anonymous', function() {
       method: 'DELETE'
     };
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
           done();
@@ -307,7 +320,7 @@ describe('Anonymous', function() {
       method: 'DELETE'
     };
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
           done();
@@ -378,7 +391,7 @@ describe('Anonymous', function() {
         method: 'GET'
       };
       var req = http.request(options, function(res) {
-        expect(res.statusCode).to.equal(503);
+        expect(res.statusCode).to.equal(401);
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
           done();
@@ -393,8 +406,129 @@ describe('Anonymous', function() {
   });
 
   it('anonymous can post an image to a public project', function(done) {
-    expect(false).to.be.true;
+    var boundary = Math.random();
+    var post_data = [];
+    var fields = {
+      location: '11,22',
+      key1: 'value1',
+      key2: 'value2'
+    };
+    var files = [{ type: 'image/jpeg',
+               keyname: 'image',
+               valuename: 'image.jpg',
+               data: 'xxx'
+        }];
+
+    for (var key in fields) {
+      var value = fields[key];
+      post_data.push(new Buffer(encodeFieldPart(boundary, key, value), 'ascii'));
+    }
+
+    for (var key in files) {
+      var value = files[key];
+      post_data.push(new Buffer(encodeFilePart(boundary, value.type, value.keyname, value.valuename), 'ascii'));
+      post_data.push(new Buffer(value.data, 'utf8'))
+    }
+
+    post_data.push(new Buffer('\r\n--' + boundary + '--'), 'ascii');
+    var length = 0;
+
+    for(var i = 0; i < post_data.length; i++) {
+      length += post_data[i].length;
+    }
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data; boundary=' + boundary,
+        'Content-Length': length
+      }
+    };
+
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var image = JSON.parse(chunk);
+        expect(image.fields.key1).to.equal('value1');
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    for (var i = 0; i < post_data.length; i++) {
+      req.write(post_data[i]);
+    }
+    req.end();
   });
+
+  it('anonymous can post an image to a public project', function(done) {
+    var boundary = Math.random();
+    var post_data = [];
+    var fields = {
+      location: '11,22',
+      key1: 'value1',
+      key2: 'value2'
+    };
+    var files = [{ type: 'image/jpeg',
+               keyname: 'image',
+               valuename: 'image.jpg',
+               data: 'xxx'
+        }];
+
+    for (var key in fields) {
+      var value = fields[key];
+      post_data.push(new Buffer(encodeFieldPart(boundary, key, value), 'ascii'));
+    }
+
+    for (var key in files) {
+      var value = files[key];
+      post_data.push(new Buffer(encodeFilePart(boundary, value.type, value.keyname, value.valuename), 'ascii'));
+      post_data.push(new Buffer(value.data, 'utf8'))
+    }
+
+    post_data.push(new Buffer('\r\n--' + boundary + '--'), 'ascii');
+    var length = 0;
+
+    for(var i = 0; i < post_data.length; i++) {
+      length += post_data[i].length;
+    }
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data; boundary=' + boundary,
+        'Content-Length': length
+      }
+    };
+
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(401);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    for (var i = 0; i < post_data.length; i++) {
+      req.write(post_data[i]);
+    }
+    req.end();
+  });
+
 
   it('anonymous can curate an image of a public project', function(done) {
     var form_data =  querystring.stringify({
@@ -458,7 +592,7 @@ describe('Anonymous', function() {
 
     var req = http.request(options);
     req.on('response', function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         done();
@@ -482,7 +616,7 @@ describe('Anonymous', function() {
       method: 'DELETE'
     };
     var req = http.request(options, function(res) {
-      expect(res.statusCode).to.equal(503);
+      expect(res.statusCode).to.equal(401);
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         done();
@@ -701,7 +835,34 @@ describe('Authenticated', function() {
   });
 
   it('user can delete a private project he is member of', function(done) {
-    expect(false).to.be.true;
+
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[1]._id+"?api=123",
+      method: 'DELETE',
+    };
+
+
+    var req = http.request(options);
+    req.on('response', function(res) {
+      expect(res.statusCode).to.equal(200);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          tasks.find({},
+            function(err, tasks) {
+              if(err) { expect(false).to.be.true; }
+              expect(tasks.length).to.equal(1);
+              done();
+          });
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
   });
 
   after(function(done) {
