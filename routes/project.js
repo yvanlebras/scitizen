@@ -206,7 +206,7 @@ exports.list = function(req, res) {
         });
       }
       else {
-        if(req.user === undefined) {
+        if(req.user === undefined || req.user.username === undefined) {
           filter.public = true;
           filter.status = true;
         }

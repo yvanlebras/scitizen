@@ -141,6 +141,8 @@ app.get('/admin', ensureAuthenticated, user.admin);
 app.get('/users', user.list);
 app.get('/users/:id', user.get);
 app.put('/users/:id', user.edit);
+app.put('/users/:id/key', user.update_key);
+app.put('/users/:id/password', user.update_password);
 app.get('/users/register', user.register_new);
 app.post('/users/register', user.register);
 app.get('/users/confirm', user.confirm);

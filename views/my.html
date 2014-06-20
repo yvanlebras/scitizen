@@ -1,4 +1,17 @@
+
 	<div class="row" data-bind="visible: manageAccount">
+		<div data-bind="with: user_current">
+			<label for="username">User id</label>
+			<input type="text" disabled id="username" data-bind="attr: { value: username }"/>
+			<label for="userkey">API key</label>
+			<input type="text" disabled id="userkey" data-bind="attr: { value: key }"/>
+			<button data-bind="click: $parent.user_newkey" type="button" id="user_key_regenerate" class="button tiny">Regenerate</button>
+			<label for="userpassword">New password</label>
+			<input type="password" id="userpassword"/>
+			<label for="userpasswordconfirm">Confirm password</label>
+			<input type="password" id="userpasswordconfirm"/>
+			<button data-bind="click: $parent.user_newpassword" type="button" id="user_password_regenerate" class="button tiny">Change password</button>
+		</div>
 	</div>
 	<div class="row" data-bind="visible: manageUsers">
 	</div>
@@ -163,10 +176,9 @@
     var my_projects = [];
 
     var project =  { name: '',
-                    owner: '{{ user }}',
+                    owner: '{{ user.username }}',
 										description: '',
-                    status: false }
-
+                    status: false };
     $(document).ready(function() {
         $.getJSON("/project", function(data) {
             viewModel.project_list(data);
@@ -186,19 +198,63 @@
     });
 
     var viewModel = {
-      user: ko.observable('{{user}}'),
-			user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
-      user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
-      home: ko.observable('/'),
-      login: ko.observable('/login'),
-      logout: ko.observable('/logout'),
-			my: ko.observable('/my'),
-      register: ko.observable('/users/register'),
-			manageItems: ko.observable(false),
-			manageAccount: ko.observable(false),
-			manageUsers: ko.observable(false),
-			form_elements: ko.observable(''),
-			image_show: function(image) {
+      		//user: ko.observable('{{user.username}}'),
+					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
+      		user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
+      		home: ko.observable('/'),
+      		login: ko.observable('/login'),
+      		logout: ko.observable('/logout'),
+					my: ko.observable('/my'),
+      		register: ko.observable('/users/register'),
+					manageItems: ko.observable(false),
+					manageAccount: ko.observable(false),
+					manageUsers: ko.observable(false),
+					form_elements: ko.observable(''),
+					user_current: ko.observable({ username: '{{ user.username}}',
+																			key: '{{ user.key}}'}),
+					user_newkey: function() {
+						$.ajax({
+								url: '/users/{{user._id}}/key',
+								type: 'PUT',
+								data: {
+									operation: 'key',
+								},
+								success: function(result) {
+									viewModel.user_current(result);
+								}
+								});
+					},
+					user_newpassword: function() {
+						var password = $("#userpassword");
+						var password_confirm = $("#userpasswordconfirm");
+						if(password!=password_confirm) {
+							alert("Passwords do not match");
+							return;
+						}
+						$.ajax({
+								url: '/users/{{user._id}}/password',
+								type: 'PUT',
+								data: {
+									operation: 'password',
+									password: password
+								},
+								success: function(result) {
+									viewModel.user_current(result);
+									alert('Updated');
+								}
+								});
+					},
+					user_manage: function() {
+						$.ajax({
+								url: '/users/{{ user._id }}',
+								type: 'GET',
+									success: function(result) {
+										viewModel.user_current(result);
+									}
+								});
+						panelAccount();
+					},
+					image_show: function(image) {
 							//console.log(image.stats);
 							//var stat_html = "";
 							$("#image_stats").html("");
@@ -274,7 +330,7 @@
 					  project_current: ko.observable({ users: []}),
 						project_delete_member: function(user) {
 							console.log("delete user "+user);
-							if(user == '{{user}}') {
+							if(user == '{{user.username}}') {
 								// Can't delete ourselves
 								return false;
 							}
@@ -337,7 +393,7 @@
 						project_google: ko.observable(''),
 						project_askimet: ko.observable(''),
 						project_short_description: ko.observable(''),
-            project_owner: ko.observable('{{user}}'),
+            project_owner: ko.observable('{{user.username}}'),
             project_status: ko.observable(false),
 					  project_public: ko.observable(true),
 					  project_switch_on_off: function(project) {

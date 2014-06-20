@@ -29,7 +29,6 @@ if(MAIL_CONFIG.host!='fake') {
 }
 
 exports.list = function(req, res){
-  console.log(scitizen_auth.is_admin(req));
   if(scitizen_auth.is_admin(req)) {
     // is admin
     users_db.find({}, function(err, users) {
@@ -59,6 +58,76 @@ exports.get = function(req, res){
   }
 };
 
+exports.update_password = function(req, res) {
+  if((req.user!==undefined && req.user.username!==undefined) ||
+      req.param('api')!==undefined) {
+      var user_updates = {};
+      users_db.findOne({_id: req.param('id')}, function(err, user){
+        if(!err &&
+          ((user.key == req.param('api')) ||
+          scitizen_auth.is_admin(req) ||
+          (user.username == req.user.username ))) {
+            user_updates.password = bcrypt.hashSync(req.param('password'), salt);
+
+            users_db.update({ _id: req.param('id') },
+                        {$set: user_updates},
+                        function(err) {
+                          if(err) {
+                            console.log(err);
+                            res.status(500).send('an error occured');
+                            return;
+                          }
+                          res.json(user);
+                        });
+        }
+        else {
+            console.log(err);
+            res.status(401).send('an error occured');
+        }
+        });
+  }
+  else {
+    res.status(401).send('You need to login first');
+  }
+
+
+}
+
+exports.update_key = function(req, res) {
+  if((req.user!==undefined && req.user.username!==undefined) ||
+      req.param('api')!==undefined) {
+      var user_updates = {};
+      users_db.findOne({_id: req.param('id')}, function(err, user){
+        if(!err &&
+          ((user.key == req.param('api')) ||
+          scitizen_auth.is_admin(req) ||
+          (user.username == req.user.username ))) {
+            user_updates.key = (Math.random() + 1).toString(36).substring(7);
+            user.key = user_updates.key;
+
+            users_db.update({ _id: req.param('id') },
+                        {$set: user_updates},
+                        function(err) {
+                          if(err) {
+                            console.log(err);
+                            res.status(500).send('an error occured');
+                            return;
+                          }
+                          res.json(user);
+                        });
+        }
+        else {
+            console.log(err);
+            res.status(401).send('an error occured');
+        }
+        });
+  }
+  else {
+    res.status(401).send('You need to login first');
+  }
+
+};
+
 exports.edit = function(req, res){
   if((req.user!==undefined && req.user.username!==undefined) ||
       req.param('api')!==undefined) {
@@ -69,6 +138,7 @@ exports.edit = function(req, res){
         ((user.key == req.param('api')) ||
         scitizen_auth.is_admin(req) ||
         (user.username == req.user.username ))) {
+
           for(var elt in req.body.form) {
             // if not admin, do not allow changing username
             if((elt == 'username' ||
@@ -87,8 +157,9 @@ exports.edit = function(req, res){
               }
             }
           }
+
           users_db.update({ _id: req.param('id') },
-                              {$set: req.body},
+                              {$set: req.body.form},
                               function(err) {
                                 if(err) {
                                   console.log(err);
@@ -129,7 +200,7 @@ exports.my = function(req, res){
             }
             res.render('my', {
                                 layout: 'layouts/default/index',
-                                user: req.user.username,
+                                user: user,
                                 isAdmin: isAdmin
                               });
         }
