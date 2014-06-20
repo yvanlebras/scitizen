@@ -67,7 +67,8 @@ exports.update_password = function(req, res) {
           ((user.key == req.param('api')) ||
           scitizen_auth.is_admin(req) ||
           (user.username == req.user.username ))) {
-            user_updates.password = bcrypt.hashSync(req.param('password'), salt);
+            var password = req.param('password');
+            user_updates.password = bcrypt.hashSync(password, salt);
 
             users_db.update({ _id: req.param('id') },
                         {$set: user_updates},
@@ -90,8 +91,7 @@ exports.update_password = function(req, res) {
     res.status(401).send('You need to login first');
   }
 
-
-}
+};
 
 exports.update_key = function(req, res) {
   if((req.user!==undefined && req.user.username!==undefined) ||
@@ -157,9 +157,9 @@ exports.edit = function(req, res){
               }
             }
           }
-
+          console.log(req.body);
           users_db.update({ _id: req.param('id') },
-                              {$set: req.body.form},
+                              {$set: req.body},
                               function(err) {
                                 if(err) {
                                   console.log(err);
