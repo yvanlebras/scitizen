@@ -216,7 +216,7 @@ exports.admin = function(req, res){
             isAdmin = true;
             res.render('admin', {
                                   layout: 'layouts/default/index',
-                                  user: req.user.username,
+                                  user: user,
                                   isAdmin: isAdmin });
         }
     });

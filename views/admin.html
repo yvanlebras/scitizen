@@ -30,7 +30,8 @@
 	});
 
 	var viewModel = {
-					user: ko.observable('{{user}}'),
+					user_current: ko.observable({ username: '{{ user.username}}',
+																			key: '{{ user.key}}'}),
 					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
 					user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
 					home: ko.observable('/'),

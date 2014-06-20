@@ -13,7 +13,36 @@
 			<button data-bind="click: $parent.user_newpassword" type="button" id="user_password_regenerate" class="button tiny">Change password</button>
 		</div>
 	</div>
-	<div class="row" data-bind="visible: manageUsers">
+	<div class="row" data-bind="visible: admin">
+		<div class="row" >
+			<table>
+			<thead>
+					<tr><th>Name</th><th>Owner</th><th>API calls</th><th>Google API calls</th><th>Quota stats</th></tr>
+			</thead>
+			<tbody data-bind="foreach: project_list">
+					<tr>
+							<td data-bind="text: name"></td>
+							<td data-bind="text: owner"></td>
+							<td data-bind="text: stats.api"></td>
+							<td data-bind="text: stats.google"></td>
+							<td data-bind="text: stats.quota"></td>
+					</tr>
+			</tbody>
+			</table>
+		</div>
+		<div class="row" >
+			<table>
+			<thead>
+					<tr><th>Name</th><th>Registered</th></tr>
+			</thead>
+			<tbody data-bind="foreach: user_list">
+					<tr>
+							<td data-bind="text: username"></td>
+							<td data-bind="text: registered"></td>
+					</tr>
+			</tbody>
+			</table>
+		</div>
 	</div>
 	<div class="row" data-bind="visible: manageItems">
 		<div class="row">
@@ -208,7 +237,7 @@
       		register: ko.observable('/users/register'),
 					manageItems: ko.observable(false),
 					manageAccount: ko.observable(false),
-					manageUsers: ko.observable(false),
+					admin: ko.observable(false),
 					form_elements: ko.observable(''),
 					user_current: ko.observable({ username: '{{ user.username}}',
 																			key: '{{ user.key}}'}),
@@ -254,6 +283,17 @@
 								});
 						panelAccount();
 					},
+					user_admin: function() {
+						$.ajax({
+								url: '/users',
+								type: 'GET',
+									success: function(result) {
+										viewModel.user_list(result);
+									}
+								});
+						panelAdmin();
+					},
+					user_list: ko.observableArray(),
 					image_show: function(image) {
 							//console.log(image.stats);
 							//var stat_html = "";
@@ -634,13 +674,13 @@
         panelNewProject();
     }
 
-		function panelUsers() {
+		function panelAdmin() {
 				viewModel.manageItems(false);
 				viewModel.showProjects(false);
 				viewModel.showProject(false);
 				viewModel.editProject(false);
 				viewModel.manageAccount(false);
-				viewModel.manageUsers(true);
+				viewModel.admin(true);
 		}
 
 		function panelAccount() {
@@ -649,7 +689,7 @@
 				viewModel.showProject(false);
 				viewModel.editProject(false);
 				viewModel.manageAccount(true);
-				viewModel.manageUsers(false);
+				viewModel.admin(false);
 		}
 
     function panelProjects() {
@@ -658,7 +698,7 @@
         viewModel.showProject(false);
         viewModel.editProject(false);
 				viewModel.manageAccount(false);
-				viewModel.manageUsers(false);
+				viewModel.admin(false);
     }
 
     function panelNewProject() {
@@ -667,7 +707,7 @@
         viewModel.showProject(true);
         viewModel.editProject(false);
 				viewModel.manageAccount(false);
-				viewModel.manageUsers(false);
+				viewModel.admin(false);
     }
 
     function panelEditProject(project_id) {
@@ -676,7 +716,7 @@
         viewModel.showProject(false);
         viewModel.editProject(true);
 				viewModel.manageAccount(false);
-				viewModel.manageUsers(false);
+				viewModel.admin(false);
     }
 
 	function panelManageItems(project_id) {
@@ -685,7 +725,7 @@
         viewModel.editProject(false);
 				viewModel.manageItems(true);
 				viewModel.manageAccount(false);
-				viewModel.manageUsers(false);
+				viewModel.admin(false);
 				var project = viewModel.project_current();
         $.getJSON("/project/"+project_id+"/image", function(data) {
             viewModel.image_list(data);
