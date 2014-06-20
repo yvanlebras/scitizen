@@ -17,28 +17,13 @@
 		<div class="row" >
 			<table>
 			<thead>
-					<tr><th>Name</th><th>Owner</th><th>API calls</th><th>Google API calls</th><th>Quota stats</th></tr>
-			</thead>
-			<tbody data-bind="foreach: project_list">
-					<tr>
-							<td data-bind="text: name"></td>
-							<td data-bind="text: owner"></td>
-							<td data-bind="text: stats.api"></td>
-							<td data-bind="text: stats.google"></td>
-							<td data-bind="text: stats.quota"></td>
-					</tr>
-			</tbody>
-			</table>
-		</div>
-		<div class="row" >
-			<table>
-			<thead>
-					<tr><th>Name</th><th>Registered</th></tr>
+					<tr><th>Name</th><th>Registered</th><th>Suspend</th></tr>
 			</thead>
 			<tbody data-bind="foreach: user_list">
 					<tr>
 							<td data-bind="text: username"></td>
 							<td data-bind="text: registered"></td>
+							<td><i class="fi-trash" data-bind="attr: { user: _id }, click: $parent.user_suspend">	</i></td>
 					</tr>
 			</tbody>
 			</table>
@@ -126,11 +111,16 @@
     </div>
     </div>
 
+
     <div class="row" data-bind="visible: showProjects">
-    <div class="large-7 columns">
+			<div class="row">
+				<i data-bind="click: addProject" class="fi-folder-add"> Create project</i>
+			</div>
+
+    <div class="row">
     <table>
     <thead>
-        <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th></th></tr>
+        <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th>Quota</th><th></th></tr>
     </thead>
     <tbody data-bind="foreach: project_list">
         <tr>
@@ -174,7 +164,7 @@
             </label>
             </div>
             </td>
-
+						<td data-bind="text: $parent.byte_convert(stats.quota)"></td>
             <td class="actions">
 							<i data-bind="attr: { project: _id }, click: $parent.edit_project" class="fi-page-edit"> </i>
 							<i class="fi-trash" data-bind="attr: { project: _id }, click: $parent.delete_project">	</i>
@@ -183,9 +173,6 @@
         </tr>
     </tbody>
     </table>
-    </div>
-    <div class="large-3 columns">
-       <i data-bind="click: addProject" class="fi-folder-add"> Create project</i>
     </div>
     </div>
 
@@ -230,6 +217,8 @@
       		//user: ko.observable('{{user.username}}'),
 					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
       		user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
+					byte_convert: function(quota) {
+						return Math.floor(quota/1000000)+'G'; },
       		home: ko.observable('/'),
       		login: ko.observable('/login'),
       		logout: ko.observable('/logout'),
@@ -241,6 +230,18 @@
 					form_elements: ko.observable(''),
 					user_current: ko.observable({ username: '{{ user.username}}',
 																			key: '{{ user.key}}'}),
+					user_suspend: function(user) {
+						$.ajax({
+								url: '/users/{{user._id}}/suspend',
+								type: 'PUT',
+								success: function(result) {
+									viewModel.user_current(result);
+									$.getJSON("/project", function(data) {
+											viewModel.project_list(data);
+									});
+								}
+								});
+					},
 					user_newkey: function() {
 						$.ajax({
 								url: '/users/{{user._id}}/key',
@@ -249,7 +250,9 @@
 									operation: 'key',
 								},
 								success: function(result) {
-									viewModel.user_current(result);
+									viewModel.user_list.remove(user);
+									user.registered = false;
+									viewModel.user_list.push(user);
 								}
 								});
 					},

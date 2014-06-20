@@ -42,9 +42,6 @@ Main page icons: from OpenClipArt
 
 * Add quotas per project, admin can increase plan
 * In my/ edit_project, use :with project_current binding instead of specific fields
-* Manage account (password modification, API key show and regeneration)
-
-
 
 ## Items
 
@@ -77,7 +74,6 @@ Main page icons: from OpenClipArt
 
 ## Admin
 
-* manage users
 * manage project quotas
 * add task for cron to manage *task* objects (bulk deletion...)
 

@@ -39,7 +39,7 @@ describe('Anonymous', function() {
     this.server = http.createServer(app).listen(app.get('port'));
   });
 
-  before(function(done){
+  beforeEach(function(done){
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
     images.remove({}, function(err) {
@@ -218,6 +218,76 @@ describe('Anonymous', function() {
         done();
     });
     req.end();
+  });
+
+  it('anonymous cannot change API of a user',
+    function(done) {
+      var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id+'/key',
+        method: 'PUT'
+      };
+      var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+          done();
+        });
+      });
+      req.on('error', function(e) {
+        expect(false).to.be.true;
+        console.log('problem with request: ' + e.message);
+        done();
+      });
+      req.end();
+  });
+
+  it('anonymous cannot change password of a user',
+    function(done) {
+      var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id+'/password',
+        method: 'PUT'
+      };
+      var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+          done();
+        });
+      });
+      req.on('error', function(e) {
+        expect(false).to.be.true;
+        console.log('problem with request: ' + e.message);
+        done();
+      });
+      req.end();
+  });
+
+
+  it('anonymous cannot suspend a user',
+    function(done) {
+      var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id+'/suspend',
+        method: 'PUT'
+      };
+      var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(401);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+          done();
+        });
+      });
+      req.on('error', function(e) {
+        expect(false).to.be.true;
+        console.log('problem with request: ' + e.message);
+        done();
+      });
+      req.end();
   });
 
   it('anonymous can get public project list', function(done) {
@@ -994,6 +1064,34 @@ describe('Authenticated', function() {
     });
     req.end();
   });
+
+
+
+  it('user can renew its API key', function(done) {
+    var key = test_context.users[0].key;
+    var options = {
+        hostname: 'localhost',
+        port: app.get('port'),
+        path: '/users/'+test_context.users[0]._id+"/key?api="+key,
+        method: 'PUT'
+    };
+    var req = http.request(options, function(res) {
+        expect(res.statusCode).to.equal(200);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            var user = JSON.parse(chunk);
+            expect(user.key).not.to.equal('123');
+            done();
+        });
+    });
+    req.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+        expect(false).to.be.true;
+        done();
+    });
+    req.end();
+  });
+
 
   after(function(done) {
     var myapp = this.server;

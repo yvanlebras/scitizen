@@ -54,9 +54,30 @@ exports.get = function(req, res){
     });
   }
   else {
-    res.status(401).send('respond with a resource');
+    res.status(401).send('Not authorized');
   }
 };
+
+exports.suspend = function(req, res) {
+  if(scitizen_auth.is_admin(req)) {
+    users_db.update({_id: req.param('id')},
+                    { $set: { registered: false }}, function(err, user){
+      // Now disable projects owned by user
+      projects_db.update({ owner: user.username},
+                          { status: false}, function(err){
+        if(err) {
+          console.log(err);
+        }
+        res.json(user);
+      });
+
+    });
+  }
+  else {
+    res.status(401).send('Not authorized');
+  }
+};
+
 
 exports.update_password = function(req, res) {
   if((req.user!==undefined && req.user.username!==undefined) ||
@@ -157,7 +178,6 @@ exports.edit = function(req, res){
               }
             }
           }
-          console.log(req.body);
           users_db.update({ _id: req.param('id') },
                               {$set: req.body},
                               function(err) {
