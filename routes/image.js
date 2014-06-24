@@ -159,6 +159,9 @@ exports.delete = function(req, res) {
                   });
                   res.json({_id: image_id});
                 });
+                scitizen_stats.sendPoints(project.name,[
+                  { 'image': -1}, { 'quota': project.stats.quota - image.size }
+                  ]);
             }
             else { res.status(401).send('Not authorized'); }
           });

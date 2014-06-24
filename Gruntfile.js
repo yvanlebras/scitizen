@@ -30,6 +30,8 @@ module.exports = function(grunt) {
   // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+
 
     grunt.registerTask('default',
         ['jshint', 'simplemocha']);

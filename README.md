@@ -23,6 +23,7 @@ Copyright: 2014 IRISA, Olivier Sallou <olivier.sallou@irisa.fr>
 
 Thanks to: JQuery, Foundation, KnockoutJS, Google maps API
 Main page icons: from OpenClipArt
+Cells image on main page CC-BY Paul Neiman
 
 # Development
 
@@ -40,7 +41,8 @@ Main page icons: from OpenClipArt
 
 ## General
 
-* Add quotas per project, admin can increase plan
+* main page
+* Add quotas per project, admin can increase plan, quotas are managed by plans in config
 * In my/ edit_project, use :with project_current binding instead of specific fields
 
 ## Items
@@ -77,10 +79,8 @@ Main page icons: from OpenClipArt
 * manage project quotas
 * add task for cron to manage *task* objects (bulk deletion...)
 
-
 # Issues:
 
-* On project deletion, all images (mongodb AND storage) should be deleted too, should manage this in background task *tasks* object.
 
 # Configuration
 
@@ -90,7 +90,7 @@ in config/default.yaml
         db: "scitizen"
         url: "http://localhost:3000/"
         admin: [ "admin@mydomain.com" ]
-        storage: "s3"
+        storage: "s3"  # or "pairtree"
     mail:
         host: "my.smtp.provider.host"
         port: 465

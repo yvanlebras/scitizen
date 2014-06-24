@@ -91,7 +91,7 @@ exports.add = function(req, res) {
                           public: true,
                           google_api: '',
                           askimet_api: '',
-                          quota: 0,
+                          plan: 'default',
                           stats: {quota: 0},
                           form: {}
                         }, function(err, project) {
@@ -359,7 +359,7 @@ exports.dashboard =  function(req, res){
             google_api = project.google_api;
         }
         else {
-            scitizen_stats.increment(project, 'google', 1);
+            scitizen_stats.send(project.name, 'google', 1);
         }
         res.render(theme_view,
                     { layout: 'layouts/'+project.theme+'/public',
@@ -435,6 +435,10 @@ function upload_file(req, res, project) {
                   favorite: false};
 
       images_db.insert(item, function(err, image) {
+           //scitizen_stats.send(project.name, 'image', 1);
+           scitizen_stats.sendPoints(project.name,[
+             { 'image': 1}, { 'quota': project.stats.quota + image.size }
+             ]);
            if(err!==null) {
                 res.status(500).send('Error while saving item');
             }
