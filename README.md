@@ -13,6 +13,8 @@ Ensure 2d index on db location  :
     db.images.ensureIndex({ "fields.loc" : "2dsphere" })
 
 
+If using InfluxDb for stats, the *scitizen* database must be created first.
+
 # License
 
 MIT
