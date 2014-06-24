@@ -36,8 +36,14 @@ background-repeat: no-repeat;
 }
 
 
+#band1 {
+  background-image: url(/images/band1.png);
+  background-position: center top;
+  background-size: cover;
+}
 .band {
-
+  height: 160px;
+  max-width: 1200px !important;
 }
 
 .main_info_text p{
