@@ -196,9 +196,19 @@
 										description: '',
                     status: false };
     $(document).ready(function() {
+			$.ajax({
+				cache: false,
+				url: "/project",
+				dataType: "json",
+				success: function(data) {
+					viewModel.project_list(data);
+				}
+			});
+			/*
         $.getJSON("/project", function(data) {
             viewModel.project_list(data);
         });
+				*/
 
 				$(document).on("click", "#form_element .fi-trash", function() {
 						//var form_elts = $("#form_element .form_elt");
@@ -236,9 +246,19 @@
 								type: 'PUT',
 								success: function(result) {
 									viewModel.user_current(result);
+									$.ajax({
+										cache: false,
+										url: "/project",
+										dataType: "json",
+										success: function(data) {
+											viewModel.project_list(data);
+										}
+									});
+									/*
 									$.getJSON("/project", function(data) {
 											viewModel.project_list(data);
 									});
+									*/
 								}
 								});
 					},
@@ -388,10 +408,21 @@
 									users: new_users,
 								},
 								success: function(result) {
+									$.ajax({
+										cache: false,
+										url: "/project",
+										dataType: "json",
+										success: function(data) {
+												viewModel.project_list(data);
+												viewModel.project_current(project);
+										}
+									});
+									/*
 									$.getJSON("/project", function(data) {
 										viewModel.project_list(data);
 										viewModel.project_current(project);
 									});
+									*/
 								}
 							});
 						},
@@ -408,9 +439,18 @@
 									users: viewModel.project_current().users,
 								},
 								success: function(result) {
+									$.ajax({
+										cache: false,
+										url: "/project",
+										dataType: "json",
+										success: function(data) {
+												viewModel.project_list(data);										}
+									});
+									/*
 									$.getJSON("/project", function(data) {
 										viewModel.project_list(data);
 									});
+									*/
 								}
 							});
 						},
@@ -425,9 +465,19 @@
 													askimet_api: viewModel.project_askimet()
 												},
 										success: function(result) {
+											$.ajax({
+												cache: false,
+												url: "/project",
+												dataType: "json",
+												success: function(data) {
+														viewModel.project_list(data);
+												}
+											});
+											/*
 											$.getJSON("/project", function(data) {
 													viewModel.project_list(data);
 											});
+											*/
 										}
 								});
 						},
@@ -730,9 +780,19 @@
 				viewModel.manageAccount(false);
 				viewModel.admin(false);
 				var project = viewModel.project_current();
+				$.ajax({
+    			cache: false,
+    			url: "/project/"+project_id+"/image",
+    			dataType: "json",
+    			success: function(data) {
+						viewModel.image_list(data);
+    			}
+				});
+				/*
         $.getJSON("/project/"+project_id+"/image", function(data) {
             viewModel.image_list(data);
         });
+				*/
 	}
 
 

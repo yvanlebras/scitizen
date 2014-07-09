@@ -236,26 +236,39 @@ var marker=null;
 
     $(document).ready(function() {
       initialize_cluster();
-      $.getJSON("/project/"+project._id, function(data) {
-        project = data;
-        viewModel.project(data);
-			  var form_html = "";
-        var count = 0;
-			  $.each(project['form'],function(key) {
-              count += 1;
-				      form_html += project_form_element(project['form'][key],null);
-        });
-			  form_html += "";
-        if(count > 0) {
-          viewModel.project_ready(true);
+      $.ajax({
+        cache: false,
+        url: "/project/"+project._id,
+        dataType: "json",
+        success: function(data) {
+      //$.getJSON("/project/"+project._id, function(data) {
+          project = data;
+          viewModel.project(data);
+          if(project.users_can_add || project.users.indexOf('{{user}}') != -1) {
+			         var form_html = "";
+               var count = 0;
+			         $.each(project['form'],function(key) {
+                 count += 1;
+				         form_html += project_form_element(project['form'][key],null);
+               });
+			            form_html += "";
+                  if(count > 0) {
+                    viewModel.project_ready(true);
+                  }
+          }
+          var converter = new Markdown.Converter();
+          viewModel.project_description(converter.makeHtml(data['description']));
+          viewModel.form_html(form_html);
+			    $("#dynaform").html(form_html);
         }
-        var converter = new Markdown.Converter();
-        viewModel.project_description(converter.makeHtml(data['description']));
-        viewModel.form_html(form_html);
-			  $("#dynaform").html(form_html);
       });
 
-      $.getJSON("/project/"+project._id+"/image", function(data) {
+      $.ajax({
+        cache: false,
+        url: "/project/"+project._id+"/image",
+        dataType: "json",
+        success: function(data) {
+      //$.getJSON("/project/"+project._id+"/image", function(data) {
         if(data!=null && data.length>0) {
           viewModel.has_images(true);
           viewModel.images(data);
@@ -263,6 +276,7 @@ var marker=null;
           viewModel.selected_image(data[0]);
           changeRandomImage();
           update_map();
+        }
         }
       });
 

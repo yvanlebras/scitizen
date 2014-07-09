@@ -85,6 +85,7 @@ exports.add = function(req, res) {
                           theme: 'default',
                           owner: req.user.username,
                           users: [ req.user.username ],
+                          users_can_add: true,
                           validation: false,
                           geo: true,
                           status: false,
