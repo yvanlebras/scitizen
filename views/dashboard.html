@@ -75,7 +75,7 @@
 
 <!-- Dialog -->
 <div id="myModal" class="reveal-modal large" data-reveal>
-  <div id="myModalContent"><img id="myModalImg" src=""/><canvas id="myModalCanvas"></canvas></div>
+  <div id="myModalContent"><canvas width="800" height="600" id="myModalCanvas"></canvas></div>
   <a class="close-reveal-modal">&#215;</a>
 </div>
 
@@ -159,8 +159,7 @@ var marker=null;
       random_image: ko.observable({_id:0}),
       click_random: function() {
         if(! viewModel.project().point_and_click) {
-          console.log("I should return here, but keep for testing");
-          //return;
+          return;
         }
         var image_url = '/image/'+viewModel.random_image()._id+'/raw';
         display_image_for_click(image_url);
@@ -225,8 +224,13 @@ var marker=null;
     ko.applyBindings(viewModel);
 
 
-    function getRelativePosition(e) {
-      var canvas = document.getElementById("myModalCanvas");
+    function getRelativePosition(canvas, e) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      /*
       var scroll = document.body.scrollTop;
       if( typeof( canvas.offsetParent ) != 'undefined' ) {
         for( var posX = 0, posY = 0; canvas; canvas = canvas.offsetParent ) {
@@ -237,17 +241,16 @@ var marker=null;
       } else {
         return {x: e.clientX - canvas.offsetLeft, y: e.clientY - (canvas.offsetTop-scroll)};
       }
+      */
     }
-
 
     function display_image_for_click(image_url) {
       $("#myModal").foundation('reveal', 'open');
-      //$("#myModalContent").html('<img class="myModalImg" src="'+image_url+'"/><canvas id="myModalCanvas"></canvas>');
       var canvas = document.getElementById('myModalCanvas');
       var context = canvas.getContext('2d');
       var imageObj = new Image();
       imageObj.onload = function() {
-        context.drawImage(imageObj,0,0);
+        $("#myModalContent").css('background-image', 'url('+imageObj.src+')');
       };
       imageObj.src = image_url;
     }
@@ -276,7 +279,7 @@ var marker=null;
 
       if(project.point_and_click) {
         keys += ",user_click";
-        form_html += '<input class="" name="user_click" type="hidden" value""/>';
+        form_html += '<input class="sciform" id="user_click" name="user_click" type="hidden" value=""/>';
       }
       form_html += '<input class="" name="form_elts" type="hidden" value="'+keys+'"/>';
       viewModel.curate_form_html(form_html);
@@ -286,7 +289,17 @@ var marker=null;
     $(document).ready(function() {
 
       $("#myModalCanvas").on('click',function(e) {
-        console.log(getRelativePosition(e));
+        var canvas = document.getElementById('myModalCanvas');
+        var pos = getRelativePosition(canvas, e);
+        $("#user_click").val(pos.x+","+pos.y);
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.globalAlpha = 0.5;
+        context.beginPath();
+        context.moveTo(0,0);
+        context.arc(Math.ceil(pos.x), Math.ceil(pos.y), 5, 0, 2 * Math.PI);
+        context.fillStyle = 'red';
+        context.fill();
       });
 
       initialize_cluster();

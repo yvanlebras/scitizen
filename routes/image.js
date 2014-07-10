@@ -114,6 +114,11 @@ exports.curate = function(req, res) {
                 var stats = { 'stats.vote': 1};
                 for(var i =0;i<forms.length;i++) {
                   if(forms[i]=='api') { continue; }
+                  var add_user_click = null;
+                  if(forms[i]=='user_click') { 
+                        add_user_click = { 'stats.user_click': req.param(forms[i])};
+                  } 
+                  else{
                   var param = req.param(forms[i]);
                   if(param instanceof Array) {
                     for(var j=0;j<param.length;j++) {
@@ -123,8 +128,12 @@ exports.curate = function(req, res) {
                   else {
                     stats['stats.' + forms[i] + '.' + param] = 1;
                   }
+                 }
                 }
                 var to_update = { $inc : stats };
+                if(add_user_click!=null) {
+                  to_update['$push'] = add_user_click;
+                }
                 images_db.update({_id: image_id}, to_update, function(err) {
                   if(err) { console.log(err); }
                   res.json({});
