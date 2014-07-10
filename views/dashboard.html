@@ -29,7 +29,7 @@
       <!-- random element -->
       <div class="row">
         <div class="large-6 columns">
-              <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
+              <img data-bind="click: click_random, attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
               <span data-bind="visible: project().point_and_click">Click image to point the region of interest</span>
         </div>
         <div class="large-6 columns">
@@ -73,7 +73,15 @@
 <!-- end new item -->
 
 
+<!-- Dialog -->
+<div id="myModal" class="reveal-modal large" data-reveal>
+  <div id="myModalContent"><img id="myModalImg" src=""/><canvas id="myModalCanvas"></canvas></div>
+  <a class="close-reveal-modal">&#215;</a>
+</div>
+
 <script type="text/javascript">
+
+$(document).foundation();
 
 var map;
 var cluster_map;
@@ -149,6 +157,14 @@ var marker=null;
       project_description: ko.observable(''),
       selected_image: ko.observable({_id:0}),
       random_image: ko.observable({_id:0}),
+      click_random: function() {
+        if(! viewModel.project().point_and_click) {
+          console.log("I should return here, but keep for testing");
+          //return;
+        }
+        var image_url = '/image/'+viewModel.random_image()._id+'/raw';
+        display_image_for_click(image_url);
+      },
       show_image: function(image) {
         viewModel.selected_image(image);
       },
@@ -209,6 +225,33 @@ var marker=null;
     ko.applyBindings(viewModel);
 
 
+    function getRelativePosition(e) {
+      var canvas = document.getElementById("myModalCanvas");
+      var scroll = document.body.scrollTop;
+      if( typeof( canvas.offsetParent ) != 'undefined' ) {
+        for( var posX = 0, posY = 0; canvas; canvas = canvas.offsetParent ) {
+          posX += canvas.offsetLeft;
+          posY += canvas.offsetTop;
+        }
+        return {x: e.clientX - posX, y: e.clientY - (posY-scroll)};
+      } else {
+        return {x: e.clientX - canvas.offsetLeft, y: e.clientY - (canvas.offsetTop-scroll)};
+      }
+    }
+
+
+    function display_image_for_click(image_url) {
+      $("#myModal").foundation('reveal', 'open');
+      //$("#myModalContent").html('<img class="myModalImg" src="'+image_url+'"/><canvas id="myModalCanvas"></canvas>');
+      var canvas = document.getElementById('myModalCanvas');
+      var context = canvas.getContext('2d');
+      var imageObj = new Image();
+      imageObj.onload = function() {
+        context.drawImage(imageObj,0,0);
+      };
+      imageObj.src = image_url;
+    }
+
 
     function changeRandomImage() {
       var data = viewModel.images();
@@ -230,12 +273,22 @@ var marker=null;
             }
             form_html += project_form_element(project['form'][key],value);
       });
+
+      if(project.point_and_click) {
+        keys += ",user_click";
+        form_html += '<input class="" name="user_click" type="hidden" value""/>';
+      }
       form_html += '<input class="" name="form_elts" type="hidden" value="'+keys+'"/>';
       viewModel.curate_form_html(form_html);
     }
 
 
     $(document).ready(function() {
+
+      $("#myModalCanvas").on('click',function(e) {
+        console.log(getRelativePosition(e));
+      });
+
       initialize_cluster();
       $.ajax({
         cache: false,

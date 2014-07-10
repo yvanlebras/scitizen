@@ -35,6 +35,10 @@ Cells image on main page CC-BY Paul Neiman
 
 # TODO
 
+## in progress
+
+in dashboard, manage canvas click on image with image superposition
+
 ## Questions
 
 * For "free" plan, limit size of image (rescale) ?

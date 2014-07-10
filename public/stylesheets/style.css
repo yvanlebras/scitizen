@@ -1,3 +1,18 @@
+meta.foundation-data-attribute-namespace {
+  font-family: false;
+}
+
+
+#myModalCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+#myModalContent {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -155,13 +170,13 @@ border-box;
     position: absolute; top: 0; bottom: 0; right: 43px;
     -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in
 0s;
-    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s;
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
     margin-left: 0;
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-    right: 0px; 
+    right: 0px;
 }
 
 .actions i { margin: 5px; }
