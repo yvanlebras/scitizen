@@ -120,7 +120,7 @@
     <div class="row">
     <table>
     <thead>
-        <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th>Quota</th><th></th></tr>
+        <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th>Allow user uploads</th><th>Point and click images</th><th>Quota</th><th></th></tr>
     </thead>
     <tbody data-bind="foreach: project_list">
         <tr>
@@ -164,6 +164,24 @@
             </label>
             </div>
             </td>
+						<td>
+						<div class="onoffswitch">
+								<input type="checkbox" name="users_can_addswitch" class="onoffswitch-checkbox" data-bind="checked: users_can_add, attr: {id: 'users_can_add'+name, value: users_can_add}, click: $parent.project_switch_users_can_add" >
+								<label class="onoffswitch-label" data-bind="attr: {for: 'users_can_add'+name}">
+								<div class="onoffswitch-inner"></div>
+								<div class="onoffswitch-switch"></div>
+						</label>
+						</div>
+						</td>
+						<td>
+						<div class="onoffswitch">
+								<input type="checkbox" name="point_and_clickswitch" class="onoffswitch-checkbox" data-bind="checked: point_and_click, attr: {id: 'point_and_click'+name, value: point_and_click}, click: $parent.project_switch_point_and_click" >
+								<label class="onoffswitch-label" data-bind="attr: {for: 'point_and_click'+name}">
+								<div class="onoffswitch-inner"></div>
+								<div class="onoffswitch-switch"></div>
+						</label>
+						</div>
+						</td>
 						<td data-bind="text: $parent.byte_convert(stats.quota)"></td>
             <td class="actions">
 							<i data-bind="attr: { project: _id }, click: $parent.edit_project" class="fi-page-edit"> </i>
@@ -528,6 +546,24 @@
               });
               return true;
             },
+						project_switch_users_can_add: function(project) {
+							$.ajax({
+								url: '/project/'+project._id,
+								type: 'PUT',
+								data: {users_can_add: project.users_can_add},
+								success: function(result) {}
+							});
+							return true;
+						},
+						project_switch_point_and_click: function(project) {
+							$.ajax({
+								url: '/project/'+project._id,
+								type: 'PUT',
+								data: {point_and_click: project.point_and_click},
+								success: function(result) {}
+							});
+							return true;
+						},
             add_project: function(){
 							viewModel.project_description('');
               $.post( "/project", { pname: this.project_name(),

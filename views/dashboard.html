@@ -30,6 +30,7 @@
       <div class="row">
         <div class="large-6 columns">
               <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
+              <span data-bind="visible: project().point_and_click">Click image to point the region of interest</span>
         </div>
         <div class="large-6 columns">
         <form id="random_form" data-bind="html: curate_form_html">

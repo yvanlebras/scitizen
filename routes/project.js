@@ -86,6 +86,7 @@ exports.add = function(req, res) {
                           owner: req.user.username,
                           users: [ req.user.username ],
                           users_can_add: true,
+                          point_and_click: false,
                           validation: false,
                           geo: true,
                           status: false,
@@ -110,19 +111,50 @@ exports.edit = function(req, res) {
                             function(can_edit) {
         if(can_edit) {
             // check params and update
+            if(req.body.form) {
             for(var elt in req.body.form) {
               if(! Array.isArray(req.body.form[elt].values)) {
-                if(req.body.form[elt].values == 'false') {
+                if(req.body.form[elt].values == "false") {
                   req.body.form[elt].values = false;
                 }
                 if(req.body.form[elt].values == 'true') {
                   req.body.form[elt].values = true;
                 }
               }
+              if(elt == 'api') {
+                delete req.body.form[elt];
+              }
             }
-            if(elt == 'api') {
-              delete req.body.form[elt];
+          }
+          else {
+            if(req.body.geo) {
+              if(req.body.geo == "false") { req.body.geo = false; }
+              else { req.body.geo = true; }
             }
+            if(req.body.users_can_add) {
+              if(req.body.users_can_add == "false") { req.body.users_can_add = false; }
+              else { req.body.users_can_add = true; }
+            }
+            if(req.body.point_and_click) {
+              if(req.body.point_and_click == "false") { req.body.point_and_click = false; }
+              else { req.body.point_and_click = true; }
+            }
+            if(req.body.validation) {
+              if(req.body.validation == "false") { req.body.validation = false; }
+              else { req.body.validation = true; }
+            }
+            if(req.body.status) {
+              if(req.body.status == "false") { req.body.status = false; }
+              else { req.body.status = true; }
+            }
+            if(req.body.public) {
+              if(req.body.public == "false") { req.body.public = false; }
+              else { req.body.public = true; }
+            }
+            if(req.body.api) { delete req.body.api; }
+          }
+
+
             projects_db.update({ _id: req.param('id') },
                                 {$set: req.body},
                                 function(err) {
