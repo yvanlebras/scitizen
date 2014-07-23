@@ -37,7 +37,7 @@ Cells image on main page CC-BY Paul Neiman
 
 ## in progress
 
-in dashboard, manage canvas click on image with image superposition
+
 
 ## Questions
 
