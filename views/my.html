@@ -206,13 +206,99 @@
     </div>
     </div>
 
+<!-- Dialog -->
+<div id="myModal" class="reveal-modal large" data-reveal>
+	<!--
+	<div class="row">
+		<div class="large-2 columns"><button id="showall">Show all points</button></div>
+		<div class="large-2 columns">
+			<button id="showcluster">Show clusters</button>
+		</div>
+	</div>
+	-->
+	<div id="myModalContent"><canvas width="800" height="600" id="myModalCanvas"></canvas></div>
+	<a class="close-reveal-modal">&#215;</a>
+</div>
+
+
+<script type='text/javascript' src='http://harthur.github.com/clusterfck/demos/colors/clusterfck.js'></script>
+
   <script>
+		$(document).foundation();
+
+
     var my_projects = [];
 
     var project =  { name: '',
                     owner: '{{ user.username }}',
 										description: '',
                     status: false };
+
+		function showAllPoints(canvas) {
+			var context = canvas[0].getContext('2d');
+			context.clearRect(0, 0, canvas[0].width, canvas[0].height);
+			var points = viewModel.image_current().stats.user_click;
+			for(point in points) {
+				pos = points[point].split(",");
+				context.globalAlpha = 0.5;
+				context.beginPath();
+				context.moveTo(0,0);
+				context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
+				context.fillStyle = 'red';
+				context.fill();
+			}
+		}
+
+		var clusters = [];
+
+		function add_cluster_points(tree, level) {
+			if(level<=viewModel.cluster_depth()) {
+				if(tree.value) {
+					clusters.push(tree.value);
+				}
+				if(tree.right) {
+					add_cluster_points(tree.right, level + 1);
+				}
+				if(tree.left) {
+				add_cluster_points(tree.left, level + 1);
+				}
+			}
+		}
+
+		function showClusterPoints(canvas) {
+			var context = canvas[0].getContext('2d');
+			context.clearRect(0, 0, canvas[0].width, canvas[0].height);
+			var points = viewModel.image_current().stats.user_click;
+			var cluster_points = [];
+			clusters = [];
+			for(pos in points) {
+				pos = points[pos].split(",");
+				cluster_points.push(pos);
+			}
+			var tree = clusterfck.hcluster(cluster_points, "euclidean", "average");
+			level = 0;
+
+			if(tree.value) {
+				clusters.push(tree.value);
+			}
+			if(tree.right) {
+				add_cluster_points(tree.right, level);
+			}
+			if(tree.left) {
+				add_cluster_points(tree.left, level);
+			}
+			for(point in clusters) {
+				pos = clusters[point];
+				context.globalAlpha = 0.5;
+				context.beginPath();
+				context.moveTo(0,0);
+				context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
+				context.fillStyle = 'red';
+				context.fill();
+			}
+
+		}
+
     $(document).ready(function() {
 			$.ajax({
 				cache: false,
@@ -222,11 +308,33 @@
 					viewModel.project_list(data);
 				}
 			});
+
 			/*
-        $.getJSON("/project", function(data) {
-            viewModel.project_list(data);
-        });
-				*/
+			$("#showall").click(function(){
+				var canvas = $("#myModalCanvas");
+				showAllPoints(canvas);
+			});
+
+			$("#showcluster").click(function(){
+				var canvas = $("#myModalCanvas");
+				showClusterPoints(canvas);
+			});
+			*/
+
+
+				$(document).on("click", "#show_image_points", function() {
+					$("#myModal").foundation('reveal', 'open');
+					var imageObj = new Image();
+					var image_url = '/image/'+$(this).attr("data-image")+'/raw';
+					var canvas = $("#myModalCanvas");
+					imageObj.onload = function() {
+						$("#myModalContent").css('background-image', 'url('+imageObj.src+')');
+						canvas.attr("height",imageObj.height);
+						canvas.attr("width", imageObj.width);
+						showAllPoints(canvas);
+					};
+					imageObj.src = image_url;
+				});
 
 				$(document).on("click", "#form_element .fi-trash", function() {
 						//var form_elts = $("#form_element .form_elt");
@@ -256,6 +364,7 @@
 					manageAccount: ko.observable(false),
 					admin: ko.observable(false),
 					form_elements: ko.observable(''),
+					cluster_depth: ko.observable(2),
 					user_current: ko.observable({ username: '{{ user.username}}',
 																			key: '{{ user.key}}'}),
 					user_suspend: function(user) {
@@ -335,11 +444,20 @@
 						panelAdmin();
 					},
 					user_list: ko.observableArray(),
+					image_current: ko.observable({}),
 					image_show: function(image) {
+						  viewModel.image_current(image);
 							//console.log(image.stats);
 							//var stat_html = "";
+							var has_point_and_click = false;
 							$("#image_stats").html("");
 							for(stat in image.stats) {
+								if(stat == 'user_click') {
+									if(stat.length>0) {
+										has_point_and_click = true;
+									}
+									continue;
+								}
 								var data = {labels: [],
 														datasets:[
 														{ fillColor : "rgba(151,187,205,0.5)",
@@ -380,6 +498,9 @@
 								$("#image_stats").append('<div class="large-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
 								var ctx = $("#chart_"+stat).get(0).getContext("2d");
 								var myNewChart = new Chart(ctx).Bar(data);
+							}
+							if(has_point_and_click) {
+								$("#image_stats").append('<div class="large-6 "><button id="show_image_points" type="button" data-image="'+image._id+'">Display image points</button></div>');
 							}
 							//$("#image_stats").html(stat_html);
 						},
