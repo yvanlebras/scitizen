@@ -13,7 +13,7 @@ body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
 }
 
 #general {
-  max_height: 400px;
+  max-height: 400px;
   background-position: center top;
   background-image: url(/images/bear.jpg);
 }
@@ -50,9 +50,9 @@ background-repeat: no-repeat;
   font-size: 1.2em;
   font-weight: bold !important;
 }
+
 .main_info_title {
   font-size: 4em;
-
 }
 .main_info_image{
   padding-top: 10px;
@@ -65,4 +65,16 @@ background-repeat: no-repeat;
   min-height: 400px;
   font-size: 1.2em;
   background-color: white;
+}
+
+@media only screen and (max-width: 40em) {
+
+#general {
+  max-height: 200px;
+}
+
+.main_info_title {
+  font-size: 2em;
+}
+
 }
