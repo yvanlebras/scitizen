@@ -22,6 +22,7 @@ var express = require('express'),
    images = db.get('images'),
    sciconfig = db.get('config'),
    bcrypt = require('bcryptjs'),
+   cors = require('cors'),
    path = require('path');
 
 
@@ -108,6 +109,7 @@ var app = express();
 app.engine('html', require('hogan-express'));
 
 app.configure(function() {
+app.use(cors());
 app.use(express.cookieParser('my cookie secret'));
 app.use(express.session({ secret: 'keyboard cat' }));
 app.use(flash());
