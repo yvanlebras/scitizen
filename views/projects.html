@@ -5,8 +5,8 @@
     <div class="row" id="project_selection" data-bind="foreach: project_list">
       <div class="row project_selection">
         <a data-bind="attr: {href: '/project/'+ko.utils.unwrapObservable(_id)+'/dashboard'}">
-          <div class="large-2 columns project_heading" data-bind="text: name"></div>
-          <div class="large-6 columns project_description" data-bind="text: short_description"></div>
+          <div class="small-2 large-2 columns project_heading" data-bind="text: name"></div>
+          <div class="small-6 large-6 columns project_description" data-bind="text: short_description"></div>
         </a>
       </div>
     </div>
