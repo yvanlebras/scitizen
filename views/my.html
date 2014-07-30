@@ -1,4 +1,3 @@
-
 	<div class="row" data-bind="visible: manageAccount">
 		<div data-bind="with: user_current">
 			<label for="username">User id</label>
@@ -33,44 +32,44 @@
 		<div class="row">
 			<h2 data-bind="text: project_current().name"></h2>
 		</div>
-		<div class="small-6 large-6 columns">
-    <table>
-    <thead>
-        <tr><th>Name</th><th>Image</th><th>Votes</th><th>Tagged as spam</th><th>Actions</th></tr>
-    </thead>
-    <tbody data-bind="foreach: image_list">
-        <tr>
-			<td data-bind="text: name"></td>
-			<td>
-			<a class="th" data-bind="attr: {href: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}">
-			<img class="thumb" data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}"/>
-			</a>
-			</td>
-			<td data-bind="if: $data.stats">
-				<span data-bind="text: stats.vote"></span>
-			</td>
-			<td data-bind="if: $data.stats">
-				<span data-bind="text: stats.spam"></span>
-			</td>
-			<td>
-			<div data-bind="ifnot: validated">
-				<div data-alert class="alert-box warning round">
-					<i class="fi-check" data-bind="click: $parent.image_validate">Validate</i>
+			<div class="small-6 large-6 columns">
+		    <table>
+		    	<thead>
+		        <tr><th>Name</th><th>Image</th><th>Votes</th><th>Tagged as spam</th><th>Actions</th></tr>
+		    	</thead>
+		    	<tbody data-bind="foreach: image_list">
+		      	<tr>
+							<td data-bind="text: name"></td>
+							<td>
+								<a class="th" data-bind="attr: {href: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}">
+									<img class="thumb" data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}"/>
+								</a>
+							</td>
+							<td data-bind="if: $data.stats">
+								<span data-bind="text: stats.vote"></span>
+							</td>
+							<td data-bind="if: $data.stats">
+								<span data-bind="text: stats.spam"></span>
+							</td>
+							<td>
+								<div data-bind="ifnot: validated">
+									<div data-alert class="alert-box warning round">
+										<i class="fi-check" data-bind="click: $parent.image_validate">Validate</i>
+									</div>
+								</div>
+								<i class="fi-trash" data-bind="click: $parent.image_trash">Trash</i>
+								<i class="fi-monitor" data-bind="click: $parent.image_show">Stats</i>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="small-6 large-6 columns">
+				<div id="image_stats" class="row">
 				</div>
 			</div>
-			<i class="fi-trash" data-bind="click: $parent.image_trash">Trash</i>
-			<i class="fi-monitor" data-bind="click: $parent.image_show">Stats</i>
-			</td>
-		</tr>
-	</tbody>
-	</table>
-	</div>
-	<div class="small-6 large-6 columns">
-		<div id="image_stats" class="row">
 		</div>
-	</div>
-	</div>
-    <div class="row" data-bind="visible: editProject">
+  <div class="row" data-bind="visible: editProject">
     <div class="small-4 large-4 columns">
 			<div>
 				<h2>Information</h2>
@@ -94,28 +93,39 @@
 			</div>
 			<div>
 				<h2>Form</h2>
-      	<form>
-        	<label>Form selection (Markdown supported)</label>
-        	<select data-bind="options: project_form_elements, optionsCaption: 'Choose from ...', value: selected_form_element">
-        	</select>
-					<div class="columns">
-        	<button type="button" class="button tiny" data-bind="click: add_project_form_element">Add</button>
-					<button type="button" class="button tiny" data-bind="click: render_project_form_element">Render</button>
-					<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
+				<h3>Widget code</h3>
+				<div class="row">
+					<div class="small-6 columns">
+					<button type="button" class="button tiny" data-bind="click: widget_foundation_show">Widget code - Foundation</button>
+					<button type="button" class="button tiny" data-bind="click: widget_bootstrap_show">Widget code - Bootstrap</button>
 					</div>
-      	</form>
-		</div>
-      <div id="form_element" data-bind="html: form_elements"></div>
+				</div>
+				<div class="row">
+      		<form>
+        		<label>Form selection (Markdown supported)</label>
+        		<select data-bind="options: project_form_elements, optionsCaption: 'Choose from ...', value: selected_form_element">
+        		</select>
+      		</form>
+				</div>
+				<div class="row">
+					<div class="columns">
+						<button type="button" class="button tiny" data-bind="click: add_project_form_element">Add</button>
+						<button type="button" class="button tiny" data-bind="click: render_project_form_element">Render</button>
+						<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
+					</div>
+				</div>
+			</div>
+      <div id="form_element" class="row" data-bind="html: form_elements"></div>
     </div>
     <div class="small-8 large-8 columns" id="form_render">
     </div>
-    </div>
+  </div>
 
 
-    <div class="row" data-bind="visible: showProjects">
-			<div class="row">
-				<i data-bind="click: addProject" class="fi-folder-add"> Create project</i>
-			</div>
+  <div class="row" data-bind="visible: showProjects">
+		<div class="row">
+			<i data-bind="click: addProject" class="fi-folder-add"> Create project</i>
+		</div>
 
     <div class="row">
     <table>
@@ -300,6 +310,8 @@
 		}
 
     $(document).ready(function() {
+
+
 			$.ajax({
 				cache: false,
 				url: "/project",
@@ -765,7 +777,24 @@
 							'textarea',
 							'text',
 							'checkbox'
-							])
+							]),
+						widget_foundation_show: function() {
+							$(".project_id").text(viewModel.project_current()._id);
+							$(".project_point_and_click").text(viewModel.project_current().point_and_click);
+							$(".scitizen_host").text(viewModel.scitizen_host());
+							$("#widget").foundation('reveal', 'open');
+							$("#widget .bootstrap").hide();
+							$("#widget .foundation").show();
+						},
+						widget_bootstrap_show: function() {
+							$(".project_id").text(viewModel.project_current()._id);
+							$(".project_point_and_click").text(viewModel.project_current().point_and_click);
+							$(".scitizen_host").text(viewModel.scitizen_host());
+							$("#widget").foundation('reveal', 'open');
+							$("#widget .bootstrap").show();
+							$("#widget .foundation").hide();
+						},
+						scitizen_host: ko.observable(window.location.host)
     };
 
     ko.applyBindings(viewModel);
@@ -954,3 +983,222 @@
 
 
   </script>
+
+
+<!-- Widget viewer -->
+<div id="widget" class="reveal-modal large" data-reveal>
+	<h3>HTML headers</h3>
+	<div class="foundation">
+	&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/foundation/5.3.1/js/vendor/jquery.min.js&quot;&gt;&lt;/script&gt;
+  <br/>
+	&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/foundation/5.3.1/js/foundation.min.js&quot;&gt;&lt;/script&gt;
+	<br/>
+	&lt;link rel=&quot;stylesheet&quot; href=&quot;//cdnjs.cloudflare.com/ajax/libs/foundation/5.3.1/css/foundation.min.css&quot;&gt;
+	</div>
+	<div class="bootstrap">
+		&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/foundation/5.3.1/js/vendor/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+		&lt;script src=&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;<br/>
+		&lt;link rel=&quot;stylesheet&quot; href=&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css&quot;&gt;<br/>
+	</div>
+	<h3>Code to include</h3>
+	<div class="bootstrap">
+		&lt;div class=&quot;modal fade&quot;&gt;<br/>
+		&lt;div class=&quot;modal-dialog&quot;&gt;<br/>
+		&lt;div class=&quot;modal-content&quot;&gt;<br/>
+			&lt;div class=&quot;modal-header&quot;&gt;<br/>
+				&lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;span class=&quot;sr-only&quot;&gt;Close&lt;/span&gt;&lt;/button&gt;<br/>
+			&lt;/div&gt;<br/>
+			&lt;div class=&quot;modal-body&quot;&gt;<br/>
+					&lt;div id=&quot;myModalContent&quot;&gt;&lt;canvas width=&quot;800&quot; height=&quot;600&quot; id=&quot;myModalCanvas&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;<br/>
+			&lt;/div&gt;<br/>
+			&lt;div class=&quot;modal-footer&quot;&gt;<br/>
+				&lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-dismiss=&quot;modal&quot;&gt;Close&lt;/button&gt;<br/>
+			&lt;/div&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;/div&gt;<br/>
+	&lt;script&gt;<br/>
+	function display_image_for_click(image_url) {<br/>
+		$(&#39;#myModal&#39;).modal(&#39;show&#39;);<br/>
+		var imageObj = new Image();<br/>
+		imageObj.onload = function() {<br/>
+			$(&quot;#myModalContent&quot;).css(&#39;background-image&#39;, &#39;url(&#39;+imageObj.src+&#39;)&#39;);<br/>
+			var canvas = $(&quot;#myModalCanvas&quot;);<br/>
+			canvas.attr(&quot;height&quot;,imageObj.height);<br/>
+			canvas.attr(&quot;width&quot;, imageObj.width);<br/>
+		};<br/>
+		imageObj.src = image_url;<br/>
+	}<br/>
+	&lt;/script&gt;<br/>
+	</div>
+	<div class="foundation">
+		&lt;div id=&quot;myModal&quot; class=&quot;reveal-modal large&quot; data-reveal&gt;<br/>
+		&lt;div id=&quot;myModalContent&quot;&gt;&lt;canvas width=&quot;800&quot; height=&quot;600&quot; id=&quot;myModalCanvas&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;<br/>
+		&lt;a class=&quot;close-reveal-modal&quot;&gt;&amp;#215;&lt;/a&gt;<br/>
+		&lt;/div&gt;<br/>
+		<br/>
+		&lt;script&gt;<br/>
+			$(document).foundation();<br/>
+			<br/>
+			function display_image_for_click(image_url) {<br/>
+				$(&quot;#myModal&quot;).foundation(&#39;reveal&#39;, &#39;open&#39;);<br/>
+				var imageObj = new Image();<br/>
+				imageObj.onload = function() {<br/>
+					$(&quot;#myModalContent&quot;).css(&#39;background-image&#39;, &#39;url(&#39;+imageObj.src+&#39;)&#39;);<br/>
+					var canvas = $(&quot;#myModalCanvas&quot;);<br/>
+					canvas.attr(&quot;height&quot;,imageObj.height);<br/>
+					canvas.attr(&quot;width&quot;, imageObj.width);<br/>
+				};<br/>
+				imageObj.src = image_url;<br/>
+			}<br/>
+		&lt;/script&gt;<br/>
+	</div>
+	<div>
+		&lt;div class=&quot;row&quot;&gt;<br/>
+		&lt;div class=&quot;large-6 columns&quot;&gt;<br/>
+				&lt;img id=&quot;random_image&quot; alt=&quot;random image from database&quot; /&gt;<br/>
+				&lt;span id=&quot;point_and_click&quot;&gt;Click image to point the region of interest&lt;/span&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;div class=&quot;large-6 columns&quot;&gt;<br/>
+				&lt;form id=&quot;random_form&quot;&gt;<br/>
+				&lt;/form&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;div class=&quot;row&quot;&gt;<br/>
+		&lt;div class=&quot;large-3 columns&quot;&gt;<br/>
+				&lt;button id=&quot;curate&quot; class=&quot;button action&quot;&gt;&lt;i class=&quot;fi-upload&quot;&gt;&lt;/i&gt; Send&lt;/button&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;div class=&quot;large-3 columns&quot;&gt;<br/>
+				&lt;button id=&quot;spam&quot; class=&quot;button action&quot;&gt;&lt;i class=&quot;fi-trash&quot;&gt;&lt;/i&gt; Spam&lt;/button&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;div class=&quot;large-6 columns&quot;&gt;<br/>
+		&lt;/div&gt;<br/>
+		&lt;/div&gt;<br/>
+		<br/>
+		&lt;script type=&#39;text/javascript&#39; src=&#39;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/javascripts/scitizen.js&#39;&gt;&lt;/script&gt;<br/>
+	&lt;script&gt;<br/>
+	<br/>
+		var scitizen_images = [];<br/>
+		var image = null;<br/>
+		var project = {
+			&#39;_id&#39;: &#39;<span class="project_id" data-bind="text: project_current()._id"></span>&#39;,
+			&#39;point_and_click&#39;: <span class="project_point_and_click" data-bind="text: project_current().point_and_click"></span>
+		};<br/>
+		<br/>
+		if(! project.point_and_click) {<br/>
+			$(&quot;#point_and_click&quot;).hide();<br/>
+		}<br/>
+		<br/>
+		$(function() {<br/>
+			$.ajax({<br/>
+				cache: false,<br/>
+				url: &quot;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/project/&quot;+project._id+&quot;/image&quot;,<br/>
+				dataType: &quot;json&quot;,<br/>
+				success: function(data) {<br/>
+						if(data!=null &amp;&amp; data.length&gt;0) {<br/>
+					images = data<br/>
+								changeRandomImage();<br/>
+						}<br/>
+				}<br/>
+			});<br/>
+			<br/>
+			$(&quot;#curate&quot;).click(function() {<br/>
+	if(image==null) { return; }<br/>
+				var form_elts = $(&quot;#random_form .sciform&quot;);<br/>
+				var curate = {};<br/>
+				var form_ids = &quot;&quot;;<br/>
+				var i = 0;<br/>
+				$.each(form_elts, function(form_elt) {<br/>
+					if(i&gt;0) { form_ids += &quot;,&quot; };<br/>
+					i+=1;<br/>
+					// send form_elts with all attr, comma separated<br/>
+					// and each key=value form element<br/>
+					curate[$(this).attr(&#39;id&#39;)]=$(this).val();<br/>
+					form_ids += $(this).attr(&#39;id&#39;);<br/>
+				});<br/>
+				curate[&#39;form_elts&#39;] = form_ids;<br/>
+				$.ajax({<br/>
+					url: &#39;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/image/&#39;+image._id,<br/>
+					type: &#39;PUT&#39;,<br/>
+					data: curate,<br/>
+					success: function(result) {<br/>
+						changeRandomImage();<br/>
+					}<br/>
+				});<br/>
+			});<br/>
+			<br/>
+			$(&quot;#spam&quot;).click(function(){<br/>
+				var image_id = image._id;<br/>
+				$.ajax({<br/>
+						url: &#39;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/image/&#39;+image_id,<br/>
+						type: &#39;PUT&#39;,<br/>
+						data: { spam: 1},<br/>
+						success: function(result) {<br/>
+							changeRandomImage();<br/>
+						}<br/>
+				});<br/>
+		});<br/>
+		<br/>
+			$(&quot;#random_image&quot;).click(function(){<br/>
+				var image_url = &#39;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/image/&#39;+image._id+&#39;/raw&#39;;<br/>
+				display_image_for_click(image_url);<br/>
+			});<br/>
+			<br/>
+			$(&quot;#myModalCanvas&quot;).on(&#39;click&#39;,function(e) {<br/>
+				if(! project.point_and_click) { return; }<br/>
+				var canvas = document.getElementById(&#39;myModalCanvas&#39;);<br/>
+				var pos = getRelativePosition(canvas, e);<br/>
+				$(&quot;#user_click&quot;).val(pos.x+&quot;,&quot;+pos.y);<br/>
+				var context = canvas.getContext(&#39;2d&#39;);<br/>
+				context.clearRect(0, 0, canvas.width, canvas.height);<br/>
+				context.globalAlpha = 0.5;<br/>
+				context.beginPath();<br/>
+				context.moveTo(0,0);<br/>
+				context.arc(Math.ceil(pos.x), Math.ceil(pos.y), 5, 0, 2 * Math.PI);<br/>
+				context.fillStyle = &#39;red&#39;;<br/>
+				context.fill();<br/>
+			});<br/>
+			<br/>
+		});<br/>
+		<br/>
+		function changeRandomImage() {<br/>
+			var data = images;<br/>
+			var random_elt = Math.floor((Math.random() * data.length));<br/>
+			image = data[random_elt];<br/>
+			$(&quot;#random_image&quot;).attr(&#39;src&#39;, &#39;http://<span class="scitizen_host" data-bind="text: scitizen_host"></span>/image/&#39;+image._id+&#39;/raw&#39;);<br/>
+			// Update form<br/>
+			var form_html = &quot;&quot;;<br/>
+			var count = 0;<br/>
+			var keys = &quot;&quot;;<br/>
+			$.each(project[&#39;form&#39;],function(key) {<br/>
+						if(count&gt;0) { keys += &#39;,&#39;; }<br/>
+						keys += project[&#39;form&#39;][key][&#39;id&#39;];<br/>
+						var key_id = &quot;r&quot;+project[&#39;form&#39;][key][&#39;id&#39;];<br/>
+						count += 1;<br/>
+						var value=null;<br/>
+						if(image[&#39;fields&#39;][key_id]!=undefined) {<br/>
+							value = image[&#39;fields&#39;][key_id];<br/>
+						}<br/>
+						form_html += project_form_element(project[&#39;form&#39;][key],value);<br/>
+			});<br/>
+			<br/>
+			if(project.point_and_click) {<br/>
+				keys += &quot;,user_click&quot;;<br/>
+				form_html += &#39;&lt;input class=&quot;sciform&quot; id=&quot;user_click&quot; name=&quot;user_click&quot; type=&quot;hidden&quot; value=&quot;&quot;/&gt;&#39;;<br/>
+			}<br/>
+			form_html += &#39;&lt;input class=&quot;&quot; name=&quot;form_elts&quot; type=&quot;hidden&quot; value=&quot;&#39;+keys+&#39;&quot;/&gt;&#39;;<br/>
+			$(&quot;#random_form&quot;).html(form_html);<br/>
+		}<br/>
+		<br/>
+		function getRelativePosition(canvas, e) {<br/>
+			var rect = canvas.getBoundingClientRect();<br/>
+			return {<br/>
+					x: e.clientX - rect.left,<br/>
+					y: e.clientY - rect.top<br/>
+				};<br/>
+		}<br/>
+		<br/>
+	&lt;/script&gt;<br/>
+	</div>
+<a class="close-reveal-modal">&#215;</a>
+</div>
