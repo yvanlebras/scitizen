@@ -497,6 +497,18 @@ function upload_file(req, res, project) {
                             res.json(image);
                           }
             });
+
+            tasks_db.insert({ type: 'rescale',
+                              object: 'images',
+                              objectid: image._id.toHexString()
+                                }, function(err, task) {
+                            });
+
+
+
+
+
+
         });
     });
 }
