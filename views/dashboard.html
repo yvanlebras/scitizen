@@ -4,18 +4,22 @@
 <a href="#" class="close" data-bind="click: clear_message">&times;</a>
 </div>
 -->
+<div data-bind="visible: image_all_panel">
+  <ul id="show_image_all" class="small-block-grid-4">
+  </ul>
+  <div data-bind="click: add_image_all" id="refresh_image_all" class="row"><i class="fi-refresh large"> Load more items</i></div>
+</div>
 <div id="main" data-bind="visible: main_panel">
   <div id="last_images" class="block row section_dark" data-bind="if: has_images">
-    <div class="large-6 columns main_image">
+    <div class="small-6 columns main_image">
         <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)+'/raw'}" alt="selected image" />
     </div>
-    <div class="large-4 columns" data-bind="foreach: last_10_images">
-      <div class="large-2">
+    <div class="small-4 columns" data-bind="foreach: last_10_images">
+      <div class="small-2">
         <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}" alt="last 10 images" />
       </div>
     </div>
   </div>
-
 
   <div class="row">
     <div data-alert class="alert-box">
@@ -25,30 +29,30 @@
 
   <div class="block row">
     <!-- help, about -->
-    <div class="large-6 columns sub" data-bind="if: has_images">
+    <div class="small-6 columns sub" data-bind="if: has_images">
       <!-- random element -->
       <div class="row">
-        <div class="large-6 columns">
+        <div class="small-6 columns">
               <img id="random_image" data-bind="click: click_random, attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
               <span data-bind="visible: project().point_and_click">Click image to point the region of interest</span>
         </div>
-        <div class="large-6 columns">
+        <div class="small-6 columns">
         <form id="random_form" data-bind="html: curate_form_html">
         </form>
         </div>
       </div>
       <div class="row">
-          <div class="large-3 columns">
+          <div class="small-3 columns">
             <button id="curate" class="button action" data-bind="click: image_curate"><i class="fi-upload"></i> Send</button>
           </div>
-          <div class="large-3 columns">
+          <div class="small-3 columns">
             <button id="spam" class="button action" data-bind="click: image_spam"><i class="fi-trash"></i> Spam</button>
           </div>
-          <div class="large-6 columns">
+          <div class="small-6 columns">
           </div>
       </div>
     </div>
-    <div id="aboutus" class="large-6 columns">
+    <div id="aboutus" class="small-6 columns">
           <div class="heading"><span>{{ project.name }}</span></div>
           <div data-bind="html: project_description"></div>
           <i class="fi-social-twitter large"></i>
@@ -167,8 +171,44 @@ var marker=null;
       show_image: function(image) {
         viewModel.selected_image(image);
       },
+      image_all_panel: ko.observable(false),
+      image_all_loaded: ko.observable(0),
+      add_image_all: function() {
+        //refresh_image_all
+        var img_html = "";
+        var nb = Math.min(20, viewModel.images().length - viewModel.image_all_loaded());
+        viewModel.image_all_loaded(nb);
+        for(var i=viewModel.image_all_loaded();i<viewModel.image_all_loaded()+nb;i++) {
+          var image = viewModel.images()[i];
+          img_html += '<li><img data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
+        }
+        viewModel.image_all_loaded(viewModel.image_all_loaded()+nb);
+        if(viewModel.image_all_loaded()>=viewModel.images().length) {
+          $("#refresh_image_all").hide();
+        }
+        $("#show_image_all").append(img_html);
+      },
+	    goto_image_all: function() {
+			      viewModel.image_all_panel(true);
+            viewModel.main_panel(false);
+            viewModel.newitem_panel(false);
+            if(viewModel.image_all_loaded() == 0) {
+              var img_html = "";
+              var nb = Math.min(20, viewModel.images().length);
+              viewModel.image_all_loaded(nb);
+              for(var i=0;i<nb;i++) {
+                var image = viewModel.images()[i];
+                img_html += '<li><img data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
+              }
+              $("#show_image_all").append(img_html);
+              if(viewModel.image_all_loaded()>=viewModel.images().length) {
+                $("#refresh_image_all").hide();
+              }
+            }
+	    },
       goto_addnew_panel: function() {
         viewModel.main_panel(false);
+        viewModel.image_all_panel(false);
         viewModel.newitem_panel(true);
         if(map==null) {
           initialize_map(event_position);
@@ -177,6 +217,7 @@ var marker=null;
       goto_home_panel: function() {
         viewModel.main_panel(true);
         viewModel.newitem_panel(false);
+        viewModel.image_all_panel(false);
       },
       has_images: ko.observable(false),
       geo: ko.observable({{ project.geo }}),
