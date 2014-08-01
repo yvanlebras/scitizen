@@ -83,6 +83,9 @@
   <a class="close-reveal-modal">&#215;</a>
 </div>
 
+<div id="myModalImage" class="reveal-modal xlarge" data-reveal>
+</div>
+
 <script type="text/javascript">
 
 $(document).foundation();
@@ -180,7 +183,7 @@ var marker=null;
         viewModel.image_all_loaded(nb);
         for(var i=viewModel.image_all_loaded();i<viewModel.image_all_loaded()+nb;i++) {
           var image = viewModel.images()[i];
-          img_html += '<li><img data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
+          img_html += '<li><img class="rawimage" data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
         }
         viewModel.image_all_loaded(viewModel.image_all_loaded()+nb);
         if(viewModel.image_all_loaded()>=viewModel.images().length) {
@@ -198,7 +201,7 @@ var marker=null;
               viewModel.image_all_loaded(nb);
               for(var i=0;i<nb;i++) {
                 var image = viewModel.images()[i];
-                img_html += '<li><img data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
+                img_html += '<li><img class="rawimage" data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
               }
               $("#show_image_all").append(img_html);
               if(viewModel.image_all_loaded()>=viewModel.images().length) {
@@ -330,6 +333,12 @@ var marker=null;
 
     $(document).ready(function() {
 
+      $(document).on('click', '.rawimage', function(e) {
+        var image_id = $(this).attr('data-id');
+        $("#myModalImage").html('<img src="/image/'+image_id+'/raw"/>');
+        $("#myModalImage").foundation('reveal', 'open');
+      });
+
       $("#myModalCanvas").on('click',function(e) {
         var canvas = document.getElementById('myModalCanvas');
         var pos = getRelativePosition(canvas, e);
@@ -454,6 +463,7 @@ var marker=null;
     google.maps.event.addListener(marker, 'click', function() {
       contentString = '<div>';
       contentString += '<img src="/image/'+result['_id']+'/raw" width="300"/>';
+      contentString += '<div>Location: '+result['fields']['location'][0]+', '+result['fields']['location'][1]+'</div>';
       for(field in result['fields']) {
         if(field!="loc" && field!="send") {
           for(i in project["form"]) {
