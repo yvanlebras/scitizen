@@ -38,6 +38,9 @@ Cells image on main page CC-BY Paul Neiman
  - add rescale image background task: on upload rescale image to tiny and
    display tiny images on web site
 
+  - add vote for images
+  - add social (facebook, google+)
+
 ## in progress
 
 
