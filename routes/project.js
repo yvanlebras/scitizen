@@ -234,6 +234,12 @@ exports.list = function(req, res) {
               res.status(404).send('no match');
               return;
             }
+            for(i=0;i<projects.length;i++) {
+            // Remove sensitive data for non project members
+                if(projects[i].users.indexOf(key_user.name)==-1 && key_user.name!= projects[i].owner ) {
+                    project_mask(projects[i]);
+                }
+            }
               res.json(projects);
           });
         });
@@ -252,6 +258,12 @@ exports.list = function(req, res) {
                   };
         }
         projects_db.find(filter, function(err,projects) {
+          for(i=0;i<projects.length;i++) {
+            // Remove sensitive data for non project members
+            if(!req.user || !req.user.username || (projects[i].users.indexOf(req.user.username)==-1 && req.user.username!= projects[i].owner )) {
+            project_mask(projects[i]);
+            }
+          }
           url_parts = url.parse(req.url, true);
           url_callback = url_parts.query.jsoncallback;
           if(url_callback !== undefined && url_callback!==null) {
@@ -280,6 +292,10 @@ exports.get = function(req, res){
                             function(can_read) {
       if(can_read) {
         if (! project.form) { project.form = {}; }
+            // Remove sensitive data for non project members
+            if(!req.user || !req.user.username || (project.users.indexOf(req.user.username)==-1 && req.user.username!= project.owner )) {
+                project_mask(project);
+            }
         url_parts = url.parse(req.url, true);
         url_callback = url_parts.query.jsoncallback;
         if(url_callback !== undefined && url_callback!==null) {
@@ -528,6 +544,15 @@ function get_content(image) {
     }
   }
   return comment;
+}
+
+/**
+* Mask sensitive data of project
+*/
+function project_mask(project) {
+    project.askimet_api = '';
+    project.google_api = '';
+    project.api = '';
 }
 
 function check_spam(project, image) {
