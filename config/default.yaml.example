@@ -1,0 +1,37 @@
+general:
+    db: "scitizen"
+    url: "http://localhost:3000/"
+    admin: [ "root@localhost" ]
+    storage: "pairtree"
+    # Quota in GB
+    plans: [ 'default' ]
+stats:
+    backend: 'influx'
+    influx:
+        host: 'localhost'
+        port: 8086
+        username: 'root'
+        password: 'XXX'
+        database: 'scitizen'
+plans:
+    default:
+        quota: 100
+mail:
+    host: "mailtrap.io"
+    #port: 465
+    port: 25
+    secure: false
+    user: "XXX"
+    password: "XXX"
+    origin: scitizen.no-reply@mydomain.com
+
+storage:
+    username: "scitizen"
+    region: "RegionOne"
+    password: "test"
+    authUrl: "http://131.254.16.132:5000/"
+    container: "scitizen"
+    path: "/var/lib/scitizen"
+
+Google:
+    apikey: ""
