@@ -3,7 +3,7 @@
 body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
 
 #map-canvas img {
-    max-width: none !important; 
+    max-width: none !important;
 }
 
 .project_selection {
@@ -16,11 +16,18 @@ body {background: #ccc url(../images/bg.png); border-top: 3px solid #000}
     background-color: white;
 }
 
-#general {
-  max-height: 400px;
-  background-position: center top;
-  background-image: url(/images/bear.jpg);
+
+
+#summary {
+  padding: 20px;
+  font-size:2em;
+  text-align: center;
 }
+.slider-img {
+  max-height:  400px;
+}
+
+
 #scientist{
   background-color: #6CBEEB;
   background-size: 100px;
@@ -66,7 +73,6 @@ background-repeat: no-repeat;
 .main_info {
   padding: 30px;
   font-family: 'Open Sans Condensed', sans-serif;
-  min-height: 400px;
   font-size: 1.2em;
   background-color: white;
 }
@@ -74,7 +80,7 @@ background-repeat: no-repeat;
 @media only screen and (max-width: 40em) {
 
 #general {
-  max-height: 200px;
+  display: none;
 }
 
 .main_info_title {

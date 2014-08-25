@@ -3,8 +3,24 @@
 
 <div>
   <div id="intro">
+    <div class="row small-12 large-12" id="summary" >
+      Scitizen = citizen science, a hosting science collaborative portal.
+    </div>
     <div class="row small-12 large-12 main_info" id="general">
-      <div class="main_info_title"><strong>Science by crowd, Science by citizens...</strong></div>
+      <div id="myslider">
+        <div class="slider-img main_info_title ecology"><img src="images/bear.jpg"/></div>
+        <div class="slider-img astronomy"><img src="images/astronomy.jpg"/></div>
+        <div class="slider-img biology"><img src="images/biology.png"/></div>
+    </div>
+      <!--<div class="main_info_title"><strong>Science by crowd, Science by citizens...</strong></div>-->
+    </div>
+    <div class="row">
+       <div data-alert class="alert-box warning radius">
+        Scitizen is in private Beta. If you wish to get an account, send us an
+email to <strong>support@genouest.org</strong>. While basic service will remain
+free, Some features may be charged in a later time (image size limit > 2M,
+number of api calls, number fo images...).
+        </div>
     </div>
     <div class="row main_info" id="scientist">
       <div class="small-2 large-2 column">
@@ -84,9 +100,11 @@
       </div>
       </div>
   </div>
+  <!--
   <div class="row" >
     <div class="small-12 large-12 columns band" id="band1"></div>
   </div>
+  -->
   <div class="row main_info" id="faq">
 	<ul>
 		<li>Some questions, problems ?... Contact us <a href="mailto:support@genouest.org">support[at]genouest.org</a></li>
@@ -98,7 +116,13 @@ your own API key for your project <a href="https://developers.google.com/maps/si
 	</ul>
   </div>
   </div>
-
+  <div class="row">
+    Credits:
+    <ul>
+    <li>"Magnificent CME Erupts on the Sun - August 31" by NASA Goddard Space Flight Center - Flickr: Magnificent CME Erupts on the Sun - August 31. Licensed under Creative Commons Attribution 2.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg#mediaviewer/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg</li>
+    <li>"Rat hippocampal neurons grown in vitro" http://www.cellimagelibrary.org/images/8735 - CC-By</li>
+  </ul>
+  </div>
 </div>
 
 <script type="text/javascript">
@@ -122,3 +146,14 @@ your own API key for your project <a href="https://developers.google.com/maps/si
 
 
 </script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#myslider').slick({
+              autoplay: true,
+              centerMode: true,
+              slidesToShow: 1
+            });
+        });
+    </script>

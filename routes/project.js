@@ -462,6 +462,7 @@ function upload_file(req, res, project) {
         fields.loc  = {'type': 'Point', 'coordinates': fields.location};
       }
 
+
       var validated = true;
 
       if(project.validation) {

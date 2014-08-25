@@ -27,6 +27,9 @@ Thanks to: JQuery, Foundation, KnockoutJS, Google maps API
 Main page icons: from OpenClipArt
 Cells image on main page CC-BY Paul Neiman
 
+Main page slider images credits:
+  "Magnificent CME Erupts on the Sun - August 31" by NASA Goddard Space Flight Center - Flickr: Magnificent CME Erupts on the Sun - August 31. Licensed under Creative Commons Attribution 2.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg#mediaviewer/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg
+  "Rat hippocampal neurons grown in vitro" http://www.cellimagelibrary.org/images/8735 - CC-By
 # Development
 
   To run with StrongOps

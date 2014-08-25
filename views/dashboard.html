@@ -55,9 +55,14 @@
     <div id="aboutus" class="small-6 columns">
           <div class="heading"><span>{{ project.name }}</span></div>
           <div data-bind="html: project_description"></div>
-          <i class="fi-social-twitter large"></i>
-          <i class="fi-social-facebook large"></i>
-          <i class="fi-social-google-plus large"></i>
+		  <div class="row social">
+            <span class='st_sharethis_large' displayText='ShareThis'></span>
+            <span class='st_facebook_large' displayText='Facebook'></span>
+            <span class='st_twitter_large' displayText='Tweet'></span>
+            <span class='st_linkedin_large' displayText='LinkedIn'></span>
+            <span class='st_pinterest_large' displayText='Pinterest'></span>
+            <span class='st_email_large' displayText='Email'></span>
+		  </div>
     </div>
   </div>
 
@@ -486,3 +491,6 @@ var marker=null;
 </script>
 <!-- Please call pinit.js only once per page -->
 <script type="text/javascript" async  data-pin-color="red" data-pin-hover="true" src="//assets.pinterest.com/js/pinit.js"></script>
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "ur-217977e3-b2b9-2886-b69a-3906bf90dcd6", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script>
