@@ -35,6 +35,10 @@ Main page slider images credits:
   To run with StrongOps
     slc run
 
+# Installation
+
+ npm install -g grunt-cli
+ npm install
 
 # TODO
 

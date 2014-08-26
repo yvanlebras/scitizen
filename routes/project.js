@@ -114,7 +114,7 @@ exports.edit = function(req, res) {
             if(req.body.form) {
             for(var elt in req.body.form) {
               if(! Array.isArray(req.body.form[elt].values)) {
-                if(req.body.form[elt].values == "false") {
+                if(req.body.form[elt].values == 'false') {
                   req.body.form[elt].values = false;
                 }
                 if(req.body.form[elt].values == 'true') {
@@ -128,27 +128,33 @@ exports.edit = function(req, res) {
           }
           else {
             if(req.body.geo) {
-              if(req.body.geo == "false") { req.body.geo = false; }
+              if(req.body.geo == 'false') { req.body.geo = false; }
               else { req.body.geo = true; }
             }
             if(req.body.users_can_add) {
-              if(req.body.users_can_add == "false") { req.body.users_can_add = false; }
+              if(req.body.users_can_add == 'false') {
+                req.body.users_can_add = false;
+              }
               else { req.body.users_can_add = true; }
             }
             if(req.body.point_and_click) {
-              if(req.body.point_and_click == "false") { req.body.point_and_click = false; }
+              if(req.body.point_and_click == 'false') {
+                req.body.point_and_click = false;
+              }
               else { req.body.point_and_click = true; }
             }
             if(req.body.validation) {
-              if(req.body.validation == "false") { req.body.validation = false; }
+              if(req.body.validation == 'false') {
+                req.body.validation = false;
+              }
               else { req.body.validation = true; }
             }
             if(req.body.status) {
-              if(req.body.status == "false") { req.body.status = false; }
+              if(req.body.status == 'false') { req.body.status = false; }
               else { req.body.status = true; }
             }
             if(req.body.public) {
-              if(req.body.public == "false") { req.body.public = false; }
+              if(req.body.public == 'false') { req.body.public = false; }
               else { req.body.public = true; }
             }
             if(req.body.api) { delete req.body.api; }
@@ -236,7 +242,8 @@ exports.list = function(req, res) {
             }
             for(i=0;i<projects.length;i++) {
             // Remove sensitive data for non project members
-                if(projects[i].users.indexOf(key_user.name)==-1 && key_user.name!= projects[i].owner ) {
+                if(projects[i].users.indexOf(key_user.name)==-1 && 
+                    key_user.name!= projects[i].owner ) {
                     project_mask(projects[i]);
                 }
             }
@@ -260,7 +267,9 @@ exports.list = function(req, res) {
         projects_db.find(filter, function(err,projects) {
           for(i=0;i<projects.length;i++) {
             // Remove sensitive data for non project members
-            if(!req.user || !req.user.username || (projects[i].users.indexOf(req.user.username)==-1 && req.user.username!= projects[i].owner )) {
+            if(!req.user || !req.user.username ||
+                (projects[i].users.indexOf(req.user.username)==-1 &&
+                    req.user.username!= projects[i].owner )) {
             project_mask(projects[i]);
             }
           }
@@ -293,7 +302,9 @@ exports.get = function(req, res){
       if(can_read) {
         if (! project.form) { project.form = {}; }
             // Remove sensitive data for non project members
-            if(!req.user || !req.user.username || (project.users.indexOf(req.user.username)==-1 && req.user.username!= project.owner )) {
+            if(!req.user || !req.user.username ||
+                (project.users.indexOf(req.user.username)==-1 &&
+                    req.user.username!= project.owner )) {
                 project_mask(project);
             }
         url_parts = url.parse(req.url, true);

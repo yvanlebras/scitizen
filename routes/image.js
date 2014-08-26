@@ -112,11 +112,11 @@ exports.curate = function(req, res) {
               else {
                 var forms = req.param('form_elts').split(',');
                 var stats = { 'stats.vote': 1};
+                var add_user_click = null;
                 for(var i =0;i<forms.length;i++) {
                   if(forms[i]=='api') { continue; }
-                  var add_user_click = null;
                   if(forms[i]=='user_click') { 
-                        add_user_click = { 'stats.user_click': req.param(forms[i])};
+                    add_user_click = {'stats.user_click': req.param(forms[i])};
                   } 
                   else{
                   var param = req.param(forms[i]);
@@ -131,8 +131,8 @@ exports.curate = function(req, res) {
                  }
                 }
                 var to_update = { $inc : stats };
-                if(add_user_click!=null) {
-                  to_update['$push'] = add_user_click;
+                if(add_user_click!==null) {
+                  to_update.$push = add_user_click;
                 }
                 images_db.update({_id: image_id}, to_update, function(err) {
                   if(err) { console.log(err); }
