@@ -23,7 +23,7 @@
     "mongodb": "*",
     "monk": "*",
     "node-akismet": "0.0.2",
-    "nodemailer": "*",
+    "nodemailer": "0.6.5",
     "passport": "0.2.0",
     "passport-facebook": "*",
     "passport-google": "*",
