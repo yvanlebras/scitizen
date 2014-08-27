@@ -37,6 +37,8 @@ Main page slider images credits:
 
 # Installation
 
+Requirements: mongodb, bzip2, influxdb (optional)
+
  npm install -g grunt-cli
  npm install
 
@@ -45,8 +47,11 @@ Main page slider images credits:
  - add rescale image background task: on upload rescale image to tiny and
    display tiny images on web site
 
-  - add vote for images
-  - add social (facebook, google+)
+ - add vote for images
+
+ - add lost password management
+
+ - add connection with Google, Facebook ....
 
 ## in progress
 
@@ -62,12 +67,9 @@ Main page slider images credits:
 
 * main page
 * Add quotas per project, admin can increase plan, quotas are managed by plans in config
-* In my/ edit_project, use :with project_current binding instead of specific fields
 
 ## Items
 
-* add possibility to point an element on an item (location on image of a specific item), at curation time. In porject, define granularity (circle radius for user selection)
-* view all items (with progressive scrolldown)
 * time based statistics for stats.api and stats.google instead of total count using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
@@ -82,6 +84,7 @@ Main page slider images credits:
 ## forms
 
 * add tags
+* add vote (star 1 to 5)
 
 ## dashboard
 
