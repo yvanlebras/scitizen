@@ -311,6 +311,10 @@
 
     $(document).ready(function() {
 
+		$(document).on('change', '.rating', function(){
+			var elt_id = $(this).attr('data-id');
+			$('#'+elt_id).val(this.value);
+		}); 
 
 			$.ajax({
 				cache: false,
@@ -776,7 +780,8 @@
 							'multiple choice',
 							'textarea',
 							'text',
-							'checkbox'
+							'checkbox',
+							'rating'
 							]),
 						widget_foundation_show: function() {
 							$(".project_id").text(viewModel.project_current()._id);
@@ -901,6 +906,11 @@
             form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
             form_elt += '<select id="form'+elt_id+'" multiple="multiple"></select>';
         }
+		else if(elt == 'rating') {
+			form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="rating" data-id="'+elt_id+'"/>';
+            form_elt += '<input type="text" id="form'+elt_id+'"/>';
+        }
+
 
 		form_elt += "</div>";
 		//$("#form_element").append(form_elt);

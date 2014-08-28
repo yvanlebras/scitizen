@@ -339,6 +339,20 @@ var marker=null;
 
     $(document).ready(function() {
 
+      $(document).on('change', '#dynaform .rating', function(){
+            var elt_id = $(this).attr('data-id');
+            console.log(elt_id);
+			console.log(this.value);
+            $('#dynaform #'+elt_id).val(this.value);
+      });
+
+      $(document).on('change', '#random_form .rating', function(){
+            var elt_id = $(this).attr('data-id');
+            console.log(elt_id);
+            console.log(this.value);
+            $('#random_form #'+elt_id).val(this.value);
+      });
+
       $(document).on('click', '.rawimage', function(e) {
         var image_id = $(this).attr('data-id');
         $("#myModalImage").html('<img src="/image/'+image_id+'/raw"/>');

@@ -47,8 +47,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
  - add rescale image background task: on upload rescale image to tiny and
    display tiny images on web site
 
- - add vote for images
-
  - add lost password management
 
  - add connection with Google, Facebook ....

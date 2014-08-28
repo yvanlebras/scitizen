@@ -75,6 +75,19 @@ function getURIParameter(param, asArray) {
             elt += '</select>';
             elt += '</div>';
         }
+        else if(elt_type == 'rating') {
+            elt += '<div class="small-8 columns">';
+            elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
+            elt += '<input type="hidden" id="r'+elt_id+'" value="0"/>';
+            elt += '<span class="star-rating">';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="1"><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="2"><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="3"><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="4"><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="5"><i></i>';
+            elt += '</span>';
+            elt += '</div>';
+        }
 
         elt += '</div>';
 
@@ -167,6 +180,30 @@ function getURIParameter(param, asArray) {
             elt += '</select>';
             elt += '</div>';
         }
+        else if(elt_type == 'rating') {
+            elt += '<div class="small-8 columns">';
+            elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
+            elt += '<input class="sciform" type="hidden" id="r'+elt_id+'" name="r'+elt_id+'" value="'+value+'"/>';
+            elt += '<span class="star-rating">';
+            var checked1 = '';
+            var checked2 = '';
+            var checked3 = '';
+            var checked4 = '';
+            var checked5 = '';
+            if(value==1) { checked1 = 'checked'; }
+            if(value==2) { checked2 = 'checked'; }
+            if(value==3) { checked3 = 'checked'; }
+            if(value==4) { checked4 = 'checked'; }
+            if(value==5) { checked5 = 'checked'; }
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="1" '+checked1+'><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="2" '+checked2+'><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="3" '+checked3+'><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="4" '+checked4+'><i></i>';
+            elt += '  <input class="rating" type="radio" data-id="r'+elt_id+'" name="rating" value="5" '+checked5+'><i></i>';
+            elt += '</span>';
+            elt += '</div>';
+        }
+
 
         elt += '</div>';
 
