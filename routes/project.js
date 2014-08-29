@@ -432,6 +432,26 @@ exports.dashboard =  function(req, res){
     });
 };
 
+exports.stats = function(req, res) {
+    projects_db.findOne({ _id : req.param('id')}, function(err, project) {
+      if(err) {
+        res.status(404).send();
+        return;
+      }
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                            function(can_read) {
+        if(can_read) {
+
+          scitizen_stats.query(project.name,'1d','1h',
+                                function(err, data) { res.json(data); });
+        }
+        else {
+          res.status(401).send('You are not allowed to access this project');
+        }
+      });
+   });
+}
+
 
 function upload_file(req, res, project) {
     var form = new formidable.IncomingForm();
