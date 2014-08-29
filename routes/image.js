@@ -227,7 +227,7 @@ exports.getraw = function(req, res) {
   images_db.findOne({ _id: image_id }, function(err, image) {
     scitizen_storage.get(image_id, function(err, result) {
       if(err>0) {
-        res.status(err).send('Could not retreive image');
+        res.status(err).send('Could not retrieve image');
       }
       else {
         serve_image(result, req, res);

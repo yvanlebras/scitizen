@@ -65,6 +65,7 @@
 				</table>
 			</div>
 			<div class="small-6 large-6 columns">
+                <div id="project_stats" class="row"></div>
 				<div id="image_stats" class="row">
 				</div>
 			</div>
@@ -976,6 +977,7 @@
 				viewModel.manageAccount(false);
 				viewModel.admin(false);
 				var project = viewModel.project_current();
+        showProjectStats(project);
 				$.ajax({
     			cache: false,
     			url: "/project/"+project_id+"/image",
@@ -990,7 +992,70 @@
         });
 				*/
 	}
+    function showProjectStats(project){
+        var html = '<div class="large-6"><div>Statistics</div>';
+        html += '<div>Google</div>';
+        html += '<canvas id="chart_google_'+project.name+'" ></canvas>';
+        html += '<div>Images</div>';
+        html += '<canvas id="chart_image_'+project.name+'" ></canvas>';
+        html += '<div>Quota</div>';
+        html += '<canvas id="chart_quota_'+project.name+'" ></canvas>';
+        html += '</div>';
+        $("#project_stats").html(html);
+        $.ajax({
+            cache: false,
+            url: "/project/"+project._id+"/stats",
+            dataType: "json",
+            success: function(stats) {
+                var data_google = { labels : [],
+                     datasets:  []
+                };
+                var data_image = { labels : [],
+                     datasets:  []
+                };
+                var data_quota = { labels : [],
+                     datasets:  []
+                };
 
+                if(stats.length==0) { return; } 
+                var stat = stats[0].points.reverse();
+                var google_stats =  { label: 'Google', data: []}
+                var image_stats =  { label: 'Images', data: [] };
+                var quota_stats =  { label: 'Quota', data: [] };
+                for(i=0;i<stat.length;i++) {
+					data_google.labels.push(timeConverter(stat[i][0]));
+                    data_image.labels.push(timeConverter(stat[i][0]));
+                    data_quota.labels.push(timeConverter(stat[i][0]));
+                    google_stats.data.push(stat[i][1]);
+                    image_stats.data.push(stat[i][2]);
+                    quota_stats.data.push(stat[i][3]);
+                }
+                data_google.datasets.push(google_stats);
+                data_image.datasets.push(image_stats);
+                data_quota.datasets.push(quota_stats);
+                var ctx = $("#chart_google_"+project.name).get(0).getContext("2d");
+                var myLineChart = new Chart(ctx).Line(data_google);
+                ctx = $("#chart_image_"+project.name).get(0).getContext("2d");
+                myLineChart = new Chart(ctx).Line(data_image);
+                ctx = $("#chart_quota_"+project.name).get(0).getContext("2d");
+                myLineChart = new Chart(ctx).Line(data_quota);
+            }
+        });
+    }
+
+function timeConverter(UNIX_timestamp){
+ var a = new Date(UNIX_timestamp);
+ var months =
+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+     var year = a.getFullYear();
+     var month = months[a.getMonth() - 1];
+     var date = a.getDate();
+     var hour = a.getHours();
+     var min = a.getMinutes();
+     var sec = a.getSeconds();
+     var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+     return time;
+ }
 
   </script>
 
