@@ -36,25 +36,25 @@ function getURIParameter(param, asArray) {
         var elt = '<div class="row">';
         var labelelt = $("#labelform"+elt_id);
         if(elt_type == 'text') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
             elt += '<input id="r'+elt_id+'" type="text" value=""/>';
             elt += '</div>';
         }
         else if(elt_type == 'textarea') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
             elt += '<textarea id="r'+elt_id+'"></textarea>';
             elt += '</div>';
         }
         else if(elt_type == 'checkbox') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
             elt += '<input type="checkbox" id="r'+elt_id+'"/>';
             elt += '</div>';
         }
         else if(elt_type == 'single') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
             elt += '<select id="r'+elt_id+'">';
             var values = $("#valuesform"+elt_id).val().split(",");
@@ -65,7 +65,7 @@ function getURIParameter(param, asArray) {
             elt += '</div>';
         }
         else if(elt_type == 'multiple') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt.val()+'</label>';
             elt += '<select id="r'+elt_id+'" multiple="multiple">';
             var values = $("#valuesform"+elt_id).val().split(",");
@@ -101,7 +101,7 @@ function getURIParameter(param, asArray) {
         var labelelt = form_elt['label'];
         var elt_id = form_elt['id'];
         if(elt_type == 'text') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
             if(value==null) {
             elt += '<input required class="sciform" name="r'+elt_id+'" id="r'+elt_id+'" value=""/>';
@@ -116,7 +116,7 @@ function getURIParameter(param, asArray) {
             elt += '</div>';
         }
         else if(elt_type == 'textarea') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
             if(value==null) {
             elt += '<textarea required  class="sciform" name="r'+elt_id+'" id="r'+elt_id+'"></textarea>';
@@ -136,13 +136,13 @@ function getURIParameter(param, asArray) {
             if(value==true || value=='true' || value==1) {
                 checked = 'checked';
             }
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
             elt += '<input '+checked+' class="sciform" name="r'+elt_id+'" type="checkbox" id="r'+elt_id+'"/>';
             elt += '</div>';
         }
         else if(elt_type == 'single') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
             elt += '<select class="sciform" required name="r'+elt_id+'" id="r'+elt_id+'">';
             var values = form_elt['values'];
@@ -160,7 +160,7 @@ function getURIParameter(param, asArray) {
             elt += '</div>';
         }
         else if(elt_type == 'multiple') {
-            elt += '<div class="large-8 columns">';
+            elt += '<div class="small-8 columns">';
             elt += '<label class="left" for="r'+elt_id+'">'+labelelt+'</label>';
             elt += '<select class="sciform" required name="r'+elt_id+'[]" id="r'+elt_id+'" multiple="multiple">';
             var values = form_elt['values'];

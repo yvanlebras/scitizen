@@ -512,12 +512,12 @@
 								//}
 								//stat_html += "</ul>";
 								//stat_html += "</div>";
-								$("#image_stats").append('<div class="large-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
+								$("#image_stats").append('<div class="small-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
 								var ctx = $("#chart_"+stat).get(0).getContext("2d");
 								var myNewChart = new Chart(ctx).Bar(data);
 							}
 							if(has_point_and_click) {
-								$("#image_stats").append('<div class="large-6 "><button id="show_image_points" type="button" data-image="'+image._id+'">Display image points</button></div>');
+								$("#image_stats").append('<div class="small-6 "><button id="show_image_points" type="button" data-image="'+image._id+'">Display image points</button></div>');
 							}
 							//$("#image_stats").html(stat_html);
 						},
@@ -993,7 +993,7 @@
 				*/
 	}
     function showProjectStats(project){
-        var html = '<div class="large-6"><div>Statistics</div>';
+        var html = '<div class="small-6"><div>Statistics</div>';
         html += '<div>Google</div>';
         html += '<canvas id="chart_google_'+project.name+'" ></canvas>';
         html += '<div>Images</div>';
