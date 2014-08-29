@@ -442,7 +442,7 @@ exports.stats = function(req, res) {
                             function(can_read) {
         if(can_read) {
 
-          scitizen_stats.query(project.name,'1d','1h',
+          scitizen_stats.query(project.name,'1w','1d',
                                 function(err, data) { res.json(data); });
         }
         else {
