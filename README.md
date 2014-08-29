@@ -49,6 +49,8 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
  - add lost password management
 
+ - admin: add account management
+
  - add connection with Google, Facebook ....
 
 ## in progress
