@@ -44,18 +44,11 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 # TODO
 
- - add rescale image background task: on upload rescale image to tiny and
-   display tiny images on web site
-
- - add lost password management
-
- - admin: add account management
-
- - add connection with Google, Facebook ....
 
 ## in progress
 
-
+ - add rescale image background task: on upload rescale image to tiny and
+   display tiny images on web site
 
 ## Questions
 
@@ -65,12 +58,12 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 ## General
 
-* main page
+* add lost password management
+* add connection with Google, Facebook ....
 * Add quotas per project, admin can increase plan, quotas are managed by plans in config
 
 ## Items
 
-* time based statistics for stats.api and stats.google instead of total count using stats lib
 * list: add $limit and $skip option (to limit number of items to show)
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache
@@ -84,7 +77,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
 ## forms
 
 * add tags
-* add vote (star 1 to 5)
 
 ## dashboard
 
@@ -100,6 +92,8 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 * manage project quotas
 * add task for cron to manage *task* objects (bulk deletion...)
+* show usage per projet, show all projects
+* add account management
 
 # Issues:
 
