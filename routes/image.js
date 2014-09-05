@@ -237,7 +237,7 @@ exports.getraw = function(req, res) {
 };
 
 exports.list = function(req, res) {
-    projects_db.findOne({ _id: req.param('id') }, function(err, project) {
+    projects_db.findOne({ _id: req.param('id'), ready: true }, function(err, project) {
       scitizen_auth.can_read(req.user, project, req.param('api'),
                               function(can_read) {
         if(can_read) {
