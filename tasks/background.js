@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -75,9 +74,6 @@ tasks_db.find({}, function(err, tasks) {
                                         image_tiny_path,
                                         {},
                                         function(code,img){
-                                            console.log('storage');
-                                            console.log(code);
-                                            console.log(img);
                                             if(code==0) {
                                             tasks_db.remove({_id: task._id}, function() { counter += 1;});
                                             }
@@ -85,7 +81,15 @@ tasks_db.find({}, function(err, tasks) {
                                             counter += 1;
                                             console.log("Task error: "+task._id);
                                             }
-                                        });
+                                            // Set image as ready now
+                                            images_db.update({ _id: task.objectid },
+                                                                {$set: {ready: true}},
+                                                                function(err) {
+                                                                  if(err) {
+                                                                    console.log(err);
+                                                                  }
+                                                                });
+                                            });
                 });
                 }); // pipe
             }
