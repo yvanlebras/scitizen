@@ -110,8 +110,8 @@ exports.edit = function(req, res) {
       scitizen_auth.can_edit(req.user, project, req.param('api'),
                             function(can_edit) {
         if(can_edit) {
-            // check params and update
-            if(req.body.form) {
+          // check params and update
+          if(req.body.form) {
             for(var elt in req.body.form) {
               if(! Array.isArray(req.body.form[elt].values)) {
                 if(req.body.form[elt].values == 'false') {
@@ -124,7 +124,13 @@ exports.edit = function(req, res) {
               if(elt == 'api') {
                 delete req.body.form[elt];
               }
+              /*
+              if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
+                if(elt == 'plan') { delete req.body.form[elt]; }
+              }
+              */
             }
+
           }
           else {
             if(req.body.geo) {
@@ -158,6 +164,11 @@ exports.edit = function(req, res) {
               else { req.body.public = true; }
             }
             if(req.body.api) { delete req.body.api; }
+            /*
+            if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
+              if(req.body.plan) { delete req.body.plan; }
+            }
+            */
           }
 
 
@@ -242,7 +253,7 @@ exports.list = function(req, res) {
             }
             for(i=0;i<projects.length;i++) {
             // Remove sensitive data for non project members
-                if(projects[i].users.indexOf(key_user.name)==-1 && 
+                if(projects[i].users.indexOf(key_user.name)==-1 &&
                     key_user.name!= projects[i].owner ) {
                     project_mask(projects[i]);
                 }

@@ -82,6 +82,10 @@
 				<input name="project_google_edit" id="project_google_edit" type="text" data-bind="value: project_google"/>
 				<label for="project_askimet_edit">Antispam Askimet API key (optional)</label>
 				<input name="project_askimet_edit" id="project_askimet_edit" type="text" data-bind="value: project_askimet"/>
+				<label for="project_plan_edit">Plan</label>
+				<select name="project_plan_edit" data-bind="value: project_plan">
+				{{#plans}} <option value="{{.}}">{{.}}</option> {{/plans}}
+				</select>
 				<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
 			</div>
 			<div data-bind="with: project_current">
@@ -315,7 +319,7 @@
 		$(document).on('change', '.rating', function(){
 			var elt_id = $(this).attr('data-id');
 			$('#'+elt_id).val(this.value);
-		}); 
+		});
 
 			$.ajax({
 				cache: false,
@@ -618,7 +622,8 @@
 													description: viewModel.project_description(),
 													short_description: viewModel.project_short_description(),
 													google_api: viewModel.project_google(),
-													askimet_api: viewModel.project_askimet()
+													askimet_api: viewModel.project_askimet(),
+													plan: viewModel.project_plan()
 												},
 										success: function(result) {
 											$.ajax({
@@ -642,6 +647,7 @@
 						project_google: ko.observable(''),
 						project_askimet: ko.observable(''),
 						project_short_description: ko.observable(''),
+						project_plan: ko.observable('default'),
             project_owner: ko.observable('{{user.username}}'),
             project_status: ko.observable(false),
 					  project_public: ko.observable(true),
@@ -717,6 +723,7 @@
 							viewModel.project_short_description(project.short_description);
 							viewModel.project_google(project.google_api);
 							viewModel.project_askimet(project.askimet_api);
+							viewModel.project_plan(project.plan);
 							//$("#form_element").html("");
 							$("#form_render").html("");
 							var form_elts = project['form'];
@@ -1017,7 +1024,7 @@
                      datasets:  []
                 };
 
-                if(stats.length==0) { return; } 
+                if(stats.length==0) { return; }
                 var stat = stats[0].points.reverse();
                 var google_stats =  { label: 'Google', data: []}
                 var image_stats =  { label: 'Images', data: [] };
