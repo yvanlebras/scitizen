@@ -94,6 +94,7 @@ Requirements: mongodb, bzip2, influxdb (optional)
 * add task for cron to manage *task* objects (bulk deletion...)
 * show usage per projet, show all projects
 * add account management
+* show pending tasks
 
 # Issues:
 
