@@ -513,6 +513,7 @@ function upload_file(req, res, project) {
                   need_spam_control: need_control,
                   size: files.image.size,
                   spam: false,
+                  ready: false,
                   favorite: false};
 
       images_db.insert(item, function(err, image) {
