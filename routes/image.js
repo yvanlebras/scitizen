@@ -115,9 +115,9 @@ exports.curate = function(req, res) {
                 var add_user_click = null;
                 for(var i =0;i<forms.length;i++) {
                   if(forms[i]=='api') { continue; }
-                  if(forms[i]=='user_click') { 
+                  if(forms[i]=='user_click') {
                     add_user_click = {'stats.user_click': req.param(forms[i])};
-                  } 
+                  }
                   else{
                   var param = req.param(forms[i]);
                   if(param instanceof Array) {
@@ -223,8 +223,16 @@ exports.getraw = function(req, res) {
     res.status(404).send('Image not found');
     return;
   }
+  var tiny = false;
+  if(req.param('tiny')!=undefined) {
+    console.log("require tiny");
+    tiny = true;
+  }
 
   images_db.findOne({ _id: image_id }, function(err, image) {
+    if(tiny) {
+      image_id = 'tiny-'+image_id;
+    }
     scitizen_storage.get(image_id, function(err, result) {
       if(err>0) {
         res.status(err).send('Could not retrieve image');
@@ -237,11 +245,12 @@ exports.getraw = function(req, res) {
 };
 
 exports.list = function(req, res) {
-    projects_db.findOne({ _id: req.param('id'), ready: true }, function(err, project) {
+    projects_db.findOne({ _id: req.param('id')}, function(err, project) {
       scitizen_auth.can_read(req.user, project, req.param('api'),
                               function(can_read) {
         if(can_read) {
-            var filter = { project: images_db.id(req.param('id')) };
+            var filter = { project: images_db.id(req.param('id')),
+                           ready: true };
             // If not a project member, show only validated images
             if(! req.user || project.users.indexOf(req.user.username)==1) {
                 filter.validated = true;

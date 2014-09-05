@@ -12,11 +12,11 @@
 <div id="main" data-bind="visible: main_panel">
   <div id="last_images" class="block row section_dark" data-bind="if: has_images">
     <div class="small-6 columns main_image">
-        <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)+'/raw'}" alt="selected image" />
+        <img data-bind="attr: {src: '/image/'+ko.utils.unwrapObservable(selected_image()._id)+'/raw?tiny'}" alt="selected image" />
     </div>
     <div class="small-4 columns" data-bind="foreach: last_10_images">
       <div class="small-2">
-        <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw'}" alt="last 10 images" />
+        <img class="thumb" data-bind="click: $parent.show_image, attr: {src: '/image/'+ko.utils.unwrapObservable(_id)+'/raw?tiny'}" alt="last 10 images" />
       </div>
     </div>
   </div>
@@ -33,7 +33,7 @@
       <!-- random element -->
       <div class="row">
         <div class="small-6 columns">
-              <img id="random_image" data-bind="click: click_random, attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw'}" alt="random image from database" />
+              <img id="random_image" data-bind="click: click_random, attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw?tiny'}" alt="random image from database" />
               <span data-bind="visible: project().point_and_click">Click image to point the region of interest</span>
         </div>
         <div class="small-6 columns">
