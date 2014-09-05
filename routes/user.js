@@ -221,7 +221,8 @@ exports.my = function(req, res){
             res.render('my', {
                                 layout: 'layouts/default/index',
                                 user: user,
-                                isAdmin: isAdmin
+                                isAdmin: isAdmin,
+                                plans: GENERAL_CONFIG.plans
                               });
         }
     });
