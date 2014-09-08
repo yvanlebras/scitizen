@@ -56,7 +56,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 ## General
 
-* add lost password management
 * add connection with Google, Facebook ....
 * Add quotas per project, admin can increase plan, quotas are managed by plans in config
 

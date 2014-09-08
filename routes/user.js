@@ -272,6 +272,90 @@ exports.register = function(req, res) {
   });
 };
 
+exports.password_reset_request = function(req, res){
+  var login = req.param('login');
+  if(login === undefined) {
+    res.json({ err: 401, msg: 'Missing user id'});
+    return;
+  }
+  users_db.findOne({username: login}, function(err, user) {
+    if(err) {
+      res.json({ err: 401, msg: 'USer does not exist'});
+      return;
+    }
+    var link = GENERAL_CONFIG.url +
+                encodeURI('users/'+user._id+
+                          '/password_reset?login='+
+                          login+'&regkey='+user.regkey);
+    var mailOptions = {
+      from: MAIL_CONFIG.origin, // sender address
+      to: login, // list of receivers
+      subject: 'Scitizen password modification request', // Subject line
+      text: 'You have request a password reset,' +
+            'Go to the following link to modify your password: '+
+            link, // plaintext body
+      html: 'You have request a password reset, '+
+             'click the following link to modify your password:'+
+             ' <a href="'+link+'">'+
+             link+'</a>' // html body
+    };
+    if(transport!==null) {
+      transport.sendMail(mailOptions, function(error, response){
+        if(error){
+          console.log(error);
+        }
+      });
+    }
+    res.json({ err: 0, msg: 'An email has been sent to your mailbox with a link to reset your password.'});
+    return;
+  });
+};
+
+exports.password_reset = function(req, res) {
+  var login = req.param('login');
+  var regkey = req.param('regkey');
+  var password = req.param('password');
+  var confirm = req.param('password_confirm');
+  if(password === undefined) {
+    res.render('password_reset', { layout: 'layouts/default/public',
+                           user: login, regkey: regkey, user_id: req.param('id') });
+  }
+  else {
+    if(password!=confirm) {
+      res.json({ err: 503, msg: 'Passwords do not match'});
+      return;
+    }
+    sciconfig.findOne( { name: 'default'}, function(err, config) {
+        if(!config) {
+            res.json({ err: 500, msg: 'Application is not configured'});
+        }
+        else {
+          users_db.findOne({username: login}, function(err, user) {
+            if(err) {
+              res.json({ err: 401, msg: 'USer does not exist'});
+              return;
+            }
+            if(user.regkey == regkey) {
+              salt = config.salt;
+              var hash = bcrypt.hashSync(password, salt);
+              users_db.update({_id: user._id},
+                            {$set: {password: hash}
+                            });
+              res.json({ err: 0, msg: 'Password modified'});
+            }
+            else {
+              res.json({ err: 0, msg: 'key is not valid'});
+              return;
+            }
+        });
+        }
+    });
+
+  }
+
+
+};
+
 exports.confirm = function(req, res) {
   var login = req.param('user');
   var regkey = req.param('regkey');

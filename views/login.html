@@ -4,14 +4,17 @@
 
     <!-- Content -->
 {{#messages}}
-   <span class="alert label"> {{ messages }} </span>
+   <span class="alert label" > {{ messages }} </span>
 {{/messages}}
+<span class="" id="message"></span>
+
 
 <form action="/login" method="post">
     <div>
         <label>Username:</label>
-        <input type="text" name="username"/>
+        <input type="text" name="username" id="username"/>
     </div>
+    <div><button type="button" class="btn btn-large" id="password_update">Lost your password ?</button></div>
     <div>
         <label>Password:</label>
         <input type="password" name="password"/>
@@ -29,6 +32,43 @@
   </div>
 
 <script>
+$(document).ready(function() {
+  $("#password_update").click(function(){
+    if( $("#username").val() === undefined || $("#username").val() === '') {
+      console.log("empty");
+      $("#message").addClass('alert-box alert');
+      $("#message").html('Username is empty, please fill it with your identifier');
+    }
+    else {
+      $.ajax({
+        url: "/users/password_reset_request",
+        type: 'POST',
+        data:  { login: $("#username").val() },
+        dataType: "json",
+        success: function(data, textStatus, jqXHR)
+        {
+          if(data.err!=0) {
+              $("#message").html("An error occured: "+data.msg);
+              $("#message").addClass("alert-box alert");
+          }
+          else {
+            $("#message").removeClass("alert-box alert");
+            $("#message").html(data.msg);
+            $("#message").addClass("alert-box success");
+          }
+
+        },
+        error: function(jqXHR, textStatus, errorThrown)
+        {
+            $("#message").addClass("alert-box alert");
+            $("#message").html("An error occured");
+        }
+      });
+    }
+  });
+});
+
+
 var viewModel = {
   project_list: ko.observableArray(),
   project_ready: ko.observable(false),
