@@ -41,7 +41,8 @@
 			      <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: login}">Login</a></li>
             <li data-bind="ifnot: user_logged"><a href="#" data-bind="attr: { href: register}">Register</a></li>
             <li data-bind="if: user_logged"><a href="#" data-bind="text: user_current().username, click: user_manage"></a></li>
-            <li data-bind="if: user_admin"><a href="#" data-bind="click: user_admin">Admin</a></li>
+            <li data-bind="if: user_admin"><a href="#" data-bind="click:
+user_admin_dashboard">Admin</a></li>
             <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: my}">My projects</a>
             <li data-bind="if: user_logged"><a href="#" data-bind="attr: { href: logout}">Logout</a></li>
 
