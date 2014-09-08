@@ -47,8 +47,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 ## in progress
 
- - add rescale image background task: on upload rescale image to tiny and
-   display tiny images on web site
 
 ## Questions
 
@@ -64,6 +62,7 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 ## Items
 
+* add rescale image background task according to project plan (limit size for free)
 * list: add $limit and $skip option (to limit number of items to show)
 * Direct to S3 file upload after form approval (need auth token and CORS) instead of file upload and transfer to S3
 * For S3, get remote HTTP file access directly instead of using local cache

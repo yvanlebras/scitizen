@@ -40,6 +40,7 @@ describe('Anonymous', function() {
   });
 
   beforeEach(function(done){
+    tasks.remove({}, function(err){});
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
     images.remove({}, function(err) {
@@ -94,22 +95,26 @@ describe('Anonymous', function() {
                         { name: 'image1',
                           project: test_context.projects[0]._id,
                           validated: true,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true
                         },
                         { name: 'image2',
                           project: test_context.projects[0]._id,
                           validated: false,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true
                         },
                         { name: 'image3',
                           project: test_context.projects[1]._id,
                           validated: true,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true
                         },
                         { name: 'image4',
                           project: test_context.projects[1]._id,
                           validated: false,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true
                         },
                         ];
                       images.insert(test_images, function(err) {
@@ -470,6 +475,31 @@ describe('Anonymous', function() {
     req.end();
   });
 
+  it('anonymous cannot get a project statistics', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id+'/stats',
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(401);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+
+
+  });
+
+
   it('anonymous can list validated images of a public project', function(done) {
     var options = {
       hostname: 'localhost',
@@ -590,7 +620,11 @@ describe('Anonymous', function() {
       res.on('data', function (chunk) {
         var image = JSON.parse(chunk);
         expect(image.fields.key1).to.equal('value1');
-        done();
+        tasks.find({}, function(err, task_list) {
+          expect(task_list.length).to.equal(1);
+          expect(task_list[0].type).to.equal('rescale');
+          done();
+        });
       });
     });
     req.on('error', function(e) {
@@ -604,7 +638,7 @@ describe('Anonymous', function() {
     req.end();
   });
 
-  it('anonymous can post an image to a public project', function(done) {
+  it('anonymous cannot post an image to a private project', function(done) {
     var boundary = Math.random();
     var post_data = [];
     var fields = {
