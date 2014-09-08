@@ -449,7 +449,7 @@ exports.stats = function(req, res) {
         res.status(404).send();
         return;
       }
-      scitizen_auth.can_read(req.user, project, req.param('api'),
+      scitizen_auth.is_member_of(req.user, project, req.param('api'),
                             function(can_read) {
         if(can_read) {
 
@@ -461,7 +461,7 @@ exports.stats = function(req, res) {
         }
       });
    });
-}
+};
 
 
 function upload_file(req, res, project) {

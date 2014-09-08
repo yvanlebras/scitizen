@@ -224,8 +224,8 @@ exports.getraw = function(req, res) {
     return;
   }
   var tiny = false;
-  if(req.param('tiny')!=undefined) {
-    console.log("require tiny");
+  if(req.param('tiny')!==undefined) {
+    console.log('require tiny');
     tiny = true;
   }
 
