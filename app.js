@@ -138,6 +138,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', index.index);
 app.get('/projects', index.projects);
+app.get('/tasks', index.tasks);
 app.get('/my', ensureAuthenticated, user.my);
 app.get('/admin', ensureAuthenticated, user.admin);
 app.get('/admin/stats', ensureAuthenticated, project.global_stats);

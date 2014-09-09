@@ -2,7 +2,8 @@ var CONFIG = require('config');
 
 var monk = require('monk'),
    db = monk('localhost:27017/'+CONFIG.general.db),
-   projects_db = db.get('projects');
+   projects_db = db.get('projects'),
+   tasks_db = db.get('tasks');
 
 /*
  * GET home page.
@@ -28,4 +29,14 @@ exports.projects = function(req, res){
     res.render('projects', { layout: 'layouts/default/public',
                               user: username,
                               project: project});
+};
+
+exports.tasks = function(req, res) {
+  tasks_db.find({}, function(err, tasks){
+    if(err) {
+      res.status(500).send('An error occured');
+      return;
+    }
+    res.json(tasks);
+  });
 };

@@ -18,6 +18,7 @@
 			<div class="small-3 large-6 scibadge panel columns" ><h2>Users</h2><div data-bind="text: user_list().length"></div></div>
 			<div class="small-3 large-6 scibadge panel columns" ><h2>Images</h2><div data-bind="text: project_global_stats_total_images"></div></div>
 			<div class="small-3 large-6 scibadge panel columns" ><h2>Size</h2><div data-bind="text: byte_convert(project_global_stats_total_size())"></div></div>
+			<div class="small-3 large-6 scibadge panel columns" ><h2>Pending Tasks</h2><div data-bind="text: tasks().length"></div></div>
 		</div>
 		<div class="row" >
 			<div class="small-12 large-6 columns">
@@ -35,7 +36,7 @@
 			</table>
 			</div>
 			<div class="small-12 large-6 columns">
-				<table>
+				<table id="project_admin_list">
 				<thead>
 						<tr><th>Name</th><th>Images</th><th>Size</th><th>Plan</th><th>Show</th></tr>
 				</thead>
@@ -157,7 +158,7 @@
 		</div>
 
     <div class="row">
-    <table>
+    <table id="project_list">
     <thead>
         <tr><th>Status</th><th>Name</th><th>Owner</th><th>Public</th><th>Geo-localisation</th><th>Validation</th><th>Allow user uploads</th><th>Point and click images</th><th>Quota</th><th></th></tr>
     </thead>
@@ -421,7 +422,10 @@
 								url: '/users/{{user._id}}/suspend',
 								type: 'PUT',
 								success: function(result) {
-									viewModel.user_current(result);
+									viewModel.user_list.remove(user);
+									user.registered = false;
+									viewModel.user_list.push(user);
+									/*
 									$.ajax({
 										cache: false,
 										url: "/project",
@@ -429,10 +433,6 @@
 										success: function(data) {
 											viewModel.project_list(data);
 										}
-									});
-									/*
-									$.getJSON("/project", function(data) {
-											viewModel.project_list(data);
 									});
 									*/
 								}
@@ -483,6 +483,15 @@
 						panelAccount();
 					},
 					user_admin_dashboard: function() {
+						if(viewModel.tasks().length == 0) {
+							$.ajax({
+									url: '/tasks',
+									type: 'GET',
+										success: function(result) {
+											viewModel.tasks(result);
+										}
+									});
+						}
 						if(viewModel.project_global_stats.length == 0) {
 							$.ajax({
 									url: '/admin/stats',
@@ -501,6 +510,7 @@
 								});
 						panelAdmin();
 					},
+					tasks: ko.observableArray(),
 					project_global_stats: ko.observableArray(),
 					user_list: ko.observableArray(),
 					image_current: ko.observable({}),
