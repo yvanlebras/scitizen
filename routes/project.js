@@ -45,9 +45,9 @@ MongoClient.connect('mongodb://127.0.0.1:27017/'+CONFIG.general.db,
 exports.global_stats = function(req, res) {
   images_db.col.aggregate([
     {$group: {
-      _id: "$project",
+      _id: '$project',
       images: {$sum: 1},
-      size: {$sum: "$size"}
+      size: {$sum: '$size'}
       }
     }
   ], function(err, stats) {

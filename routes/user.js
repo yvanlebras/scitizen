@@ -306,7 +306,10 @@ exports.password_reset_request = function(req, res){
         }
       });
     }
-    res.json({ err: 0, msg: 'An email has been sent to your mailbox with a link to reset your password.'});
+    var msg = 'An email has been sent to your mailbox ';
+        msg += 'with a link to reset your password.';
+    res.json({ err: 0,
+      msg: msg});
     return;
   });
 };
@@ -318,7 +321,7 @@ exports.password_reset = function(req, res) {
   var confirm = req.param('password_confirm');
   if(password === undefined) {
     res.render('password_reset', { layout: 'layouts/default/public',
-                           user: login, regkey: regkey, user_id: req.param('id') });
+                      user: login, regkey: regkey, user_id: req.param('id') });
   }
   else {
     if(password!=confirm) {
