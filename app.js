@@ -140,6 +140,7 @@ app.get('/', index.index);
 app.get('/projects', index.projects);
 app.get('/my', ensureAuthenticated, user.my);
 app.get('/admin', ensureAuthenticated, user.admin);
+app.get('/admin/stats', ensureAuthenticated, project.global_stats);
 app.get('/users', user.list);
 app.get('/users/register', user.register_new);
 app.post('/users/register', user.register);

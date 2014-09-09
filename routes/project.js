@@ -37,6 +37,24 @@ MongoClient.connect('mongodb://127.0.0.1:27017/'+CONFIG.general.db,
                         });
 });
 
+
+/**
+* Global projects statistics
+*
+*/
+exports.global_stats = function(req, res) {
+  images_db.col.aggregate([
+    {$group: {
+      _id: "$project",
+      images: {$sum: 1},
+      size: {$sum: "$size"}
+      }
+    }
+  ], function(err, stats) {
+    res.json(stats);
+  });
+};
+
 /**
 * Sets current project in session
 *
