@@ -13,19 +13,43 @@
 		</div>
 	</div>
 	<div class="row" data-bind="visible: admin">
+		<div class="row">
+			<div class="small-3 large-6 scibadge panel columns" ><h2>Projects</h2><div data-bind="text: project_global_stats_total_projects"></div></div>
+			<div class="small-3 large-6 scibadge panel columns" ><h2>Users</h2><div data-bind="text: user_list().length"></div></div>
+			<div class="small-3 large-6 scibadge panel columns" ><h2>Images</h2><div data-bind="text: project_global_stats_total_images"></div></div>
+			<div class="small-3 large-6 scibadge panel columns" ><h2>Size</h2><div data-bind="text: byte_convert(project_global_stats_total_size())"></div></div>
+		</div>
 		<div class="row" >
+			<div class="small-12 large-6 columns">
 			<table>
 			<thead>
-					<tr><th>Name</th><th>Registered</th><th>Suspend</th></tr>
+					<tr><th>Name</th><th>Registered/Active</th><th>Suspend</th></tr>
 			</thead>
 			<tbody data-bind="foreach: user_list">
 					<tr>
 							<td data-bind="text: username"></td>
 							<td data-bind="text: registered"></td>
-							<td><i class="fi-trash" data-bind="attr: { user: _id }, click: $parent.user_suspend">	</i></td>
+							<td><i class="fi-pause" data-bind="attr: { user: _id }, click: $parent.user_suspend">	</i></td>
 					</tr>
 			</tbody>
 			</table>
+			</div>
+			<div class="small-12 large-6 columns">
+				<table>
+				<thead>
+						<tr><th>Name</th><th>Images</th><th>Size</th><th>Plan</th><th>Show</th></tr>
+				</thead>
+				<tbody data-bind="foreach: project_global_stats">
+						<tr>
+								<td data-bind="text: $parent.find_project(_id).name"></td>
+								<td data-bind="text: images"></td>
+								<td data-bind="text: $parent.byte_convert(size)"></td>
+								<td data-bind="text: $parent.find_project(_id).plan"></td>
+								<td><i class="fi-monitor" data-bind="attr: { project: _id }, click: $parent.show_project_id"></i></td>
+						</tr>
+				</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 	<div class="row" data-bind="visible: manageItems">
@@ -375,7 +399,11 @@
 					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
       		user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
 					byte_convert: function(quota) {
-						return Math.floor(quota/1000000)+'G'; },
+						if(quota>1000000000) { return (quota/1000000000).toFixed(2)+' GB'; }
+						else if(quota>1000000) { return (quota/1000000).toFixed(2)+' MB'; }
+						else if(quota>1000) { return (quota/1000).toFixed(2)+' KB'; }
+						else return quota + ' Bytes';
+				},
       		home: ko.observable('/'),
       		login: ko.observable('/login'),
       		logout: ko.observable('/logout'),
@@ -455,6 +483,15 @@
 						panelAccount();
 					},
 					user_admin_dashboard: function() {
+						if(viewModel.project_global_stats.length == 0) {
+							$.ajax({
+									url: '/admin/stats',
+									type: 'GET',
+										success: function(result) {
+											viewModel.project_global_stats(result);
+										}
+									});
+						}
 						$.ajax({
 								url: '/users',
 								type: 'GET',
@@ -464,6 +501,7 @@
 								});
 						panelAdmin();
 					},
+					project_global_stats: ko.observableArray(),
 					user_list: ko.observableArray(),
 					image_current: ko.observable({}),
 					image_show: function(image) {
@@ -735,6 +773,10 @@
 							viewModel.form_elements(new_elements);
 							panelEditProject(project._id);
 					  },
+						show_project_id: function(project) {
+							var project = viewModel.find_project(project._id);
+							viewModel.show_project(project);
+						},
             show_project: function(project) {
 							viewModel.project_current(project);
 							panelManageItems(project._id);
@@ -809,6 +851,36 @@
 						},
 						scitizen_host: ko.observable(window.location.host)
     };
+
+		viewModel.project_global_stats_total_projects = ko.computed(function(){
+									return viewModel.project_global_stats().length; }
+									, viewModel);
+		viewModel.project_global_stats_total_images = ko.computed(function(){
+									var nb_images = 0;
+									for(i=0;i<viewModel.project_global_stats().length;i++) {
+										nb_images += viewModel.project_global_stats()[i].images
+									}
+									return nb_images; }
+									, viewModel);
+
+		viewModel.project_global_stats_total_size = ko.computed(function(){
+									var size = 0;
+									for(i=0;i<viewModel.project_global_stats().length;i++) {
+										size += viewModel.project_global_stats()[i].size
+									}
+									return size; }
+									, viewModel);
+
+			viewModel.find_project = function(project_id) {
+				var project = null;
+				for(i=0;i<viewModel.project_list().length;i++){
+					if(viewModel.project_list()[i]._id == project_id) {
+						project = viewModel.project_list()[i];
+						break;
+					}
+				}
+				return project;
+			};
 
     ko.applyBindings(viewModel);
 
@@ -1030,7 +1102,7 @@
                 var image_stats =  { label: 'Images', data: [] };
                 var quota_stats =  { label: 'Quota', data: [] };
                 for(i=0;i<stat.length;i++) {
-					data_google.labels.push(timeConverter(stat[i][0]));
+										data_google.labels.push(timeConverter(stat[i][0]));
                     data_image.labels.push(timeConverter(stat[i][0]));
                     data_quota.labels.push(timeConverter(stat[i][0]));
                     google_stats.data.push(stat[i][1]);
