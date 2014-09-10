@@ -226,7 +226,8 @@ exports.delete = function(req, res) {
                 // can be time consuming
                 tasks_db.insert({ type: 'remove',
                                   object: 'images',
-                                  objectid: req.param('id')
+                                  objectid: req.param('id'),
+                                  status: '0'
                                 }, function(err, task) {
                                     if(err) {
                                       console.log(err);
@@ -579,7 +580,8 @@ function upload_file(req, res, project) {
 
             tasks_db.insert({ type: 'rescale',
                               object: 'images',
-                              objectid: image._id.toHexString()
+                              objectid: image._id.toHexString(),
+                              status: '0'
                                 }, function(err, task) {
                                   if(!err){
                                   scitizen_tasks.send(task._id);
