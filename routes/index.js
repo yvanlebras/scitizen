@@ -1,7 +1,7 @@
 var CONFIG = require('config');
 
 var monk = require('monk'),
-   db = monk('localhost:27017/'+CONFIG.general.db),
+   db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
    projects_db = db.get('projects'),
    tasks_db = db.get('tasks');
 

@@ -13,7 +13,7 @@ var MongoClient = require('mongodb').MongoClient;
 var CONFIG = require('config');
 
 var monk = require('monk'),
-   db = monk('localhost:27017/'+CONFIG.general.db),
+   db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
    users_db = db.get('users'),
    projects_db = db.get('projects'),
    images_db = db.get('images');
@@ -225,7 +225,6 @@ exports.getraw = function(req, res) {
   }
   var tiny = false;
   if(req.param('tiny')!==undefined) {
-    console.log('require tiny');
     tiny = true;
   }
 

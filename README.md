@@ -15,6 +15,22 @@ Ensure 2d index on db location  :
 
 If using InfluxDb for stats, the *scitizen* database must be created first.
 
+
+Scitizen supports background tasks scheduling (for image resizing for example) with RabbitMQ (needs to be installed).
+This allows to execute multiple message receivers on multiple nodes to horizontaly scale the background tasks management.
+
+To do so, configure rabbitmq in the config file and execute on one or more nodes:
+
+    node tasks/amqp-receives nodeid
+
+    nodeid is a node unique identifier.
+
+If you do not wish to use rabbitmq, simply set the rabbitmq host to empty string ('').
+Background tasks can be run manually (or croned) with:
+
+  node tasks/amqp-publish
+
+
 # License
 
 MIT

@@ -1,7 +1,8 @@
-var GENERAL_CONFIG = require('config').general;
+var CONFIG = require('config');
+var GENERAL_CONFIG = CONFIG.general;
 
 var monk = require('monk'),
-    db = monk('localhost:27017/'+GENERAL_CONFIG.db),
+    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
     users_db = db.get('users'),
     sciconfig = db.get('config'),
     bcrypt = require('bcryptjs');

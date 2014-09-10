@@ -5,6 +5,18 @@ general:
     storage: "pairtree"
     # Quota in GB
     plans: [ 'default' ]
+
+mongo:
+    host: 'localhost'
+    port: 27017
+
+rabbitmq:
+    host: 'localhost'
+    port: 5672
+    login:
+    password:
+    vhost: '/'
+
 stats:
     backend: 'influx'
     influx:

@@ -8,14 +8,14 @@ var scitizen_storage = require('scitizen-storage');
 
 var scitizen_auth = require('../lib/auth.js');
 var scitizen_stats = require('../lib/stats.js');
-
+var scitizen_tasks = require('../lib/tasks.js');
 
 var CONFIG = require('config');
 
 var MongoClient = require('mongodb').MongoClient;
 
 var monk = require('monk'),
-   db = monk('localhost:27017/'+CONFIG.general.db),
+   db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
    users_db = db.get('users'),
    projects_db = db.get('projects'),
    tasks_db = db.get('tasks'),
@@ -231,8 +231,9 @@ exports.delete = function(req, res) {
                                     if(err) {
                                       console.log(err);
                                     }
-                                      res.json({});
-                });
+                                    scitizen_tasks.send(task._id);
+                                    res.json({});
+                                });
               }
             });
         }
@@ -580,6 +581,9 @@ function upload_file(req, res, project) {
                               object: 'images',
                               objectid: image._id.toHexString()
                                 }, function(err, task) {
+                                  if(!err){
+                                  scitizen_tasks.send(task._id);
+                                }
                             });
 
 
