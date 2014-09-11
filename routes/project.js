@@ -232,7 +232,7 @@ exports.delete = function(req, res) {
                                     if(err) {
                                       console.log(err);
                                     }
-                                    scitizen_tasks.send(task._id);
+                                    scitizen_tasks.send(task);
                                     res.json({});
                                 });
               }

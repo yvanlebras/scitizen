@@ -5,6 +5,8 @@ process.env.PORT = 3001;
 // get the application server module
 var app = require('../app');
 var http = require('http');
+var path = require('path');
+var fs = require('fs');
 
 var expect = require('chai').expect;
 
@@ -17,7 +19,13 @@ var monk = require('monk'),
    tasks = db.get('tasks'),
    images = db.get('images');
 
+var image_tasks = require('../lib/image_tasks');
+
 var querystring = require('querystring');
+
+var scitizen_storage = require('scitizen-storage');
+scitizen_storage.configure(CONFIG.general.storage, CONFIG.storage);
+
 
 var test_context =  {};
 
@@ -1126,6 +1134,45 @@ describe('Authenticated', function() {
     req.end();
   });
 
+  it('rescale an image to create a tiny image', function(done) {
+    images.findOne({name: 'image1'}, function (err, image) {
+      var orig_file_path = path.join(__dirname, "../public/images/world.png");
+      var rstream = fs.createReadStream(orig_file_path);
+      rstream.pipe(fs.createWriteStream('/tmp/scitizen-image.png'));
+      var metadata = { project:  image.project, name: image.name };
+      scitizen_storage.put(image._id.toHexString(),
+                  '/tmp/scitizen-image.png',
+                  metadata,
+                  function(err, result) {
+                    expect(err).to.equal(0);
+                    image_tasks.rescale(image._id.toHexString(), function(res){
+                      expect(res).to.equal(0);
+                      scitizen_storage.get(('tiny-'+image._id.toHexString()),
+                      function(err, tinyimage) {
+                        expect(err).to.equal(0);
+                        done();
+                      });
+                    });
+
+      });
+
+    });
+  });
+
+
+  it('delete all images of a project', function(done){
+    this.timeout(8000);
+    projects.findOne({name: 'test'}, function(err, project) {
+      image_tasks.delete(project._id, function(err) {
+        // There is no real file associated
+        expect(err).to.equal(500);
+        images.count({project: project._id}, function(nb) {
+          expect(nb).to.equal(0);
+          done();
+        });
+      });
+    });
+  });
 
   after(function(done) {
     var myapp = this.server;
