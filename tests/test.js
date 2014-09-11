@@ -1166,13 +1166,14 @@ describe('Authenticated', function() {
       image_tasks.delete(project._id, function(err) {
         // There is no real file associated
         expect(err).to.equal(500);
-        images.count({project: project._id}, function(nb) {
+        images.count({project: project._id}, function(err, nb) {
           expect(nb).to.equal(0);
           done();
         });
       });
     });
   });
+
 
   after(function(done) {
     var myapp = this.server;
