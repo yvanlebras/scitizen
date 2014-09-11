@@ -584,7 +584,7 @@ function upload_file(req, res, project) {
                               status: '0'
                                 }, function(err, task) {
                                   if(!err){
-                                  scitizen_tasks.send(task._id);
+                                  scitizen_tasks.send(task);
                                 }
                             });
 

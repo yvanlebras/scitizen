@@ -43,13 +43,14 @@ connection.on('ready', function () {
       // Receive messages
       q.subscribe(function (message) {
         // Print messages to stdout
-        var task_id = JSON.parse(message.data);
+        var mtask = JSON.parse(message.data);
+        console.log(mtask);
+        var task_id = mtask._id;
         tasks_db.findOne({ _id : task_id}, function(err, task){
           if(err) {
             console.log('Could not found task ' + task_id);
             return;
           }
-          console.log(task);
           if(task.type == 'rescale') {
             var image_id = task.objectid;
             image_tasks.rescale(image_id, function(code) {
@@ -62,7 +63,15 @@ connection.on('ready', function () {
             });
           }
           else if(task.type == 'remove') {
-            console.log('REMOVE: Not yet implement');
+            var project_id = task.objectid;
+            image_tasks.delete(project_id, function(code) {
+              if(code == 0) {
+                tasks_db.remove({ _id : task_id});
+              }
+              else {
+                tasks_db.update({ _id : task_id}, {$set: {status: code}});
+              }
+            });
           }
         });
       });
