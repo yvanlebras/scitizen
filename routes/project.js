@@ -113,6 +113,7 @@ exports.add = function(req, res) {
                           askimet_api: '',
                           plan: 'default',
                           stats: {quota: 0},
+                          style: '',
                           form: {}
                         }, function(err, project) {
                           res.json(project);
@@ -141,6 +142,10 @@ exports.edit = function(req, res) {
               }
               if(elt == 'api') {
                 delete req.body.form[elt];
+              }
+              if(elt == 'style' && elt.toLowerCase().indexOf('style')) {
+                res.status(401).send('Usage of style tag is not allowed');
+                return;
               }
               /*
               if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
@@ -182,6 +187,11 @@ exports.edit = function(req, res) {
               else { req.body.public = true; }
             }
             if(req.body.api) { delete req.body.api; }
+
+            if(req.body.style && req.body.style.toLowerCase().indexOf('style')){
+              res.status(401).send('Usage of style tag is not allowed');
+              return;
+            }
             /*
             if(CONFIG.general.admin.indexOf(req.user.username)==-1) {
               if(req.body.plan) { delete req.body.plan; }

@@ -103,6 +103,8 @@
 				<textarea rows="20" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
 				<label for="project_desc_edit">Description (MarkDown support)</label>
 				<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
+				<label for="project_style_edit">CSS Style (optional)</label>
+				<textarea rows="20" id="project_style_edit" name="project_style_edit"  data-bind="value: project_style"></textarea>
 				<label for="project_google_edit">Google Maps API key (optional)</label>
 				<input name="project_google_edit" id="project_google_edit" type="text" data-bind="value: project_google"/>
 				<label for="project_askimet_edit">Antispam Askimet API key (optional)</label>
@@ -262,359 +264,417 @@
 
 
 <script type='text/javascript' src='http://harthur.github.com/clusterfck/demos/colors/clusterfck.js'></script>
+<script>
+$(document).foundation();
 
-  <script>
-		$(document).foundation();
 
+var my_projects = [];
 
-    var my_projects = [];
+var project =  { name: '',
+								owner: '{{ user.username }}',
+								description: '',
+								status: false };
 
-    var project =  { name: '',
-                    owner: '{{ user.username }}',
-										description: '',
-                    status: false };
+function showAllPoints(canvas) {
+	var context = canvas[0].getContext('2d');
+	context.clearRect(0, 0, canvas[0].width, canvas[0].height);
+	var points = viewModel.image_current().stats.user_click;
+	for(point in points) {
+		pos = points[point].split(",");
+		context.globalAlpha = 0.5;
+		context.beginPath();
+		context.moveTo(0,0);
+		context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
+		context.fillStyle = 'red';
+		context.fill();
+	}
+}
 
-		function showAllPoints(canvas) {
-			var context = canvas[0].getContext('2d');
-			context.clearRect(0, 0, canvas[0].width, canvas[0].height);
-			var points = viewModel.image_current().stats.user_click;
-			for(point in points) {
-				pos = points[point].split(",");
-				context.globalAlpha = 0.5;
-				context.beginPath();
-				context.moveTo(0,0);
-				context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
-				context.fillStyle = 'red';
-				context.fill();
-			}
+var clusters = [];
+
+function add_cluster_points(tree, level) {
+	if(level<=viewModel.cluster_depth()) {
+		if(tree.value) {
+			clusters.push(tree.value);
 		}
-
-		var clusters = [];
-
-		function add_cluster_points(tree, level) {
-			if(level<=viewModel.cluster_depth()) {
-				if(tree.value) {
-					clusters.push(tree.value);
-				}
-				if(tree.right) {
-					add_cluster_points(tree.right, level + 1);
-				}
-				if(tree.left) {
-				add_cluster_points(tree.left, level + 1);
-				}
-			}
+		if(tree.right) {
+			add_cluster_points(tree.right, level + 1);
 		}
-
-		function showClusterPoints(canvas) {
-			var context = canvas[0].getContext('2d');
-			context.clearRect(0, 0, canvas[0].width, canvas[0].height);
-			var points = viewModel.image_current().stats.user_click;
-			var cluster_points = [];
-			clusters = [];
-			for(pos in points) {
-				pos = points[pos].split(",");
-				cluster_points.push(pos);
-			}
-			var tree = clusterfck.hcluster(cluster_points, "euclidean", "average");
-			level = 0;
-
-			if(tree.value) {
-				clusters.push(tree.value);
-			}
-			if(tree.right) {
-				add_cluster_points(tree.right, level);
-			}
-			if(tree.left) {
-				add_cluster_points(tree.left, level);
-			}
-			for(point in clusters) {
-				pos = clusters[point];
-				context.globalAlpha = 0.5;
-				context.beginPath();
-				context.moveTo(0,0);
-				context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
-				context.fillStyle = 'red';
-				context.fill();
-			}
-
+		if(tree.left) {
+		add_cluster_points(tree.left, level + 1);
 		}
+	}
+}
 
-    $(document).ready(function() {
+function showClusterPoints(canvas) {
+	var context = canvas[0].getContext('2d');
+	context.clearRect(0, 0, canvas[0].width, canvas[0].height);
+	var points = viewModel.image_current().stats.user_click;
+	var cluster_points = [];
+	clusters = [];
+	for(pos in points) {
+		pos = points[pos].split(",");
+		cluster_points.push(pos);
+	}
+	var tree = clusterfck.hcluster(cluster_points, "euclidean", "average");
+	level = 0;
 
-		$(document).on('change', '.rating', function(){
-			var elt_id = $(this).attr('data-id');
-			$('#'+elt_id).val(this.value);
+	if(tree.value) {
+		clusters.push(tree.value);
+	}
+	if(tree.right) {
+		add_cluster_points(tree.right, level);
+	}
+	if(tree.left) {
+		add_cluster_points(tree.left, level);
+	}
+	for(point in clusters) {
+		pos = clusters[point];
+		context.globalAlpha = 0.5;
+		context.beginPath();
+		context.moveTo(0,0);
+		context.arc(Math.ceil(pos[0]), Math.ceil(pos[1]), 5, 0, 2 * Math.PI);
+		context.fillStyle = 'red';
+		context.fill();
+	}
+
+}
+
+$(document).ready(function() {
+
+$(document).on('change', '.rating', function(){
+	var elt_id = $(this).attr('data-id');
+	$('#'+elt_id).val(this.value);
+});
+
+	$.ajax({
+		cache: false,
+		url: "/project",
+		dataType: "json",
+		success: function(data) {
+			viewModel.project_list(data);
+		}
+	});
+
+	/*
+	$("#showall").click(function(){
+		var canvas = $("#myModalCanvas");
+		showAllPoints(canvas);
+	});
+
+	$("#showcluster").click(function(){
+		var canvas = $("#myModalCanvas");
+		showClusterPoints(canvas);
+	});
+	*/
+
+
+		$(document).on("click", "#show_image_points", function() {
+			$("#myModal").foundation('reveal', 'open');
+			var imageObj = new Image();
+			var image_url = '/image/'+$(this).attr("data-image")+'/raw';
+			var canvas = $("#myModalCanvas");
+			imageObj.onload = function() {
+				$("#myModalContent").css('background-image', 'url('+imageObj.src+')');
+				canvas.attr("height",imageObj.height);
+				canvas.attr("width", imageObj.width);
+				showAllPoints(canvas);
+			};
+			imageObj.src = image_url;
 		});
 
-			$.ajax({
-				cache: false,
-				url: "/project",
-				dataType: "json",
-				success: function(data) {
-					viewModel.project_list(data);
-				}
-			});
-
-			/*
-			$("#showall").click(function(){
-				var canvas = $("#myModalCanvas");
-				showAllPoints(canvas);
-			});
-
-			$("#showcluster").click(function(){
-				var canvas = $("#myModalCanvas");
-				showClusterPoints(canvas);
-			});
-			*/
-
-
-				$(document).on("click", "#show_image_points", function() {
-					$("#myModal").foundation('reveal', 'open');
-					var imageObj = new Image();
-					var image_url = '/image/'+$(this).attr("data-image")+'/raw';
-					var canvas = $("#myModalCanvas");
-					imageObj.onload = function() {
-						$("#myModalContent").css('background-image', 'url('+imageObj.src+')');
-						canvas.attr("height",imageObj.height);
-						canvas.attr("width", imageObj.width);
-						showAllPoints(canvas);
-					};
-					imageObj.src = image_url;
+		$(document).on("click", "#form_element .fi-trash", function() {
+				//var form_elts = $("#form_element .form_elt");
+				var new_form_elements ='';
+				var trash_id = $(this).attr("data-id");
+				$("#form_element .form_elt").each(function(index) {
+					if($(this).attr("id")!=("elt"+trash_id)) {
+						new_form_elements += $(this)[0].outerHTML;
+					}
 				});
+				viewModel.form_elements(new_form_elements);
+		});
+});
 
-				$(document).on("click", "#form_element .fi-trash", function() {
-						//var form_elts = $("#form_element .form_elt");
-						var new_form_elements ='';
-						var trash_id = $(this).attr("data-id");
-						$("#form_element .form_elt").each(function(index) {
-							if($(this).attr("id")!=("elt"+trash_id)) {
-								new_form_elements += $(this)[0].outerHTML;
+var viewModel = {
+			//user: ko.observable('{{user.username}}'),
+			user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
+			user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
+			byte_convert: function(quota) {
+				if(quota>1000000000) { return (quota/1000000000).toFixed(2)+' GB'; }
+				else if(quota>1000000) { return (quota/1000000).toFixed(2)+' MB'; }
+				else if(quota>1000) { return (quota/1000).toFixed(2)+' KB'; }
+				else return quota + ' Bytes';
+		},
+			home: ko.observable('/'),
+			login: ko.observable('/login'),
+			logout: ko.observable('/logout'),
+			my: ko.observable('/my'),
+			register: ko.observable('/users/register'),
+			manageItems: ko.observable(false),
+			manageAccount: ko.observable(false),
+			admin: ko.observable(false),
+			form_elements: ko.observable(''),
+			cluster_depth: ko.observable(2),
+			user_current: ko.observable({ username: '{{ user.username}}',
+																	key: '{{ user.key}}'}),
+			user_suspend: function(user) {
+				$.ajax({
+						url: '/users/{{user._id}}/suspend',
+						type: 'PUT',
+						success: function(result) {
+							viewModel.user_list.remove(user);
+							user.registered = false;
+							viewModel.user_list.push(user);
+							/*
+							$.ajax({
+								cache: false,
+								url: "/project",
+								dataType: "json",
+								success: function(data) {
+									viewModel.project_list(data);
+								}
+							});
+							*/
+						}
+						});
+			},
+			user_newkey: function() {
+				$.ajax({
+						url: '/users/{{user._id}}/key',
+						type: 'PUT',
+						data: {
+							operation: 'key',
+						},
+						success: function(result) {
+							viewModel.user_list.remove(user);
+							user.registered = false;
+							viewModel.user_list.push(user);
+						}
+						});
+			},
+			user_newpassword: function() {
+				var password = $("#userpassword");
+				var password_confirm = $("#userpasswordconfirm");
+				if(password!=password_confirm) {
+					alert("Passwords do not match");
+					return;
+				}
+				$.ajax({
+						url: '/users/{{user._id}}/password',
+						type: 'PUT',
+						data: {
+							operation: 'password',
+							password: password
+						},
+						success: function(result) {
+							viewModel.user_current(result);
+							alert('Updated');
+						}
+						});
+			},
+			user_manage: function() {
+				$.ajax({
+						url: '/users/{{ user._id }}',
+						type: 'GET',
+							success: function(result) {
+								viewModel.user_current(result);
 							}
 						});
-						viewModel.form_elements(new_form_elements);
-				});
-    });
-
-    var viewModel = {
-      		//user: ko.observable('{{user.username}}'),
-					user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
-      		user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
-					byte_convert: function(quota) {
-						if(quota>1000000000) { return (quota/1000000000).toFixed(2)+' GB'; }
-						else if(quota>1000000) { return (quota/1000000).toFixed(2)+' MB'; }
-						else if(quota>1000) { return (quota/1000).toFixed(2)+' KB'; }
-						else return quota + ' Bytes';
+				panelAccount();
+			},
+			user_admin_dashboard: function() {
+				if(viewModel.tasks().length == 0) {
+					$.ajax({
+							url: '/tasks',
+							type: 'GET',
+								success: function(result) {
+									viewModel.tasks(result);
+								}
+							});
+				}
+				if(viewModel.project_global_stats.length == 0) {
+					$.ajax({
+							url: '/admin/stats',
+							type: 'GET',
+								success: function(result) {
+									viewModel.project_global_stats(result);
+								}
+							});
+				}
+				$.ajax({
+						url: '/users',
+						type: 'GET',
+							success: function(result) {
+								viewModel.user_list(result);
+							}
+						});
+				panelAdmin();
+			},
+			tasks: ko.observableArray(),
+			project_global_stats: ko.observableArray(),
+			user_list: ko.observableArray(),
+			image_current: ko.observable({}),
+			image_show: function(image) {
+					viewModel.image_current(image);
+					//console.log(image.stats);
+					//var stat_html = "";
+					var has_point_and_click = false;
+					$("#image_stats").html("");
+					for(stat in image.stats) {
+						if(stat == 'user_click') {
+							if(stat.length>0) {
+								has_point_and_click = true;
+							}
+							continue;
+						}
+						var data = {labels: [],
+												datasets:[
+												{ fillColor : "rgba(151,187,205,0.5)",
+													strokeColor : "rgba(151,187,205,1)",
+													data: []
+												}
+												]
+											};
+						//stat_html += "<div>";
+						project = viewModel.project_current();
+						var label=null;
+						for(var j=0;j<project["form"].length;j++) {
+							if("r"+project["form"][j]["id"] == stat) {
+								label = project["form"][j]["label"];
+								break;
+							}
+						}
+						if(label==null) {
+							continue;
+						}
+						//stat_html += "<div>"+label+"</div>";
+						//$("#image_stats").append("<div>"+label+"</div>");
+						//stat_html += "<ul>";
+						var nb_stat = 0;
+						for(count in image.stats[stat]) {
+							nb_stat += 1;
+							data.labels.push(count);
+							//stat_html += "<li>"+count+": "+image.stats[stat][count]+"</li>";
+							data.datasets[0].data.push( image.stats[stat][count] );
+						}
+						//if(nb_stat==1) {
+							// Add a fake for scale
+							data.labels.push("other");
+							data.datasets[0].data.push( 0 );
+						//}
+						//stat_html += "</ul>";
+						//stat_html += "</div>";
+						$("#image_stats").append('<div class="small-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
+						var ctx = $("#chart_"+stat).get(0).getContext("2d");
+						var myNewChart = new Chart(ctx).Bar(data);
+					}
+					if(has_point_and_click) {
+						$("#image_stats").append('<div class="small-6 "><button id="show_image_points" type="button" data-image="'+image._id+'">Display image points</button></div>');
+					}
+					//$("#image_stats").html(stat_html);
 				},
-      		home: ko.observable('/'),
-      		login: ko.observable('/login'),
-      		logout: ko.observable('/logout'),
-					my: ko.observable('/my'),
-      		register: ko.observable('/users/register'),
-					manageItems: ko.observable(false),
-					manageAccount: ko.observable(false),
-					admin: ko.observable(false),
-					form_elements: ko.observable(''),
-					cluster_depth: ko.observable(2),
-					user_current: ko.observable({ username: '{{ user.username}}',
-																			key: '{{ user.key}}'}),
-					user_suspend: function(user) {
-						$.ajax({
-								url: '/users/{{user._id}}/suspend',
-								type: 'PUT',
+				image_list: ko.observableArray(),
+				image_trash: function(image) {
+					$.ajax({
+							url: '/image/'+image._id,
+							type: 'DELETE',
 								success: function(result) {
-									viewModel.user_list.remove(user);
-									user.registered = false;
-									viewModel.user_list.push(user);
-									/*
-									$.ajax({
-										cache: false,
-										url: "/project",
-										dataType: "json",
-										success: function(data) {
-											viewModel.project_list(data);
-										}
-									});
-									*/
+									viewModel.image_list.remove(function(item) { return item._id == image._id })
 								}
-								});
-					},
-					user_newkey: function() {
-						$.ajax({
-								url: '/users/{{user._id}}/key',
-								type: 'PUT',
-								data: {
-									operation: 'key',
-								},
-								success: function(result) {
-									viewModel.user_list.remove(user);
-									user.registered = false;
-									viewModel.user_list.push(user);
-								}
-								});
-					},
-					user_newpassword: function() {
-						var password = $("#userpassword");
-						var password_confirm = $("#userpasswordconfirm");
-						if(password!=password_confirm) {
-							alert("Passwords do not match");
-							return;
-						}
-						$.ajax({
-								url: '/users/{{user._id}}/password',
-								type: 'PUT',
-								data: {
-									operation: 'password',
-									password: password
-								},
-								success: function(result) {
-									viewModel.user_current(result);
-									alert('Updated');
-								}
-								});
-					},
-					user_manage: function() {
-						$.ajax({
-								url: '/users/{{ user._id }}',
-								type: 'GET',
-									success: function(result) {
-										viewModel.user_current(result);
-									}
-								});
-						panelAccount();
-					},
-					user_admin_dashboard: function() {
-						if(viewModel.tasks().length == 0) {
-							$.ajax({
-									url: '/tasks',
-									type: 'GET',
-										success: function(result) {
-											viewModel.tasks(result);
-										}
-									});
-						}
-						if(viewModel.project_global_stats.length == 0) {
-							$.ajax({
-									url: '/admin/stats',
-									type: 'GET',
-										success: function(result) {
-											viewModel.project_global_stats(result);
-										}
-									});
-						}
-						$.ajax({
-								url: '/users',
-								type: 'GET',
-									success: function(result) {
-										viewModel.user_list(result);
-									}
-								});
-						panelAdmin();
-					},
-					tasks: ko.observableArray(),
-					project_global_stats: ko.observableArray(),
-					user_list: ko.observableArray(),
-					image_current: ko.observable({}),
-					image_show: function(image) {
-						  viewModel.image_current(image);
-							//console.log(image.stats);
-							//var stat_html = "";
-							var has_point_and_click = false;
-							$("#image_stats").html("");
-							for(stat in image.stats) {
-								if(stat == 'user_click') {
-									if(stat.length>0) {
-										has_point_and_click = true;
-									}
-									continue;
-								}
-								var data = {labels: [],
-														datasets:[
-														{ fillColor : "rgba(151,187,205,0.5)",
-															strokeColor : "rgba(151,187,205,1)",
-															data: []
-														}
-														]
-													};
-								//stat_html += "<div>";
-								project = viewModel.project_current();
-								var label=null;
-								for(var j=0;j<project["form"].length;j++) {
-									if("r"+project["form"][j]["id"] == stat) {
-										label = project["form"][j]["label"];
-										break;
-									}
-								}
-								if(label==null) {
-									continue;
-								}
-								//stat_html += "<div>"+label+"</div>";
-								//$("#image_stats").append("<div>"+label+"</div>");
-								//stat_html += "<ul>";
-								var nb_stat = 0;
-								for(count in image.stats[stat]) {
-									nb_stat += 1;
-									data.labels.push(count);
-									//stat_html += "<li>"+count+": "+image.stats[stat][count]+"</li>";
-									data.datasets[0].data.push( image.stats[stat][count] );
-								}
-								//if(nb_stat==1) {
-									// Add a fake for scale
-									data.labels.push("other");
-									data.datasets[0].data.push( 0 );
-								//}
-								//stat_html += "</ul>";
-								//stat_html += "</div>";
-								$("#image_stats").append('<div class="small-6 "><div>'+label+'</div><canvas id="chart_'+stat+'" ></canvas></div>');
-								var ctx = $("#chart_"+stat).get(0).getContext("2d");
-								var myNewChart = new Chart(ctx).Bar(data);
+							});
+				},
+				image_validate: function(image) {
+					$.ajax({
+							url: '/image/'+image._id+'/validate',
+							type: 'PUT',
+							success: function(result) {
+								image_list.remove(image);
+								image['validated'] = true;
+								image_list.push(image);
 							}
-							if(has_point_and_click) {
-								$("#image_stats").append('<div class="small-6 "><button id="show_image_points" type="button" data-image="'+image._id+'">Display image points</button></div>');
-							}
-							//$("#image_stats").html(stat_html);
+							});
+				},
+				project_list: ko.observableArray(),
+				showProjects: ko.observable(true),
+				showProject: ko.observable(false),
+				editProject: ko.observable(false),
+				project_current: ko.observable({ users: []}),
+				project_delete_member: function(user) {
+					console.log("delete user "+user);
+					if(user == '{{user.username}}') {
+						// Can't delete ourselves
+						return false;
+					}
+					var index = viewModel.project_current().users.indexOf(user);
+					var project = viewModel.project_current();
+					var new_users = project.users.splice(index, 1);
+					project.users = new_users;
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {
+							users: new_users,
 						},
-					  image_list: ko.observableArray(),
-						image_trash: function(image) {
+						success: function(result) {
 							$.ajax({
-									url: '/image/'+image._id,
-									type: 'DELETE',
-										success: function(result) {
-											viewModel.image_list.remove(function(item) { return item._id == image._id })
-										}
-									});
+								cache: false,
+								url: "/project",
+								dataType: "json",
+								success: function(data) {
+										viewModel.project_list(data);
+										viewModel.project_current(project);
+								}
+							});
+							/*
+							$.getJSON("/project", function(data) {
+								viewModel.project_list(data);
+								viewModel.project_current(project);
+							});
+							*/
+						}
+					});
+				},
+				project_add_member: function() {
+					var user_new = $("#add_member").val();
+					if(user_new=="") {
+						return false;
+					}
+					viewModel.project_current().users.push(user_new);
+					$.ajax({
+						url: '/project/'+viewModel.project_current()._id,
+						type: 'PUT',
+						data: {
+							users: viewModel.project_current().users,
 						},
-            image_validate: function(image) {
-              $.ajax({
-                  url: '/image/'+image._id+'/validate',
-                  type: 'PUT',
-                  success: function(result) {
-										image_list.remove(image);
-										image['validated'] = true;
-										image_list.push(image);
-                  }
-                  });
-            },
-            project_list: ko.observableArray(),
-            showProjects: ko.observable(true),
-            showProject: ko.observable(false),
-            editProject: ko.observable(false),
-					  project_current: ko.observable({ users: []}),
-						project_delete_member: function(user) {
-							console.log("delete user "+user);
-							if(user == '{{user.username}}') {
-								// Can't delete ourselves
-								return false;
-							}
-							var index = viewModel.project_current().users.indexOf(user);
-							var project = viewModel.project_current();
-							var new_users = project.users.splice(index, 1);
-							project.users = new_users;
+						success: function(result) {
 							$.ajax({
-								url: '/project/'+project._id,
+								cache: false,
+								url: "/project",
+								dataType: "json",
+								success: function(data) {
+										viewModel.project_list(data);										}
+							});
+							/*
+							$.getJSON("/project", function(data) {
+								viewModel.project_list(data);
+							});
+							*/
+						}
+					});
+				},
+				project_update: function() {
+						$.ajax({
+								url: '/project/'+viewModel.project_current()._id,
 								type: 'PUT',
 								data: {
-									users: new_users,
-								},
+											description: viewModel.project_description(),
+											short_description: viewModel.project_short_description(),
+											style: viewModel.project_style(),
+											google_api: viewModel.project_google(),
+											askimet_api: viewModel.project_askimet(),
+											plan: viewModel.project_plan()
+										},
 								success: function(result) {
 									$.ajax({
 										cache: false,
@@ -622,532 +682,461 @@
 										dataType: "json",
 										success: function(data) {
 												viewModel.project_list(data);
-												viewModel.project_current(project);
 										}
 									});
 									/*
 									$.getJSON("/project", function(data) {
-										viewModel.project_list(data);
-										viewModel.project_current(project);
+											viewModel.project_list(data);
 									});
 									*/
 								}
-							});
-						},
-						project_add_member: function() {
-							var user_new = $("#add_member").val();
-							if(user_new=="") {
-								return false;
-							}
-							viewModel.project_current().users.push(user_new);
-							$.ajax({
-								url: '/project/'+viewModel.project_current()._id,
-								type: 'PUT',
-								data: {
-									users: viewModel.project_current().users,
-								},
-								success: function(result) {
-									$.ajax({
-										cache: false,
-										url: "/project",
-										dataType: "json",
-										success: function(data) {
-												viewModel.project_list(data);										}
-									});
-									/*
-									$.getJSON("/project", function(data) {
-										viewModel.project_list(data);
-									});
-									*/
-								}
-							});
-						},
-						project_update: function() {
-								$.ajax({
-										url: '/project/'+viewModel.project_current()._id,
-										type: 'PUT',
-										data: {
-													description: viewModel.project_description(),
-													short_description: viewModel.project_short_description(),
-													google_api: viewModel.project_google(),
-													askimet_api: viewModel.project_askimet(),
-													plan: viewModel.project_plan()
-												},
-										success: function(result) {
-											$.ajax({
-												cache: false,
-												url: "/project",
-												dataType: "json",
-												success: function(data) {
-														viewModel.project_list(data);
-												}
-											});
-											/*
-											$.getJSON("/project", function(data) {
-													viewModel.project_list(data);
-											});
-											*/
-										}
-								});
-						},
-            project_name: ko.observable(''),
-					  project_description: ko.observable(''),
-						project_google: ko.observable(''),
-						project_askimet: ko.observable(''),
-						project_short_description: ko.observable(''),
-						project_plan: ko.observable('default'),
-            project_owner: ko.observable('{{user.username}}'),
-            project_status: ko.observable(false),
-					  project_public: ko.observable(true),
-					  project_switch_on_off: function(project) {
-            	$.ajax({
-              	url: '/project/'+project._id,
-                type: 'PUT',
-                data: {status: project.status},
-                success: function(result) {
-                }
-            });
-						return true;
-					  },
-            project_switch_public: function(project) {
-            	$.ajax({
-              	url: '/project/'+project._id,
-                type: 'PUT',
-                data: {public: project.public},
-                success: function(result) {
-              	}
-              });
-              return true;
-            },
-            project_switch_geo: function(project) {
-            	$.ajax({
-              	url: '/project/'+project._id,
-                type: 'PUT',
-                data: {geo: project.geo},
-                success: function(result) {
-                					}
-              });
-              return true;
-            },
-            project_switch_validation: function(project) {
-            	$.ajax({
-              	url: '/project/'+project._id,
-                type: 'PUT',
-                data: {validation: project.validation},
-                success: function(result) {}
-              });
-              return true;
-            },
-						project_switch_users_can_add: function(project) {
-							$.ajax({
-								url: '/project/'+project._id,
-								type: 'PUT',
-								data: {users_can_add: project.users_can_add},
-								success: function(result) {}
-							});
-							return true;
-						},
-						project_switch_point_and_click: function(project) {
-							$.ajax({
-								url: '/project/'+project._id,
-								type: 'PUT',
-								data: {point_and_click: project.point_and_click},
-								success: function(result) {}
-							});
-							return true;
-						},
-            add_project: function(){
-							viewModel.project_description('');
-              $.post( "/project", { pname: this.project_name(),
-											  pdesc: this.project_description()
-												}, function(data) {
-              						viewModel.project_list.push(data);
-              });
-              panelProjects();
-            },
-            edit_project: function(project) {
-							viewModel.project_current(project);
-							viewModel.project_description(project.description);
-							viewModel.project_short_description(project.short_description);
-							viewModel.project_google(project.google_api);
-							viewModel.project_askimet(project.askimet_api);
-							viewModel.project_plan(project.plan);
-							//$("#form_element").html("");
-							$("#form_render").html("");
-							var form_elts = project['form'];
-							var new_elements = '';
-							for(var i=0;i<form_elts.length;i++){
-								var form_elt = form_elts[i];
-								new_elements += add_to_form(form_elt['type'],form_elt);
-							}
-							viewModel.form_elements(new_elements);
-							panelEditProject(project._id);
-					  },
-						show_project_id: function(project) {
-							var project = viewModel.find_project(project._id);
-							viewModel.show_project(project);
-						},
-            show_project: function(project) {
-							viewModel.project_current(project);
-							panelManageItems(project._id);
-					  },
-            delete_project: function(project) {
-            	$.ajax({
-              	url: '/project/'+project._id,
-                type: 'DELETE',
-                success: function(result) {
-                    viewModel.project_list.remove(function(item) {
-											return item._id == project._id
-										})
-                }
-              });
-            },
-          	selected_form_element: ko.observable(),
-					  render_project_form_element: function() {
-            	render_form();
-            },
-					  save_project_form_element: function() {
-            	save_form();
-            },
-            add_project_form_element: function() {
-							//var previous_form = viewModel.form_elements();
-							// Save existing form status
-							var form_elts = [];
-							$("#form_element .label").each(function(elt) {
-								var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
-								if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
-									var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
-									form_elt['values'] = values;
-								}
-								form_elts.push(form_elt);
-							});
-							var new_elements = '';
-							for(var i=0;i<form_elts.length;i++){
-								var form_elt = form_elts[i];
-								new_elements += add_to_form(form_elt['type'],form_elt);
-							}
-							new_elements += add_to_form(this.selected_form_element());
-							viewModel.form_elements(new_elements);
-
-            },
-					  delete_project_form_element: function(data, form_elt) {
-							$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
-							var new_form_elements = $("#form_element").html("");
-							viewModel.form_elements(new_form_elements);
-					  },
-            project_form_elements: ko.observableArray([
-							'single choice',
-							'multiple choice',
-							'textarea',
-							'text',
-							'checkbox',
-							'rating'
-							]),
-						widget_foundation_show: function() {
-							$(".project_id").text(viewModel.project_current()._id);
-							$(".project_point_and_click").text(viewModel.project_current().point_and_click);
-							$(".scitizen_host").text(viewModel.scitizen_host());
-							$("#widget").foundation('reveal', 'open');
-							$("#widget .bootstrap").hide();
-							$("#widget .foundation").show();
-						},
-						widget_bootstrap_show: function() {
-							$(".project_id").text(viewModel.project_current()._id);
-							$(".project_point_and_click").text(viewModel.project_current().point_and_click);
-							$(".scitizen_host").text(viewModel.scitizen_host());
-							$("#widget").foundation('reveal', 'open');
-							$("#widget .bootstrap").show();
-							$("#widget .foundation").hide();
-						},
-						scitizen_host: ko.observable(window.location.host)
-    };
-
-		viewModel.project_global_stats_total_projects = ko.computed(function(){
-									return viewModel.project_global_stats().length; }
-									, viewModel);
-		viewModel.project_global_stats_total_images = ko.computed(function(){
-									var nb_images = 0;
-									for(i=0;i<viewModel.project_global_stats().length;i++) {
-										nb_images += viewModel.project_global_stats()[i].images
-									}
-									return nb_images; }
-									, viewModel);
-
-		viewModel.project_global_stats_total_size = ko.computed(function(){
-									var size = 0;
-									for(i=0;i<viewModel.project_global_stats().length;i++) {
-										size += viewModel.project_global_stats()[i].size
-									}
-									return size; }
-									, viewModel);
-
-			viewModel.find_project = function(project_id) {
-				var project = null;
-				for(i=0;i<viewModel.project_list().length;i++){
-					if(viewModel.project_list()[i]._id == project_id) {
-						project = viewModel.project_list()[i];
-						break;
-					}
-				}
-				return project;
-			};
-
-    ko.applyBindings(viewModel);
-
-	/**
-	* Save form for project
-	*/
-	function save_form() {
-		var project_form = [];
-		$("#form_element .label").each(function(elt) {
-			var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
-			if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
-				var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
-				form_elt['values'] = values;
-			}
-			project_form.push(form_elt);
-		});
-        $.ajax({
-						url: '/project/'+viewModel.project_current()._id,
-            type: 'PUT',
-            data: {form: project_form},
-            success: function(result) {
-							var old = viewModel.project_current();
-							viewModel.project_current.remove(old);
-							old.form = project_form;
-							viewModel.project_current(old);
-							viewModel.project_list.push(old);
-							/*
-							var plist = viewModel.project_list();
-							for(var i=0;i<plist.length;i++){
-								if(plist[i]._id == old._id) {
-									plist[i] = old;
-									break;
-								}
-							}
-							*/
-
-            }
-        });
-	}
-
-
-	/**
-	* Show what form will looks like
-	*/
-	function render_form() {
-		var form_html = "<form>";
-		$("#form_element .label").each(function(elt) {
-			form_html += render_form_element(this.getAttribute("data-type"), this.getAttribute("data-id"));
-		});
-		form_html += "</form>";
-		$("#form_render").html(form_html);
-	}
-
-    /**
-    * Add a form element (choice, textarea, .. to project form)
-    */
-    var elt_count = 0;
-
-	function add_to_form(elt) {
-		add_to_form(elt,null);
-	}
-
-  function add_to_form(elt, info) {
-		if(elt == undefined) {
-			return;
-		}
-		elt_count += 1;
-		var elt_id = elt_count;
-		if(info!=null && 'id' in info) {
-			elt_id = parseInt(info['id'].replace('elt',''));
-			if(elt_count<= elt_id) { elt_count = elt_id + 1; }
-		}
-		var form_elt = '<div id="elt'+elt_id+'" class="form_elt">';
-		//form_elt += '<i class="fi-trash" data-id="'+elt_id+'" data-bind="click: delete_project_form_element"></i>';
-		form_elt += '<i class="fi-trash" data-id="'+elt_id+'"></i>';
-		var labelvalue = 'label'+elt_id;
-		var eltvalues = "";
-		if(info!=null) {
-			labelvalue = info['label'];
-			if('values' in info) {
-				eltvalues = info['values'].join();
-			}
-		}
-		if(elt == 'textarea') {
-			form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="textarea" data-id="'+elt_id+'"/>';
-			form_elt += '<textarea id="form'+elt_id+'"></textarea>';
-		}
-        else if(elt == 'text') {
-            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="text" data-id="'+elt_id+'"/>';
-            form_elt += '<input type="text" id="form'+elt_id+'"/>';
-        }
-        else if(elt == 'checkbox') {
-            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="checkbox" data-id="'+elt_id+'"/>';
-            form_elt += '<input type="checkbox" id="form'+elt_id+'"/>';
-        }
-        else if(elt == 'single' || elt=='single choice') {
-            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="single" data-id="'+elt_id+'"/>';
-		    form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
-            form_elt += '<select id="form'+elt_id+'"></select>';
-        }
-        else if(elt == 'multiple' || elt == 'multiple choice') {
-            form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="multiple" data-id="'+elt_id+'"/>';
-            form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
-            form_elt += '<select id="form'+elt_id+'" multiple="multiple"></select>';
-        }
-		else if(elt == 'rating') {
-			form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="rating" data-id="'+elt_id+'"/>';
-            form_elt += '<input type="text" id="form'+elt_id+'"/>';
-        }
-
-
-		form_elt += "</div>";
-		//$("#form_element").append(form_elt);
-		//var dynamic_elt = document.getElementById("elt"+elt_id);
-		//ko.applyBindings(viewModel, dynamic_elt);
-		return form_elt;
-    }
-
-    function addProject() {
-        panelNewProject();
-    }
-
-		function panelAdmin() {
-				viewModel.manageItems(false);
-				viewModel.showProjects(false);
-				viewModel.showProject(false);
-				viewModel.editProject(false);
-				viewModel.manageAccount(false);
-				viewModel.admin(true);
-		}
-
-		function panelAccount() {
-				viewModel.manageItems(false);
-				viewModel.showProjects(false);
-				viewModel.showProject(false);
-				viewModel.editProject(false);
-				viewModel.manageAccount(true);
-				viewModel.admin(false);
-		}
-
-    function panelProjects() {
-        viewModel.manageItems(false);
-        viewModel.showProjects(true);
-        viewModel.showProject(false);
-        viewModel.editProject(false);
-				viewModel.manageAccount(false);
-				viewModel.admin(false);
-    }
-
-    function panelNewProject() {
-        viewModel.manageItems(false);
-        viewModel.showProjects(false);
-        viewModel.showProject(true);
-        viewModel.editProject(false);
-				viewModel.manageAccount(false);
-				viewModel.admin(false);
-    }
-
-    function panelEditProject(project_id) {
-				viewModel.manageItems(false);
-        viewModel.showProjects(false);
-        viewModel.showProject(false);
-        viewModel.editProject(true);
-				viewModel.manageAccount(false);
-				viewModel.admin(false);
-    }
-
-	function panelManageItems(project_id) {
-        viewModel.showProjects(false);
-        viewModel.showProject(false);
-        viewModel.editProject(false);
-				viewModel.manageItems(true);
-				viewModel.manageAccount(false);
-				viewModel.admin(false);
-				var project = viewModel.project_current();
-        showProjectStats(project);
-				$.ajax({
-    			cache: false,
-    			url: "/project/"+project_id+"/image",
-    			dataType: "json",
-    			success: function(data) {
-						viewModel.image_list(data);
-    			}
+						});
+				},
+				project_name: ko.observable(''),
+				project_description: ko.observable(''),
+				project_google: ko.observable(''),
+				project_askimet: ko.observable(''),
+				project_short_description: ko.observable(''),
+				project_style: ko.observable(''),
+				project_plan: ko.observable('default'),
+				project_owner: ko.observable('{{user.username}}'),
+				project_status: ko.observable(false),
+				project_public: ko.observable(true),
+				project_switch_on_off: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {status: project.status},
+						success: function(result) {
+						}
 				});
-				/*
-        $.getJSON("/project/"+project_id+"/image", function(data) {
-            viewModel.image_list(data);
-        });
-				*/
+				return true;
+				},
+				project_switch_public: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {public: project.public},
+						success: function(result) {
+						}
+					});
+					return true;
+				},
+				project_switch_geo: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {geo: project.geo},
+						success: function(result) {
+											}
+					});
+					return true;
+				},
+				project_switch_validation: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {validation: project.validation},
+						success: function(result) {}
+					});
+					return true;
+				},
+				project_switch_users_can_add: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {users_can_add: project.users_can_add},
+						success: function(result) {}
+					});
+					return true;
+				},
+				project_switch_point_and_click: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'PUT',
+						data: {point_and_click: project.point_and_click},
+						success: function(result) {}
+					});
+					return true;
+				},
+				add_project: function(){
+					viewModel.project_description('');
+					$.post( "/project", { pname: this.project_name(),
+										pdesc: this.project_description()
+										}, function(data) {
+											viewModel.project_list.push(data);
+					});
+					panelProjects();
+				},
+				edit_project: function(project) {
+					viewModel.project_current(project);
+					viewModel.project_description(project.description);
+					viewModel.project_short_description(project.short_description);
+					viewModel.project_style(project.style);
+					viewModel.project_google(project.google_api);
+					viewModel.project_askimet(project.askimet_api);
+					viewModel.project_plan(project.plan);
+					//$("#form_element").html("");
+					$("#form_render").html("");
+					var form_elts = project['form'];
+					var new_elements = '';
+					for(var i=0;i<form_elts.length;i++){
+						var form_elt = form_elts[i];
+						new_elements += add_to_form(form_elt['type'],form_elt);
+					}
+					viewModel.form_elements(new_elements);
+					panelEditProject(project._id);
+				},
+				show_project_id: function(project) {
+					var project = viewModel.find_project(project._id);
+					viewModel.show_project(project);
+				},
+				show_project: function(project) {
+					viewModel.project_current(project);
+					panelManageItems(project._id);
+				},
+				delete_project: function(project) {
+					$.ajax({
+						url: '/project/'+project._id,
+						type: 'DELETE',
+						success: function(result) {
+								viewModel.project_list.remove(function(item) {
+									return item._id == project._id
+								})
+						}
+					});
+				},
+				selected_form_element: ko.observable(),
+				render_project_form_element: function() {
+					render_form();
+				},
+				save_project_form_element: function() {
+					save_form();
+				},
+				add_project_form_element: function() {
+					//var previous_form = viewModel.form_elements();
+					// Save existing form status
+					var form_elts = [];
+					$("#form_element .label").each(function(elt) {
+						var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
+						if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
+							var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
+							form_elt['values'] = values;
+						}
+						form_elts.push(form_elt);
+					});
+					var new_elements = '';
+					for(var i=0;i<form_elts.length;i++){
+						var form_elt = form_elts[i];
+						new_elements += add_to_form(form_elt['type'],form_elt);
+					}
+					new_elements += add_to_form(this.selected_form_element());
+					viewModel.form_elements(new_elements);
+
+				},
+				delete_project_form_element: function(data, form_elt) {
+					$("#elt"+form_elt.currentTarget.getAttribute("data-id")).remove();
+					var new_form_elements = $("#form_element").html("");
+					viewModel.form_elements(new_form_elements);
+				},
+				project_form_elements: ko.observableArray([
+					'single choice',
+					'multiple choice',
+					'textarea',
+					'text',
+					'checkbox',
+					'rating'
+					]),
+				widget_foundation_show: function() {
+					$(".project_id").text(viewModel.project_current()._id);
+					$(".project_point_and_click").text(viewModel.project_current().point_and_click);
+					$(".scitizen_host").text(viewModel.scitizen_host());
+					$("#widget").foundation('reveal', 'open');
+					$("#widget .bootstrap").hide();
+					$("#widget .foundation").show();
+				},
+				widget_bootstrap_show: function() {
+					$(".project_id").text(viewModel.project_current()._id);
+					$(".project_point_and_click").text(viewModel.project_current().point_and_click);
+					$(".scitizen_host").text(viewModel.scitizen_host());
+					$("#widget").foundation('reveal', 'open');
+					$("#widget .bootstrap").show();
+					$("#widget .foundation").hide();
+				},
+				scitizen_host: ko.observable(window.location.host)
+};
+
+viewModel.project_global_stats_total_projects = ko.computed(function(){
+							return viewModel.project_global_stats().length; }
+							, viewModel);
+viewModel.project_global_stats_total_images = ko.computed(function(){
+							var nb_images = 0;
+							for(i=0;i<viewModel.project_global_stats().length;i++) {
+								nb_images += viewModel.project_global_stats()[i].images
+							}
+							return nb_images; }
+							, viewModel);
+
+viewModel.project_global_stats_total_size = ko.computed(function(){
+							var size = 0;
+							for(i=0;i<viewModel.project_global_stats().length;i++) {
+								size += viewModel.project_global_stats()[i].size
+							}
+							return size; }
+							, viewModel);
+
+	viewModel.find_project = function(project_id) {
+		var project = null;
+		for(i=0;i<viewModel.project_list().length;i++){
+			if(viewModel.project_list()[i]._id == project_id) {
+				project = viewModel.project_list()[i];
+				break;
+			}
+		}
+		return project;
+	};
+
+ko.applyBindings(viewModel);
+
+/**
+* Save form for project
+*/
+function save_form() {
+var project_form = [];
+$("#form_element .label").each(function(elt) {
+	var form_elt = { label: this.value, type: this.getAttribute("data-type"), id: this.getAttribute("data-id") };
+	if(form_elt['type'] == 'single' || form_elt['type'] == 'multiple') {
+		var values = $("#valuesform"+this.getAttribute("data-id")).val().split(",");
+		form_elt['values'] = values;
 	}
-    function showProjectStats(project){
-        var html = '<div class="small-6"><div>Statistics</div>';
-        html += '<div>Google</div>';
-        html += '<canvas id="chart_google_'+project.name+'" ></canvas>';
-        html += '<div>Images</div>';
-        html += '<canvas id="chart_image_'+project.name+'" ></canvas>';
-        html += '<div>Quota</div>';
-        html += '<canvas id="chart_quota_'+project.name+'" ></canvas>';
-        html += '</div>';
-        $("#project_stats").html(html);
-        $.ajax({
-            cache: false,
-            url: "/project/"+project._id+"/stats",
-            dataType: "json",
-            success: function(stats) {
-                var data_google = { labels : [],
-                     datasets:  []
-                };
-                var data_image = { labels : [],
-                     datasets:  []
-                };
-                var data_quota = { labels : [],
-                     datasets:  []
-                };
+	project_form.push(form_elt);
+});
+		$.ajax({
+				url: '/project/'+viewModel.project_current()._id,
+				type: 'PUT',
+				data: {form: project_form},
+				success: function(result) {
+					var old = viewModel.project_current();
+					viewModel.project_current.remove(old);
+					old.form = project_form;
+					viewModel.project_current(old);
+					viewModel.project_list.push(old);
+					/*
+					var plist = viewModel.project_list();
+					for(var i=0;i<plist.length;i++){
+						if(plist[i]._id == old._id) {
+							plist[i] = old;
+							break;
+						}
+					}
+					*/
 
-                if(stats.length==0) { return; }
-                var stat = stats[0].points.reverse();
-                var google_stats =  { label: 'Google', data: []}
-                var image_stats =  { label: 'Images', data: [] };
-                var quota_stats =  { label: 'Quota', data: [] };
-                for(i=0;i<stat.length;i++) {
-										data_google.labels.push(timeConverter(stat[i][0]));
-                    data_image.labels.push(timeConverter(stat[i][0]));
-                    data_quota.labels.push(timeConverter(stat[i][0]));
-                    google_stats.data.push(stat[i][1]);
-                    image_stats.data.push(stat[i][2]);
-                    quota_stats.data.push(stat[i][3]);
-                }
-                data_google.datasets.push(google_stats);
-                data_image.datasets.push(image_stats);
-                data_quota.datasets.push(quota_stats);
-                var ctx = $("#chart_google_"+project.name).get(0).getContext("2d");
-                var myLineChart = new Chart(ctx).Line(data_google);
-                ctx = $("#chart_image_"+project.name).get(0).getContext("2d");
-                myLineChart = new Chart(ctx).Line(data_image);
-                ctx = $("#chart_quota_"+project.name).get(0).getContext("2d");
-                myLineChart = new Chart(ctx).Line(data_quota);
-            }
-        });
-    }
+				}
+		});
+}
 
-function timeConverter(UNIX_timestamp){
- var a = new Date(UNIX_timestamp);
- var months =
-['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-     var year = a.getFullYear();
-     var month = months[a.getMonth() - 1];
-     var date = a.getDate();
-     var hour = a.getHours();
-     var min = a.getMinutes();
-     var sec = a.getSeconds();
-     var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-     return time;
- }
 
-  </script>
+/**
+* Show what form will looks like
+*/
+function render_form() {
+var form_html = "<form>";
+$("#form_element .label").each(function(elt) {
+	form_html += render_form_element(this.getAttribute("data-type"), this.getAttribute("data-id"));
+});
+form_html += "</form>";
+$("#form_render").html(form_html);
+}
 
+/**
+* Add a form element (choice, textarea, .. to project form)
+*/
+var elt_count = 0;
+
+function add_to_form(elt) {
+add_to_form(elt,null);
+}
+
+function add_to_form(elt, info) {
+if(elt == undefined) {
+	return;
+}
+elt_count += 1;
+var elt_id = elt_count;
+if(info!=null && 'id' in info) {
+	elt_id = parseInt(info['id'].replace('elt',''));
+	if(elt_count<= elt_id) { elt_count = elt_id + 1; }
+}
+var form_elt = '<div id="elt'+elt_id+'" class="form_elt">';
+//form_elt += '<i class="fi-trash" data-id="'+elt_id+'" data-bind="click: delete_project_form_element"></i>';
+form_elt += '<i class="fi-trash" data-id="'+elt_id+'"></i>';
+var labelvalue = 'label'+elt_id;
+var eltvalues = "";
+if(info!=null) {
+	labelvalue = info['label'];
+	if('values' in info) {
+		eltvalues = info['values'].join();
+	}
+}
+if(elt == 'textarea') {
+	form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="textarea" data-id="'+elt_id+'"/>';
+	form_elt += '<textarea id="form'+elt_id+'"></textarea>';
+}
+		else if(elt == 'text') {
+				form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="text" data-id="'+elt_id+'"/>';
+				form_elt += '<input type="text" id="form'+elt_id+'"/>';
+		}
+		else if(elt == 'checkbox') {
+				form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="checkbox" data-id="'+elt_id+'"/>';
+				form_elt += '<input type="checkbox" id="form'+elt_id+'"/>';
+		}
+		else if(elt == 'single' || elt=='single choice') {
+				form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="single" data-id="'+elt_id+'"/>';
+		form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
+				form_elt += '<select id="form'+elt_id+'"></select>';
+		}
+		else if(elt == 'multiple' || elt == 'multiple choice') {
+				form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="multiple" data-id="'+elt_id+'"/>';
+				form_elt += '<input type="text" id="valuesform'+elt_id+'" value="'+eltvalues+'" placeholder="Enter choices, comma separated"/>';
+				form_elt += '<select id="form'+elt_id+'" multiple="multiple"></select>';
+		}
+else if(elt == 'rating') {
+	form_elt += '<input type="text" class="label" id="labelform'+elt_id+'" value="'+labelvalue+'" data-type="rating" data-id="'+elt_id+'"/>';
+				form_elt += '<input type="text" id="form'+elt_id+'"/>';
+		}
+
+
+form_elt += "</div>";
+//$("#form_element").append(form_elt);
+//var dynamic_elt = document.getElementById("elt"+elt_id);
+//ko.applyBindings(viewModel, dynamic_elt);
+return form_elt;
+}
+
+function addProject() {
+		panelNewProject();
+}
+
+function panelAdmin() {
+		viewModel.manageItems(false);
+		viewModel.showProjects(false);
+		viewModel.showProject(false);
+		viewModel.editProject(false);
+		viewModel.manageAccount(false);
+		viewModel.admin(true);
+}
+
+function panelAccount() {
+		viewModel.manageItems(false);
+		viewModel.showProjects(false);
+		viewModel.showProject(false);
+		viewModel.editProject(false);
+		viewModel.manageAccount(true);
+		viewModel.admin(false);
+}
+
+function panelProjects() {
+		viewModel.manageItems(false);
+		viewModel.showProjects(true);
+		viewModel.showProject(false);
+		viewModel.editProject(false);
+		viewModel.manageAccount(false);
+		viewModel.admin(false);
+}
+
+function panelNewProject() {
+		viewModel.manageItems(false);
+		viewModel.showProjects(false);
+		viewModel.showProject(true);
+		viewModel.editProject(false);
+		viewModel.manageAccount(false);
+		viewModel.admin(false);
+}
+
+function panelEditProject(project_id) {
+		viewModel.manageItems(false);
+		viewModel.showProjects(false);
+		viewModel.showProject(false);
+		viewModel.editProject(true);
+		viewModel.manageAccount(false);
+		viewModel.admin(false);
+}
+
+function panelManageItems(project_id) {
+		viewModel.showProjects(false);
+		viewModel.showProject(false);
+		viewModel.editProject(false);
+		viewModel.manageItems(true);
+		viewModel.manageAccount(false);
+		viewModel.admin(false);
+		var project = viewModel.project_current();
+		showProjectStats(project);
+		$.ajax({
+			cache: false,
+			url: "/project/"+project_id+"/image",
+			dataType: "json",
+			success: function(data) {
+				viewModel.image_list(data);
+			}
+		});
+		/*
+		$.getJSON("/project/"+project_id+"/image", function(data) {
+				viewModel.image_list(data);
+		});
+		*/
+}
+function showProjectStats(project){
+		var html = '<div class="small-6"><div>Statistics</div>';
+		html += '<div>Google</div>';
+		html += '<canvas id="chart_google_'+project.name+'" ></canvas>';
+		html += '<div>Images</div>';
+		html += '<canvas id="chart_image_'+project.name+'" ></canvas>';
+		html += '<div>Quota</div>';
+		html += '<canvas id="chart_quota_'+project.name+'" ></canvas>';
+		html += '</div>';
+		$("#project_stats").html(html);
+		$.ajax({
+				cache: false,
+				url: "/project/"+project._id+"/stats",
+				dataType: "json",
+				success: function(stats) {
+						var data_google = { labels : [],
+								datasets:  []
+						};
+						var data_image = { labels : [],
+								datasets:  []
+						};
+						var data_quota = { labels : [],
+								datasets:  []
+						};
+
+						if(stats.length==0) { return; }
+						var stat = stats[0].points.reverse();
+						var google_stats =  { label: 'Google', data: []}
+						var image_stats =  { label: 'Images', data: [] };
+						var quota_stats =  { label: 'Quota', data: [] };
+						for(i=0;i<stat.length;i++) {
+								data_google.labels.push(timeConverter(stat[i][0]));
+								data_image.labels.push(timeConverter(stat[i][0]));
+								data_quota.labels.push(timeConverter(stat[i][0]));
+								google_stats.data.push(stat[i][1]);
+								image_stats.data.push(stat[i][2]);
+								quota_stats.data.push(stat[i][3]);
+						}
+						data_google.datasets.push(google_stats);
+						data_image.datasets.push(image_stats);
+						data_quota.datasets.push(quota_stats);
+						var ctx = $("#chart_google_"+project.name).get(0).getContext("2d");
+						var myLineChart = new Chart(ctx).Line(data_google);
+						ctx = $("#chart_image_"+project.name).get(0).getContext("2d");
+						myLineChart = new Chart(ctx).Line(data_image);
+						ctx = $("#chart_quota_"+project.name).get(0).getContext("2d");
+						myLineChart = new Chart(ctx).Line(data_quota);
+				}
+		});
+}
+
+</script>
 
 <!-- Widget viewer -->
 <div id="widget" class="reveal-modal large" data-reveal>
