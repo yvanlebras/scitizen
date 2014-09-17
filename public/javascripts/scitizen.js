@@ -14,6 +14,26 @@ if(document.getElementById('user_view')!=null) {
 */
 
 /**
+* Convert a timemstamp to human readable date
+*
+* @param {long} Unix timestamp
+* @return {string}
+*/
+function timeConverter(UNIX_timestamp){
+ var a = new Date(UNIX_timestamp);
+ var months =
+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+     var year = a.getFullYear();
+     var month = months[a.getMonth() - 1];
+     var date = a.getDate();
+     var hour = a.getHours();
+     var min = a.getMinutes();
+     var sec = a.getSeconds();
+     var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+     return time;
+ }
+
+/**
  * parses and returns URI query parameters
  *
  * @param {string} param parm
