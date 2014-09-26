@@ -548,6 +548,11 @@ function upload_file(req, res, project) {
         need_control = true;
       }
 
+      var user_id = '';
+      if(scitizen_auth.is_authenticated()) {
+        user_id = req.user.username;
+      }
+
       var item = {project: images_db.id(req.param('id')),
                   contentType: files.image.type,
                   fields: fields,
@@ -557,6 +562,7 @@ function upload_file(req, res, project) {
                   size: files.image.size,
                   spam: false,
                   ready: false,
+                  user: user_id,
                   favorite: false};
 
       images_db.insert(item, function(err, image) {
