@@ -25,3 +25,10 @@
     <button class="button expand action" id="send" name="send" value="item">Send</button>
   </div>
 </form>
+<script>
+$(document).ready(function() {
+  $(document).on('click', '#send', function(e) {
+    addEvent('{{project.name}}', 'add');
+  });
+});
+</script>

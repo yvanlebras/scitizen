@@ -462,11 +462,13 @@ exports.dashboard =  function(req, res){
         else {
             scitizen_stats.send(project.name, 'google', 1);
         }
+        var analytics_part = 'analytics_'+CONFIG.analytics.backend;
         res.render(theme_view,
                     { layout: 'layouts/'+project.theme+'/public',
-                      partials: { part: 'new_item' },
+                      partials: { part: 'new_item', analytics: analytics_part },
                       project: project,
                       apikey: google_api,
+                      analytics: CONFIG.analytics,
                       messages: req.flash('info'),
                       user: username });
         });

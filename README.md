@@ -137,6 +137,16 @@ in config/default.yaml
         container: "scitizen"
         # For s3 and pairtree
         path: "/tmp/scitizen"
-
+    analytics:
+        # piwik or google or none
+        backend: 'piwik'
+        google:
+          # Google User-ID
+          siteid: ''
+        piwik:
+          # Piwik url like  mydomain.com/piwik
+          url: ''
+          # Piwik site id
+          siteid: ''
     Google:
-      apikey: ""  # Google maps API
+        apikey: ""  # Google maps API

@@ -149,6 +149,10 @@ your own API key for your project <a href="https://developers.google.com/maps/si
 
 
     <script type="text/javascript">
+    var piwik_url = '{{ analytics.piwik.url}}';
+    var piwik_siteid = '{{ analytics.piwik.siteid}}';
+    var google_siteid = '{{ analytics.google.siteid}}';
+    
         $(document).ready(function(){
             $('#myslider').slick({
               autoplay: true,
@@ -157,3 +161,5 @@ your own API key for your project <a href="https://developers.google.com/maps/si
             });
         });
     </script>
+
+{{> analytics}}

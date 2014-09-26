@@ -17,6 +17,10 @@
 
 <script type="text/javascript">
 
+var piwik_url = '{{ analytics.piwik.url}}';
+var piwik_siteid = '{{ analytics.piwik.siteid}}';
+var google_siteid = '{{ analytics.google.siteid}}';
+
     var viewModel = {
       project_list: ko.observableArray(),
       project_ready: ko.observable(false),
@@ -41,3 +45,4 @@
     });
 
 </script>
+{{> analytics}}

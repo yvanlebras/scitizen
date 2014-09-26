@@ -15,9 +15,12 @@ exports.index = function(req, res){
         username = req.user.username;
     }
     var project = { name: '', theme: 'default' };
+    var analytics_part = 'analytics_'+CONFIG.analytics.backend;
     res.render('index', { layout: 'layouts/default/public',
-                              user: username,
-                              project: project});
+                          partials: { analytics: analytics_part },
+                          user: username,
+                          analytics: CONFIG.analytics,
+                          project: project});
 };
 
 exports.projects = function(req, res){
@@ -26,9 +29,12 @@ exports.projects = function(req, res){
         username = req.user.username;
     }
     var project = { name: '', theme: 'default' };
+    var analytics_part = 'analytics_'+CONFIG.analytics.backend;
     res.render('projects', { layout: 'layouts/default/public',
-                              user: username,
-                              project: project});
+                             partials: { analytics: analytics_part },
+                             user: username,
+                             analytics: CONFIG.analytics,
+                             project: project});
 };
 
 exports.tasks = function(req, res) {

@@ -25,6 +25,16 @@ stats:
         username: 'root'
         password: 'XXX'
         database: 'scitizen'
+
+analytics:
+    # piwik or google or none
+    backend: 'piwik'
+    google:
+      siteid: ''
+    piwik:
+      url: ''
+      siteid: ''
+
 plans:
     default:
         quota: 100

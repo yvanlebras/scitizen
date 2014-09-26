@@ -101,6 +101,10 @@ var infowindow = new google.maps.InfoWindow();;
 var event_position = new google.maps.LatLng(48.112047191207964, -1.6814074292778969);
 var marker=null;
 
+var piwik_url = '{{ analytics.piwik.url}}';
+var piwik_siteid = '{{ analytics.piwik.siteid}}';
+var google_siteid = '{{ analytics.google.siteid}}';
+
   /**
   * Adds a clickable Google map on element "map-canvas",
   * centered on <i>event_position</i>
@@ -235,6 +239,7 @@ var marker=null;
       images: ko.observableArray(),
       image_spam: function() {
         var image_id = viewModel.random_image()._id;
+        addEvent(viewModel.project().name, 'spam');
         $.ajax({
             url: '/image/'+image_id,
             type: 'PUT',
@@ -245,6 +250,7 @@ var marker=null;
         });
       },
       image_curate: function() {
+        addEvent(viewModel.project().name, 'curate');
         var form_elts = $("#random_form .sciform");
         var curate = {};
         var form_ids = "";
@@ -508,3 +514,6 @@ var marker=null;
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
 <script type="text/javascript">stLight.options({publisher: "ur-217977e3-b2b9-2886-b69a-3906bf90dcd6", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script>
+
+
+{{> analytics}}
