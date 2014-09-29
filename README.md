@@ -67,13 +67,11 @@ Requirements: mongodb, bzip2, influxdb (optional)
 ## Questions
 
 * For "free" plan, limit size of image (rescale) ?
-* what should we block/do when quota is reached ? (block uploads etc... bad experience for end user, warn project owner before manual blocking?)
 * Quotas for Google maps API (remove map when reached ?) or force user to get a google api key ?
 
 ## General
 
 * add connection with Google, Facebook ....
-* Add quotas per project, admin can increase plan, quotas are managed by plans in config
 
 ## Items
 
@@ -105,8 +103,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
 ## Admin
 
 * manage project quotas
-* show usage per projet, show all projects
-* show pending tasks
 
 # Issues:
 
@@ -150,3 +146,9 @@ in config/default.yaml
           siteid: ''
     Google:
         apikey: ""  # Google maps API
+    plans:
+        default:
+            quota: 100
+            tiny:
+              max_width: 600
+              max_height: 400

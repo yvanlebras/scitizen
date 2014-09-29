@@ -38,6 +38,9 @@ analytics:
 plans:
     default:
         quota: 100
+        tiny:
+          max_width: 600
+          max_height: 400
 mail:
     host: "mailtrap.io"
     #port: 465

@@ -77,7 +77,8 @@ describe('Anonymous', function() {
                 geo: true,
                 status:true,
                 validation: false,
-                form: {}
+                form: {},
+                plan: 'default'
                 },
                 {
                 name: 'test2',
@@ -91,7 +92,8 @@ describe('Anonymous', function() {
                 geo: true,
                 status:true,
                 validation: false,
-                form: {}
+                form: {},
+                plan: 'default'
                 }
                 ], function(err, project) {
                     if(err) {
@@ -887,7 +889,8 @@ describe('Authenticated', function() {
                 geo: true,
                 status:true,
                 validation: false,
-                form: {}
+                form: {},
+                plan: 'default'
                 },
                 {
                 name: 'test2',
@@ -901,7 +904,8 @@ describe('Authenticated', function() {
                 geo: true,
                 status:true,
                 validation: false,
-                form: {}
+                form: {},
+                plan: 'default'
                 }
                 ], function(err, project) {
                     if(err) {

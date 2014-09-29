@@ -516,7 +516,7 @@ function upload_file(req, res, project) {
         properfields[name].push(value);
       }
     }
-  });
+    });
 
 
     form.parse(req, function(err, fields, files) {
@@ -565,6 +565,13 @@ function upload_file(req, res, project) {
                   user: user_id,
                   favorite: false};
 
+      // Quota in Mb
+      var max_plan = CONFIG.plans[project.plan].quota*1000000;
+      if(project.stats.quota + files.image.size > max_plan) {
+        res.status(401).send('Project storage exceeded its quota');
+        return;
+      }
+
       images_db.insert(item, function(err, image) {
            //scitizen_stats.send(project.name, 'image', 1);
            scitizen_stats.sendPoints(project.name,[
@@ -611,7 +618,7 @@ function upload_file(req, res, project) {
 
 
 
-        });
+        }); // end images_db.insert
     });
 }
 

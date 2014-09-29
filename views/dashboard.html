@@ -4,7 +4,7 @@
 <a href="#" class="close" data-bind="click: clear_message">&times;</a>
 </div>
 -->
-<div data-bind="visible: image_all_panel">
+<div id="image_browse" data-bind="visible: image_all_panel">
   <ul id="show_image_all" class="small-block-grid-4">
   </ul>
   <div data-bind="click: add_image_all" id="refresh_image_all" class="row"><i class="fi-refresh large"> Load more items</i></div>
@@ -192,7 +192,11 @@ var google_siteid = '{{ analytics.google.siteid}}';
         viewModel.image_all_loaded(nb);
         for(var i=viewModel.image_all_loaded();i<viewModel.image_all_loaded()+nb;i++) {
           var image = viewModel.images()[i];
-          img_html += '<li><img class="rawimage" data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
+          var ismine = '';
+          if(image.user !=== undefined && '{{user}}'!=='') {
+            if(image.user == '{{user}}') { ismine= 'mine'; }
+          }
+          img_html += '<li><img class="rawimage '+ismine+'" data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
         }
         viewModel.image_all_loaded(viewModel.image_all_loaded()+nb);
         if(viewModel.image_all_loaded()>=viewModel.images().length) {
