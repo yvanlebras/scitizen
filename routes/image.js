@@ -265,3 +265,34 @@ exports.list = function(req, res) {
       });
     });
 };
+
+/**
+* List user contributions
+*/
+exports.my = function(req, res) {
+    projects_db.findOne({ _id: req.param('id')}, function(err, project) {
+      scitizen_auth.can_read(req.user, project, req.param('api'),
+                              function(can_read) {
+        if(can_read) {
+            if(! scitizen_auth.is_authenticated(req)) {
+              res.status(401).send('You need to be authenticated!');
+              return;
+            }
+            var filter = { project: images_db.id(req.param('id')),
+                           ready: true };
+            filter.user = req.user.username;
+            // If not a project member, show only validated images
+            if(project.users.indexOf(req.user.username)== -1) {
+                filter.validated = true;
+                filter.need_spam_control = false;
+            }
+            images_db.find(filter, function(err, images) {
+                res.json(images);
+            });
+        }
+        else {
+            res.status(401).send('You\'re not allowed to access this project');
+        }
+      }, req);
+    });
+};

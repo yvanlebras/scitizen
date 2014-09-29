@@ -104,25 +104,29 @@ describe('Anonymous', function() {
                           project: test_context.projects[0]._id,
                           validated: true,
                           need_spam_control: false,
-                          ready: true
+                          ready: true,
+                          user: 'test'
                         },
                         { name: 'image2',
                           project: test_context.projects[0]._id,
                           validated: false,
                           need_spam_control: false,
-                          ready: true
+                          ready: true,
+                          user: ''
                         },
                         { name: 'image3',
                           project: test_context.projects[1]._id,
                           validated: true,
                           need_spam_control: false,
-                          ready: true
+                          ready: true,
+                          user: 'test'
                         },
                         { name: 'image4',
                           project: test_context.projects[1]._id,
                           validated: false,
                           need_spam_control: false,
-                          ready: true
+                          ready: true,
+                          user: ''
                         },
                         ];
                       images.insert(test_images, function(err) {
@@ -507,7 +511,6 @@ describe('Anonymous', function() {
 
   });
 
-
   it('anonymous can list validated images of a public project', function(done) {
     var options = {
       hostname: 'localhost',
@@ -808,6 +811,30 @@ describe('Anonymous', function() {
     req.end();
   });
 
+
+  it('anonymous cannot list *my* images of a public project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id+'/image/my',
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      expect(res.statusCode).to.equal(401);
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
+  });
+
+
   after(function(done) {
     var myapp = this.server;
     this.server.close(done);
@@ -820,7 +847,7 @@ describe('Authenticated', function() {
     this.server = http.createServer(app).listen(app.get('port'));
   });
 
-  before(function(done){
+  beforeEach(function(done){
     projects.remove({}, function(err) {
     users.remove({}, function(err) {
     images.remove({}, function(err) {
@@ -886,22 +913,30 @@ describe('Authenticated', function() {
                         { name: 'image1',
                           project: test_context.projects[0]._id,
                           validated: true,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true,
+                          user: 'test'
                         },
                         { name: 'image2',
                           project: test_context.projects[0]._id,
                           validated: false,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: false,
+                          user: ''
                         },
                         { name: 'image3',
                           project: test_context.projects[1]._id,
                           validated: true,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: true,
+                          user: 'test'
                         },
                         { name: 'image4',
                           project: test_context.projects[0]._id,
                           validated: false,
-                          need_spam_control: false
+                          need_spam_control: false,
+                          ready: false,
+                          user: ''
                         },
                         ];
                         images.insert(test_images, function(err) {
@@ -1172,6 +1207,30 @@ describe('Authenticated', function() {
         });
       });
     });
+  });
+
+
+  it('user can list *my* images of a project', function(done) {
+    var options = {
+      hostname: 'localhost',
+      port: app.get('port'),
+      path: '/project/'+test_context.projects[0]._id+'/image/my?api=123',
+      method: 'GET'
+    };
+    var req = http.request(options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var images = JSON.parse(chunk);
+        expect(images.length).to.equal(1);
+        done();
+      });
+    });
+    req.on('error', function(e) {
+      expect(false).to.be.true;
+      console.log('problem with request: ' + e.message);
+      done();
+    });
+    req.end();
   });
 
 

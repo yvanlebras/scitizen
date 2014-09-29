@@ -549,7 +549,7 @@ function upload_file(req, res, project) {
       }
 
       var user_id = '';
-      if(scitizen_auth.is_authenticated()) {
+      if(scitizen_auth.is_authenticated(req)) {
         user_id = req.user.username;
       }
 

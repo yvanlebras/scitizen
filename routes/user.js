@@ -178,6 +178,9 @@ exports.edit = function(req, res){
                 req.body.form[elt].values = true;
               }
             }
+            if(elt == 'api') {
+              delete req.body.form[elt];
+            }
           }
           users_db.update({ _id: req.param('id') },
                               {$set: req.body},

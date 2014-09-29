@@ -168,6 +168,7 @@ app.get('/project/:id/stats', project.stats);
 //app.get('/project/:id/map', project.map);
 app.get('/project/:id/around/:long/:lat/:dist', project.around);
 app.get('/project/:id/image', image.list);
+app.get('/project/:id/image/my', image.my);
 app.delete('/image/:id', image.delete);
 app.get('/image/:id', image.get);
 app.put('/image/:id', image.curate);
