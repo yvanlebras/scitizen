@@ -1,3 +1,13 @@
+# Requirements
+
+imagemagick
+
+then
+
+npm install
+
+# Running
+
 forever start -l forever.log -o out.log -e err.log app.js --NODE_CONFIG_DIR=.
 
 node app.js --NODE_CONFIG_DIR=.
@@ -33,7 +43,7 @@ Background tasks can be run manually (or croned) with:
 
 # License
 
-MIT
+AGPL for non-commercial usage. For commercial usage, please contact us (support@genouest.org).
 
 # Credits:
 
