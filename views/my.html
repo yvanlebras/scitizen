@@ -96,41 +96,51 @@
 			</div>
 		</div>
   <div class="row" data-bind="visible: editProject">
-    <div class="small-4 large-4 columns">
-			<div>
-				<h2>Information</h2>
-				<label for="project_short_desc_edit">Short description</label>
-				<textarea rows="20" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
-				<label for="project_desc_edit">Description (MarkDown support)</label>
-				<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
-				<label for="project_style_edit">CSS Style (optional)</label>
-				<textarea rows="20" id="project_style_edit" name="project_style_edit"  data-bind="value: project_style"></textarea>
-				<label for="project_google_edit">Google Maps API key (optional)</label>
-				<input name="project_google_edit" id="project_google_edit" type="text" data-bind="value: project_google"/>
-				<label for="project_askimet_edit">Antispam Askimet API key (optional)</label>
-				<input name="project_askimet_edit" id="project_askimet_edit" type="text" data-bind="value: project_askimet"/>
-				<label for="project_plan_edit">Plan</label>
-				<select name="project_plan_edit" data-bind="value: project_plan">
-				{{#plans}} <option value="{{.}}">{{.}}</option> {{/plans}}
-				</select>
-				<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
-			</div>
-			<div data-bind="with: project_current">
-				<h2>Members</h2>
-				<table data-bind="foreach: users">
-					<tr><td data-bind="text: $data"></td><td data-bind="click: viewModel.project_delete_member"><i class="fi-trash"> Delete</i></td></tr>
-				</table>
-				<input type="text" id="add_member" value=""/>
-				<button type="button" class="button tiny" data-bind="click: $parent.project_add_member">Add member</button>
-			</div>
-			<div>
+		<dl class="tabs" data-tab>
+  		<dd class="active"><a href="#project_edit_settings_general">Settings</a></dd>
+  		<dd><a href="#project_edit_settings_form">Form</a></dd>
+		</dl>
+		<div class="tabs-content">
+  		<div class="content active" id="project_edit_settings_general">
+    <!--<div class="small-4 large-4 columns">-->
+				<div class="row">
+					<h2>Information</h2>
+					<label for="project_short_desc_edit">Short description</label>
+					<textarea rows="5" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
+					<label for="project_desc_edit">Description (MarkDown support)</label>
+					<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
+					<label for="project_style_edit">CSS Style (optional)</label>
+					<textarea rows="20" id="project_style_edit" name="project_style_edit"  data-bind="value: project_style"></textarea>
+					<label for="project_google_edit">Google Maps API key (optional)</label>
+					<input name="project_google_edit" id="project_google_edit" type="text" data-bind="value: project_google"/>
+					<label for="project_askimet_edit">Antispam Askimet API key (optional)</label>
+					<input name="project_askimet_edit" id="project_askimet_edit" type="text" data-bind="value: project_askimet"/>
+					<label for="project_plan_edit">Plan</label>
+					<select name="project_plan_edit" data-bind="value: project_plan">
+					{{#plans}} <option value="{{.}}">{{.}}</option> {{/plans}}
+					</select>
+					<button type="button" class="button tiny" data-bind="click: project_update">Update</button>
+				</div>
+				<div data-bind="with: project_current">
+					<h2>Members</h2>
+					<table data-bind="foreach: users">
+						<tr><td data-bind="text: $data"></td><td data-bind="click: viewModel.project_delete_member"><i class="fi-trash"> Delete</i></td></tr>
+					</table>
+					<input type="text" id="add_member" value=""/>
+					<button type="button" class="button tiny" data-bind="click: $parent.project_add_member">Add member</button>
+				</div>
+			</div> <!-- end content -->
+
+			<div class="content" id="project_edit_settings_form">
+			<div class="row">
+			<div class="small-4 large-4 columns">
 				<h2>Form</h2>
 				<h3>Widget code</h3>
 				<div class="row">
-					<div class="small-6 columns">
+					<!--<div class="small-4 columns">-->
 					<button type="button" class="button tiny" data-bind="click: widget_foundation_show">Widget code - Foundation</button>
 					<button type="button" class="button tiny" data-bind="click: widget_bootstrap_show">Widget code - Bootstrap</button>
-					</div>
+					<!--</div>-->
 				</div>
 				<div class="row">
       		<form>
@@ -146,12 +156,14 @@
 						<button type="button" class="button tiny" data-bind="click: save_project_form_element">Save</button>
 					</div>
 				</div>
-			</div>
       <div id="form_element" class="row" data-bind="html: form_elements"></div>
-    </div>
-    <div class="small-8 large-8 columns" id="form_render">
-    </div>
-  </div>
+			</div>
+    	<div class="small-8 large-8 columns" id="form_render"></div>
+		</div>
+
+		</div> <!-- end content -->
+	</div> <!-- end tabs-content -->
+</div> <!-- end row -->
 
 
   <div class="row" data-bind="visible: showProjects">
@@ -167,6 +179,11 @@
     <tbody data-bind="foreach: project_list">
         <tr>
             <td>
+							<div class="switch radius">
+  							<input name="onoffswitch" id="onoffswitch" type="checkbox" data-bind="checked: status, attr: {id: 'onoff'+name, value: status}, click: $parent.project_switch_on_off">
+  							<label data-bind="attr: {for: 'onoff'+name}"></label>
+							</div>
+							<!--
             <div class="onoffswitch">
                 <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" data-bind="checked: status, attr: {id: 'onoff'+name, value: status}, click: $parent.project_switch_on_off" >
                 <label class="onoffswitch-label" data-bind="attr: {for: 'onoff'+name}">
@@ -174,21 +191,33 @@
                 <div class="onoffswitch-switch"></div>
             </label>
             </div>
+					-->
             </td>
             <td data-bind="text: name"></td>
             <td data-bind="text: owner"></td>
 
-			<td>
-			<div class="onoffswitch">
-                <input type="checkbox" name="publicswitch" class="onoffswitch-checkbox" data-bind="checked: public, attr: {id: 'public'+name, value: public}, click: $parent.project_switch_public" >
-                <label class="onoffswitch-label" data-bind="attr: {for: 'public'+name}">
-                <div class="onoffswitch-inner"></div>
-                <div class="onoffswitch-switch"></div>
-            </label>
-            </div>
+						<td>
+							<div class="switch radius">
+								<input name="publicswitch" id="publicswitch" type="checkbox" data-bind="checked: public, attr: {id: 'public'+name, value: public}, click: $parent.project_switch_public">
+								<label data-bind="attr: {for: 'public'+name}"></label>
+							</div>
+							<!--
+							<div class="onoffswitch">
+	                <input type="checkbox" name="publicswitch" class="onoffswitch-checkbox" data-bind="checked: public, attr: {id: 'public'+name, value: public}, click: $parent.project_switch_public" >
+	                <label class="onoffswitch-label" data-bind="attr: {for: 'public'+name}">
+	                <div class="onoffswitch-inner"></div>
+	                <div class="onoffswitch-switch"></div>
+	            </label>
+	            </div>
+							-->
             </td>
 
             <td>
+							<div class="switch radius">
+								<input name="geoswitch" id="geoswitch" type="checkbox" data-bind="checked: geo, attr: {id: 'geo'+name, value: geo}, click: $parent.project_switch_geo">
+								<label data-bind="attr: {for: 'geo'+name}"></label>
+							</div>
+						<!--
             <div class="onoffswitch">
                 <input type="checkbox" name="geoswitch" class="onoffswitch-checkbox" data-bind="checked: geo, attr: {id: 'geo'+name, value: geo}, click: $parent.project_switch_geo" >
                 <label class="onoffswitch-label" data-bind="attr: {for: 'geo'+name}">
@@ -196,8 +225,14 @@
                 <div class="onoffswitch-switch"></div>
             </label>
             </div>
+						-->
             </td>
             <td>
+							<div class="switch radius">
+								<input name="validationswitch" id="validationswitch" type="checkbox" data-bind="checked: validation, attr: {id: 'validation'+name, value: validation}, click: $parent.project_switch_validation">
+								<label data-bind="attr: {for: 'validation'+name}"></label>
+							</div>
+						<!--
             <div class="onoffswitch">
                 <input type="checkbox" name="validationswitch" class="onoffswitch-checkbox" data-bind="checked: validation, attr: {id: 'validation'+name, value: validation}, click: $parent.project_switch_validation" >
                 <label class="onoffswitch-label" data-bind="attr: {for: 'validation'+name}">
@@ -205,8 +240,14 @@
                 <div class="onoffswitch-switch"></div>
             </label>
             </div>
+						-->
             </td>
 						<td>
+							<div class="switch radius">
+								<input name="users_can_addswitch" id="users_can_addswitch" type="checkbox" data-bind="checked: users_can_add, attr: {id: 'users_can_add'+name, value: users_can_add}, click: $parent.project_switch_users_can_add">
+								<label data-bind="attr: {for: 'users_can_add'+name}"></label>
+							</div>
+						<!--
 						<div class="onoffswitch">
 								<input type="checkbox" name="users_can_addswitch" class="onoffswitch-checkbox" data-bind="checked: users_can_add, attr: {id: 'users_can_add'+name, value: users_can_add}, click: $parent.project_switch_users_can_add" >
 								<label class="onoffswitch-label" data-bind="attr: {for: 'users_can_add'+name}">
@@ -214,8 +255,14 @@
 								<div class="onoffswitch-switch"></div>
 						</label>
 						</div>
+						-->
 						</td>
 						<td>
+							<div class="switch radius">
+								<input name="point_and_clickswitch" id="point_and_clickswitch" type="checkbox" data-bind="checked: point_and_click, attr: {id: 'point_and_click'+name, value: point_and_click}, click: $parent.project_switch_point_and_click">
+								<label data-bind="attr: {for: 'point_and_click'+name}"></label>
+							</div>
+						<!--
 						<div class="onoffswitch">
 								<input type="checkbox" name="point_and_clickswitch" class="onoffswitch-checkbox" data-bind="checked: point_and_click, attr: {id: 'point_and_click'+name, value: point_and_click}, click: $parent.project_switch_point_and_click" >
 								<label class="onoffswitch-label" data-bind="attr: {for: 'point_and_click'+name}">
@@ -223,6 +270,7 @@
 								<div class="onoffswitch-switch"></div>
 						</label>
 						</div>
+						-->
 						</td>
 						<td data-bind="text: $parent.byte_convert(stats.quota)"></td>
             <td class="actions">

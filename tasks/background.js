@@ -1,6 +1,8 @@
 /**
- * Module dependencies.
+ * Executes all background tasks
  */
+
+
 
 var CONFIG = require('config');
 
@@ -16,91 +18,52 @@ var user = require('../routes/user'),
    images = db.get('images'),
    tasks_db = db.get('tasks'),
    sciconfig = db.get('config'),
-   path = require('path');
+   path = require('path'),
+   image_tasks = require('../lib/image_tasks');
 
-var scitizen_storage = require('scitizen-storage');
-
-var pkgcloud = require('pkgcloud');
-
-var gm = require('gm');
-gm = gm.subClass({ imageMagick: true });
-
-function image_resize(image, callback) {
- gm(image)
- .resize(600)
- .autoOrient()
- .write(writeStream, function (err) {
-  if (!err) { callback(true); }
-  else { callback(false); }
- });
-}
-
-var args = process.argv.slice(2);
-console.log(args);
 
 var counter = 0;
 var nbTasks = -1;
 var interval = null;
 
+function manageTask(task) {
+  var task_id = task._id;
+  if(task.type == 'rescale') {
+      var image_id = task.objectid;
+      image_tasks.rescale(image_id, function(code) {
+        if(code == 0) {
+          tasks_db.remove({ _id : task_id}, function(err) { counter++; });
+        }
+        else {
+          tasks_db.update({ _id : task_id}, {$set: {status: code}},
+              function(err) { counter++; });
+        }
+      });
+   }
+   else if(task.type == 'remove') {
+      var project_id = task.objectid;
+      image_tasks.delete(project_id, function(code) {
+        if(code == 0) {
+          tasks_db.remove({ _id : task_id}, function(err) { counter++; });
+        }
+        else {
+          tasks_db.update({ _id : task_id}, {$set: {status: code}},
+            function(err) { counter++; });
+        }
+      });
+   }
+}
+
 tasks_db.find({}, function(err, tasks) {
    nbTasks = tasks.length;
    for(i=0;i<tasks.length;i++) {
-     var task = tasks[i];
-     if(task.type == 'rescale') {
-        scitizen_storage.get(task.objectid, function(err, result) {
-            if(err>0) {
-                console.log('Could not retreive image');
-                counter += 1;
-                tasks_db.remove({_id: task._id});
-            }
-            else {
-                var image_path = CONFIG.storage.path+ '/' +result.path;
-                var image_tiny_name = 'tiny-'+path.basename(image_path);
-                var image_tiny_path = path.dirname(image_path)+'/'+image_tiny_name+'tmp';
-                console.log("manage "+image_path);
-                var pipestream = fs.createReadStream(image_path).pipe(fs.createWriteStream(image_tiny_path));
-                pipestream.on('finish', function() {
-                gm(image_tiny_path).size(function(err, value){
-                    if(value.width>640 || value.height>480) {
-                        if(value.width>=value.height) {
-                          gm(image_tiny_path).resize(640);
-                        }
-                        else {
-                          gm(image_tiny_path).resize(null,480);
-                        }
-                    }
-                    console.log("image resized");
-                    scitizen_storage.put(image_tiny_name,
-                                        image_tiny_path,
-                                        {},
-                                        function(code,img){
-                                            if(code==0) {
-                                            tasks_db.remove({_id: task._id}, function() { counter += 1;});
-                                            }
-                                            else {
-                                            counter += 1;
-                                            console.log("Task error: "+task._id);
-                                            }
-                                            // Set image as ready now
-                                            images_db.update({ _id: task.objectid },
-                                                                {$set: {ready: true}},
-                                                                function(err) {
-                                                                  if(err) {
-                                                                    console.log(err);
-                                                                  }
-                                                                });
-                                            });
-                });
-                }); // pipe
-            }
-        });
-     }
+     manageTask(tasks[i]);
    }
 });
 
 function checkIsOver() {
   console.log("Checking progress... "+counter+"/"+nbTasks);
-  if(nbTasks>-1 && counter == nbTasks) { 
+  if(nbTasks>-1 && counter == nbTasks) {
     clearInterval(interval);
     process.exit(0);
   }

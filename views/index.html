@@ -16,10 +16,9 @@
     </div>
     <div class="row">
        <div data-alert class="alert-box warning radius">
-        Scitizen is in private Beta. If you wish to get an account, send us an
-email to <strong>support@genouest.org</strong>. While basic service will remain
-free, Some features may be charged in a later time (image size limit > 2M,
-number of api calls, number fo images...).
+         <p>This is a demo web site and should be used for test only.</p>
+         <p>Only default "plan" is available with a limit of 100Mb per project.
+           Projects may be removed when space is required</p>
         </div>
     </div>
     <div class="row main_info" id="scientist">
@@ -108,20 +107,16 @@ number of api calls, number fo images...).
   <div class="row main_info" id="faq">
 	<ul>
 		<li>Some questions, problems ?... Contact us <a href="mailto:support@genouest.org">support[at]genouest.org</a></li>
-		<li>Default project plans have limited disk quota (100Go). If you need more, you can contact us for a personal pricing plan or collaboration.</li>
-		<li>Maps make use of the free but limited Google Maps API. Usage is
-limited. If you think your project will need high usage, you can get and use
+		<li>Maps make use of the free but limited Google Maps API. Usage is limited. If you think your project will need high usage, you can get and use
 your own API key for your project <a href="https://developers.google.com/maps/signup?csw=1">at Google</a>.</li>
 		<li><a href="http://akismet.com/">Akismet</a> helps you prevent spam in your submitted data. You can use your Akismet key per project to help you filtering user data (Optional)</li>
 	</ul>
   </div>
   </div>
   <div class="row">
-    Credits:
-    <ul>
-    <li>"Magnificent CME Erupts on the Sun - August 31" by NASA Goddard Space Flight Center - Flickr: Magnificent CME Erupts on the Sun - August 31. Licensed under Creative Commons Attribution 2.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg#mediaviewer/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg</li>
-    <li>"Rat hippocampal neurons grown in vitro" http://www.cellimagelibrary.org/images/8735 - CC-By</li>
-  </ul>
+    <h4>Credits</h4>
+    <p><a href="http://commons.wikimedia.org/wiki/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg#mediaviewer/File:Magnificent_CME_Erupts_on_the_Sun_-_August_31.jpg">"Magnificent CME Erupts on the Sun - August 31" by NASA Goddard Space Flight Center - Flickr: Magnificent CME Erupts on the Sun - August 31</a>. Licensed under Creative Commons Attribution 2.0 via Wikimedia Commons</p>
+    <p><a href="http://www.cellimagelibrary.org/images/8735">"Rat hippocampal neurons grown in vitro"</a> - CC-By</p>
   </div>
 </div>
 
@@ -152,7 +147,7 @@ your own API key for your project <a href="https://developers.google.com/maps/si
     var piwik_url = '{{ analytics.piwik.url}}';
     var piwik_siteid = '{{ analytics.piwik.siteid}}';
     var google_siteid = '{{ analytics.google.siteid}}';
-    
+
         $(document).ready(function(){
             $('#myslider').slick({
               autoplay: true,
