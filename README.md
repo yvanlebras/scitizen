@@ -1,44 +1,70 @@
 # Requirements
 
+## Package dependencies
+
+bzip2
 imagemagick
+rabbitmq-server (recommended)
+mongodb
+influxdb (optional for time based statistics)
 
-then
+## Npm dependencies
 
-npm install
+In scitizen directory run:
 
-# Running
+    npm install -g grunt-cli
+    npm install
 
-forever start -l forever.log -o out.log -e err.log app.js --NODE_CONFIG_DIR=.
+Optional: forever can be used to launch the program in background
 
-node app.js --NODE_CONFIG_DIR=.
+    npm install -g forever
 
 
+Ensure 2d index on db location in mongo database:
 
-Ensure 2d index on db location  :
-
+    mongo scitizen
     // For mongo 2.2
-    db.images.ensureIndex( { "fields.location" : "2d" })
-
+    >db.images.ensureIndex( { "fields.location" : "2d" })
     // GeoJSON in loc, for mongo 2.4
-    db.images.ensureIndex({ "fields.loc" : "2dsphere" })
+    >db.images.ensureIndex({ "fields.loc" : "2dsphere" })
 
 
 If using InfluxDb for stats, the *scitizen* database must be created first.
 
+# Running
 
-Scitizen supports background tasks scheduling (for image resizing for example) with RabbitMQ (needs to be installed).
-This allows to execute multiple message receivers on multiple nodes to horizontaly scale the background tasks management.
+## Web server
 
-To do so, configure rabbitmq in the config file and execute on one or more nodes:
+The web server can be executed on one or multiple nodes for scalability.
+Server will listen by default on port 3000, you may need an HTTP proxy to forward requests from port 80 to port 3000.
 
-    node tasks/amqp-receives nodeid
+As a daemon:
 
-    nodeid is a node unique identifier.
+    forever start -l forever.log -o out.log -e err.log app.js
+
+For development
+
+    node app.js
+
+## Background task processor
+
+The background task processor manage long running tasks such as project deletion, image rescaling etc...
+Process can be executed on one or multiple nodes to manage tasks scalability.
+Web servers and background task processors dialog via the RabbitMQ messaging application.
+
+As a daemon:
+
+    forever start -l amqp.log -o amqpout.log -e amqperr.log tasks/amqp-receive.js
+
+For development
+
+    node tasks/amqp-receive.js
+
 
 If you do not wish to use rabbitmq, simply set the rabbitmq host to empty string ('').
-Background tasks can be run manually (or croned) with:
+Background tasks can then be run manually (or croned) with:
 
-  node tasks/amqp-publish
+    node tasks/background.js
 
 
 # License
@@ -62,23 +88,12 @@ Main page slider images credits:
   To run with StrongOps
     slc run
 
-# Installation
-
-Requirements: mongodb, bzip2, influxdb (optional)
-
- npm install -g grunt-cli
- npm install
 
 # TODO
 
 
 ## in progress
 
-
-## Questions
-
-* For "free" plan, limit size of image (rescale) ?
-* Quotas for Google maps API (remove map when reached ?) or force user to get a google api key ?
 
 ## General
 
@@ -110,8 +125,6 @@ Requirements: mongodb, bzip2, influxdb (optional)
 
 ## Admin
 
-* manage project quotas
-
 # Issues:
 
 
@@ -122,8 +135,8 @@ in config/default.yaml
     general:
         db: "scitizen"
         url: "http://localhost:3000/"
-        admin: [ "admin@mydomain.com" ]
-        storage: "s3"  # or "pairtree"
+        admin: [ "admin@mydomain.com" ] # To access admin section
+        storage: "s3"  # "s3" or "pairtree"
     mail:
         host: "my.smtp.provider.host"
         port: 465
@@ -139,7 +152,8 @@ in config/default.yaml
         password: ""
         authUrl: ""
         container: "scitizen"
-        # For s3 and pairtree
+        # For s3 and pairtree,  for pairtree storage must be shared between web nodes and background processor nodes,
+        # for s3 it only needs to be shared between web nodes.
         path: "/tmp/scitizen"
     analytics:
         # piwik or google or none
@@ -156,7 +170,7 @@ in config/default.yaml
         apikey: ""  # Google maps API
     plans:
         default:
-            quota: 100
-            tiny:
+            quota: 100 # Max quota in Mb
+            tiny: # for each input image, a tiny image is created to be shown in image lists
               max_width: 600
               max_height: 400
