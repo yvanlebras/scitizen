@@ -108,8 +108,6 @@ Main page slider images credits:
 
 ## project creation
 
-* check name duplicates
-* add optional url for projects managing themselves the web page
 * add optional image
 
 ## forms

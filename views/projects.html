@@ -4,7 +4,12 @@
   <div class="" id="projects">
     <div class="row" id="project_selection" data-bind="foreach: project_list">
       <div class="row project_selection">
+        <div data-bind="if: $parent.remote_site(homepage)">
+          <a data-bind="attr: {href: homepage}">
+        </div>
+        <div data-bind="ifnot: $parent.remote_site(homepage)">
         <a data-bind="attr: {href: '/project/'+ko.utils.unwrapObservable(_id)+'/dashboard'}">
+        </div>
           <div class="small-2 large-2 columns project_heading" data-bind="text: name"></div>
           <div class="small-6 large-6 columns project_description" data-bind="text: short_description"></div>
         </a>
@@ -29,6 +34,7 @@ var google_siteid = '{{ analytics.google.siteid}}';
 	    goto_image_all: function() {},
       user: ko.observable('{{user}}'),
       user_logged: ko.computed(function() { return '{{user}}'!=''; }, viewModel),
+      remote_site: function(homepage) { return homepage !== '';},
       home: ko.observable('/'),
       login: ko.observable('/login'),
       logout: ko.observable('/logout'),

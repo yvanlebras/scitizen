@@ -1,3 +1,4 @@
+
 	<div class="row" data-bind="visible: manageAccount">
 		<div data-bind="with: user_current">
 			<label for="username">User id</label>
@@ -109,6 +110,8 @@
 					<textarea rows="5" id="project_short_desc_edit" name="project_short_desc_edit"  data-bind="value: project_short_description"></textarea>
 					<label for="project_desc_edit">Description (MarkDown support)</label>
 					<textarea rows="20" id="project_desc_edit" name="project_desc_edit"  data-bind="value: project_description"></textarea>
+					<label for="project_homepage_edit">Remote site URL (optional, to use an external web site instead of Scitizen generated web site)</label>
+					<input name="project_homepage_edit" id="project_homepage_edit" type="text" data-bind="value: project_homepage"/>
 					<label for="project_style_edit">CSS Style (optional)</label>
 					<textarea rows="20" id="project_style_edit" name="project_style_edit"  data-bind="value: project_style"></textarea>
 					<label for="project_google_edit">Google Maps API key (optional)</label>
@@ -457,6 +460,9 @@ $(document).on('change', '.rating', function(){
 });
 
 var viewModel = {
+			message: function(msg) {
+				alert(msg);
+			},
 			//user: ko.observable('{{user.username}}'),
 			user_admin: ko.computed(function() { return {{isAdmin}}; }, viewModel),
 			user_logged: ko.computed(function() { return '{{user.username}}'!=''; }, viewModel),
@@ -661,7 +667,6 @@ var viewModel = {
 				editProject: ko.observable(false),
 				project_current: ko.observable({ users: []}),
 				project_delete_member: function(user) {
-					console.log("delete user "+user);
 					if(user == '{{user.username}}') {
 						// Can't delete ourselves
 						return false;
@@ -733,7 +738,8 @@ var viewModel = {
 											style: viewModel.project_style(),
 											google_api: viewModel.project_google(),
 											askimet_api: viewModel.project_askimet(),
-											plan: viewModel.project_plan()
+											plan: viewModel.project_plan(),
+											homepage: viewModel.homepage()
 										},
 								success: function(result) {
 									$.ajax({
@@ -754,6 +760,7 @@ var viewModel = {
 				},
 				project_name: ko.observable(''),
 				project_description: ko.observable(''),
+				project_homepage: ko.observable(''),
 				project_google: ko.observable(''),
 				project_askimet: ko.observable(''),
 				project_short_description: ko.observable(''),
@@ -820,13 +827,18 @@ var viewModel = {
 					return true;
 				},
 				add_project: function(){
-					viewModel.project_description('');
+					//viewModel.project_description('');
 					$.post( "/project", { pname: this.project_name(),
-										pdesc: this.project_description()
+										pdesc: this.project_short_description()
 										}, function(data) {
-											viewModel.project_list.push(data);
+											if('err' in data) {
+												viewModel.message(data.err);
+											}
+											else {
+												viewModel.project_list.push(data);
+												panelProjects();
+											}
 					});
-					panelProjects();
 				},
 				edit_project: function(project) {
 					viewModel.project_current(project);
@@ -836,6 +848,7 @@ var viewModel = {
 					viewModel.project_google(project.google_api);
 					viewModel.project_askimet(project.askimet_api);
 					viewModel.project_plan(project.plan);
+					viewModel.project_homepage(project.homepage);
 					//$("#form_element").html("");
 					$("#form_render").html("");
 					var form_elts = project['form'];

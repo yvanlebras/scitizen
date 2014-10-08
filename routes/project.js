@@ -96,6 +96,11 @@ exports.upload = function(req, res) {
 *
 */
 exports.add = function(req, res) {
+  projects_db.find({name: req.param('pname')}, function(err, dups){
+    if(dups && dups.length>0) {
+      res.json({err: 'Project name already exists'});
+      return;
+    }
     //var key = (Math.random() + 1).toString(36).substring(7);
     projects_db.insert({ name: req.param('pname'),
                           short_description: req.param('pdesc'),
@@ -114,10 +119,12 @@ exports.add = function(req, res) {
                           plan: 'default',
                           stats: {quota: 0},
                           style: '',
+                          homepage: '',
                           form: {}
                         }, function(err, project) {
                           res.json(project);
     });
+  });
 };
 
 /**

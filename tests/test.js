@@ -78,7 +78,8 @@ describe('Anonymous', function() {
                 status:true,
                 validation: false,
                 form: {},
-                plan: 'default'
+                plan: 'default',
+                homepage: ''
                 },
                 {
                 name: 'test2',
@@ -93,7 +94,8 @@ describe('Anonymous', function() {
                 status:true,
                 validation: false,
                 form: {},
-                plan: 'default'
+                plan: 'default',
+                homepage: ''
                 }
                 ], function(err, project) {
                     if(err) {
@@ -890,7 +892,8 @@ describe('Authenticated', function() {
                 status:true,
                 validation: false,
                 form: {},
-                plan: 'default'
+                plan: 'default',
+                homepage: ''
                 },
                 {
                 name: 'test2',
@@ -905,7 +908,8 @@ describe('Authenticated', function() {
                 status:true,
                 validation: false,
                 form: {},
-                plan: 'default'
+                plan: 'default',
+                homepage: ''
                 }
                 ], function(err, project) {
                     if(err) {
