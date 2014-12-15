@@ -6,6 +6,7 @@ var formidable = require('formidable');
 var pkgcloud = require('pkgcloud');
 var scitizen_storage = require('scitizen-storage');
 var scitizen_auth = require('../lib/auth.js');
+var scitizen_stats = require('../lib/stats.js');
 
 
 var MongoClient = require('mongodb').MongoClient;
