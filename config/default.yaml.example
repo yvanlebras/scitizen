@@ -46,8 +46,8 @@ mail:
     #port: 465
     port: 25
     secure: false
-    user: "XXX"
-    password: "XXX"
+    user: ""
+    password: ""
     origin: scitizen.no-reply@mydomain.com
 
 storage:

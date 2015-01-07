@@ -18,6 +18,8 @@ var scitizen_auth = require('../lib/auth.js');
 
 
 if(MAIL_CONFIG.host!='fake') {
+  if(MAIL_CONFIG.user != undefined && MAIL_CONFIG.user != "") {
+  console.log('Mail config with authentication: '+MAIL_CONFIG.user);
   transport = nodemailer.createTransport('SMTP', {
     host: MAIL_CONFIG.host, // hostname
     secureConnection: MAIL_CONFIG.secure, // use SSL
@@ -27,6 +29,15 @@ if(MAIL_CONFIG.host!='fake') {
         pass: MAIL_CONFIG.password
     }
   });
+  }
+  else {
+  console.log('Mail config without authentication');
+  transport = nodemailer.createTransport('SMTP', {
+    host: MAIL_CONFIG.host, // hostname
+    secureConnection: MAIL_CONFIG.secure, // use SSL
+    port: MAIL_CONFIG.port, // port for secure SMTP
+  });
+  }
 }
 
 exports.list = function(req, res){
