@@ -35,6 +35,7 @@
         <div class="small-6 columns">
               <img id="random_image" data-bind="click: click_random, attr: {src: '/image/'+ko.utils.unwrapObservable(random_image()._id)+'/raw?tiny'}" alt="random image from database" />
               <span data-bind="visible: project().point_and_click">Click image to point the region of interest</span>
+              <span data-bind="text: random_image_date"></span>
         </div>
         <div class="small-6 columns">
         <form id="random_form" data-bind="html: curate_form_html">
@@ -282,6 +283,10 @@ var google_siteid = '{{ analytics.google.siteid}}';
       curate_form_html: ko.observable()
     };
     ko.applyBindings(viewModel);
+    viewModel.random_image_date = ko.computed(function() {
+         return new Date(parseInt(this.random_image()._id.toString().slice(0,8), 16)*1000);
+      }, viewModel);
+
 
 
     function getRelativePosition(canvas, e) {
