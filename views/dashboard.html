@@ -190,11 +190,10 @@ var google_siteid = '{{ analytics.google.siteid}}';
         //refresh_image_all
         var img_html = "";
         var nb = Math.min(20, viewModel.images().length - viewModel.image_all_loaded());
-        viewModel.image_all_loaded(nb);
         for(var i=viewModel.image_all_loaded();i<viewModel.image_all_loaded()+nb;i++) {
           var image = viewModel.images()[i];
           var ismine = '';
-          if(image.user !== undefined && '{{user}}'!=='') {
+          if(image && image.user !== undefined && '{{user}}'!=='') {
             if(image.user == '{{user}}') { ismine= 'mine'; }
           }
           img_html += '<li><img class="rawimage '+ismine+'" data-id="'+image._id+'" src="/image/'+image._id+'/raw" /></li>';
