@@ -156,7 +156,7 @@ exports.delete = function(req, res) {
             scitizen_auth.can_edit(req.user, project, req.param('api'),
                                   function(can_edit){
             if(can_edit) {
-                scitizen_storage.delete(image_id, function(err,res) {
+                scitizen_storage.delete(image_id, function(err,dimage) {
                 if(err>0) {
                     console.log('Failed to delete '+image_id+' from storage');
                 }
