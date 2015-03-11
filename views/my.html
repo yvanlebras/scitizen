@@ -673,13 +673,12 @@ var viewModel = {
 					}
 					var index = viewModel.project_current().users.indexOf(user);
 					var project = viewModel.project_current();
-					var new_users = project.users.splice(index, 1);
-					project.users = new_users;
+					var removed_users = project.users.splice(index, 1);
 					$.ajax({
 						url: '/project/'+project._id,
 						type: 'PUT',
 						data: {
-							users: new_users,
+							users: project.users,
 						},
 						success: function(result) {
 							$.ajax({
