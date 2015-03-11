@@ -308,8 +308,11 @@ var google_siteid = '{{ analytics.google.siteid}}';
       */
     }
 
+
+    var curimage = null;
     function display_image_for_click(image_url) {
       $("#myModal").foundation('reveal', 'open');
+      /*
       var imageObj = new Image();
       imageObj.onload = function() {
         $("#myModalContent").css('background-image', 'url('+imageObj.src+')');
@@ -318,6 +321,18 @@ var google_siteid = '{{ analytics.google.siteid}}';
         canvas.attr("width", imageObj.width);
       };
       imageObj.src = image_url;
+      */
+      var canvas = document.getElementById('myModalCanvas');
+      var context = canvas.getContext('2d');
+      imageObj = new Image();
+      imageObj.onload = function() {
+        var canvas = $("#myModalCanvas");
+        canvas.attr("height",imageObj.height);
+        canvas.attr("width", imageObj.width);
+        context.drawImage(imageObj, 0, 0);
+      };
+      imageObj.src = image_url;
+      curimage = imageObj;
     }
 
 
@@ -385,6 +400,7 @@ var google_siteid = '{{ analytics.google.siteid}}';
         context.arc(Math.ceil(pos.x), Math.ceil(pos.y), 5, 0, 2 * Math.PI);
         context.fillStyle = 'red';
         context.fill();
+        context.drawImage(imageObj, 0, 0);
       });
 
       initialize_cluster();

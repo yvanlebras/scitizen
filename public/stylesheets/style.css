@@ -2,6 +2,10 @@ meta.foundation-data-attribute-namespace {
   font-family: false;
 }
 
+.reveal-modal {
+    overflow-y: auto;
+}
+
 #image_stats {
  margin-left: 10px;
 }
