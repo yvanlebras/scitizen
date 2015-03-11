@@ -705,7 +705,9 @@ var viewModel = {
 					if(user_new=="") {
 						return false;
 					}
-					viewModel.project_current().users.push(user_new);
+					var p = viewModel.project_current();
+                    p.users.push(user_new);
+                    viewModel.project_current(p);
 					$.ajax({
 						url: '/project/'+viewModel.project_current()._id,
 						type: 'PUT',
